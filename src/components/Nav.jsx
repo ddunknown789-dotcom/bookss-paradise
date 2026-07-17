@@ -59,7 +59,9 @@ export default function Nav() {
       ref={root}
     >
       <div className="nav-inner">
-        <a className="nav-logo" href="#home" onClick={() => setMenuOpen(false)}>@Bookss.Paradise</a>
+        {/* the header logo is the fixed badge that flies in from the intro;
+            this spacer just reserves its slot in the nav layout */}
+        <a className="nav-logo-slot" href="#home" aria-label="Books Paradise home" onClick={() => setMenuOpen(false)} />
         <nav className="nav-links" aria-label="Primary">
           {LINKS.map((l) => (
             <a key={l.label} href={l.href} className={l.active ? 'active' : ''}>

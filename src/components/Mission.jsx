@@ -65,7 +65,7 @@ export default function Mission() {
           <h2 className="section-title">Our Mission</h2>
           <Divider align="left" width={320} />
           <p className="mission-text">
-            @Bookss.Paradise is more than just a page – it’s a paradise for readers. Our mission is to connect
+            Books Paradise is more than just a page – it’s a paradise for readers. Our mission is to connect
             people with stories that inspire, heal, and transform.
           </p>
           <div className="mission-stats">
