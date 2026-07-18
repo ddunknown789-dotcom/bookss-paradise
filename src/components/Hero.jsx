@@ -9,8 +9,11 @@ export default function Hero() {
   useLayoutEffect(() => {
     if (NOANIM) return
     const ctx = gsap.context(() => {
+      // Fires the instant the hero's top edge peeks into the viewport, which is
+      // the same moment the intro logo starts travelling to the header — so the
+      // section reveals progressively *while* the logo moves, with no dead gap.
       const tl = gsap.timeline({
-        scrollTrigger: { trigger: root.current, start: 'top 72%' },
+        scrollTrigger: { trigger: root.current, start: 'top 97%' },
       })
       tl.fromTo('.hl .line > span', { yPercent: 115 }, { yPercent: 0, duration: 1.1, stagger: 0.14, ease: 'power4.out' })
         .fromTo('.hero .divider', { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.8, ease: 'power2.out' }, '-=0.55')

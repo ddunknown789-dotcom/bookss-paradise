@@ -32,11 +32,19 @@ export default function Intro() {
         const size = badge.offsetWidth || 1
         const cs = window.innerWidth <= 680 ? 46 : 54 // header logo diameter
         corner.scale = cs / size
-        // park the badge centred on the nav's reserved logo slot
+        // Park the badge on the nav's reserved logo slot so the logo and the
+        // burger sit on exactly the same line. The vertical centre is derived
+        // from the nav's LAYOUT box (padding + row height) rather than a
+        // getBoundingClientRect, because the nav is shifted by a translateY
+        // while it's hidden — offsetHeight/padding are transform-independent.
+        const navEl = document.querySelector('.nav')
+        const navInner = document.querySelector('.nav-inner')
         const slot = document.querySelector('.nav-logo-slot')
-        const sr = slot ? slot.getBoundingClientRect() : { left: 30, width: 60 }
+        const sr = slot ? slot.getBoundingClientRect() : { left: 30 }
+        const padTop = navEl ? parseFloat(getComputedStyle(navEl).paddingTop) || 22 : 22
+        const rowH = navInner ? navInner.offsetHeight : 54
         const cx = sr.left + cs / 2 + 2
-        const cy = window.innerWidth <= 680 ? 26 : 30
+        const cy = padTop + rowH / 2
         corner.x = cx - window.innerWidth / 2
         corner.y = cy - window.innerHeight / 2
       }
@@ -61,31 +69,36 @@ export default function Intro() {
 
       // ---- scroll-scrubbed: assemble the badge, hold, then it shrinks and
       //      travels to the top-left corner where it becomes the header logo. ----
+      // Timeline is 10 units long and maps 1:1 onto the spacer's scroll range.
+      // The spacer is 250vh and `end: bottom top` means progress 0.6 is exactly
+      // the moment the hero's top edge reaches the bottom of the viewport — so
+      // starting the corner-travel at 6.0 makes the logo move and the hero
+      // reveal happen together, finishing together at progress 1.
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: root.current,
           start: 'top top',
-          end: 'bottom bottom',
-          scrub: 0.6,
+          end: 'bottom top',
+          scrub: 1,
           onRefresh: measure,
         },
       })
-      // 1) cream ring spins in, then its wordmark fades on
-      tl.to(cream, { opacity: 1, scale: 1, rotate: 0, ease: 'back.out(1.3)', duration: 1 }, 0.3)
-        .to(arc, { opacity: 1, ease: 'power2.out', duration: 0.7 }, 0.9)
-        // 2) green ring locks in; shadow deepens
-        .to(green, { opacity: 1, scale: 1, rotate: 0, ease: 'back.out(1.2)', duration: 1.1 }, 1.5)
-        .to('.badge-shadow', { opacity: 1, scale: 1, ease: 'power2.out', duration: 1.1 }, 1.5)
-        // 3) small settle of the fully assembled badge
-        .to(inner, { scale: 1.045, duration: 0.5, ease: 'power2.out' }, 2.7)
-        .to(inner, { scale: 1, duration: 0.45, ease: 'power2.inOut' }, 3.25)
-        // 4) HOLD (3.7 → 4.7), then the whole logo glides to the top-left corner
-        .to(badge, {
-          x: () => corner.x, y: () => corner.y, scale: () => corner.scale,
-          xPercent: -50, yPercent: -50, ease: 'power3.inOut', duration: 1.4,
-        }, 4.8)
-        .to(['.badge-glow', '.badge-shadow'], { opacity: 0, duration: 0.6, ease: 'power2.in' }, 4.8)
-        .to('.intro-cue', { opacity: 0, duration: 0.25 }, 0.05)
+      // --- ASSEMBLY (progress 0 → 0.6) ---
+      tl.to(cream, { opacity: 1, scale: 1, rotate: 0, ease: 'back.out(1.3)', duration: 2 }, 0.8)
+        .to(arc, { opacity: 1, ease: 'power2.out', duration: 1.2 }, 2.0)
+        .to(green, { opacity: 1, scale: 1, rotate: 0, ease: 'back.out(1.2)', duration: 2.2 }, 3.0)
+        .to('.badge-shadow', { opacity: 1, scale: 1, ease: 'power2.out', duration: 2.2 }, 3.0)
+        // gentle settle that flows straight into the travel (no dead pause)
+        .to(inner, { scale: 1.035, duration: 0.6, ease: 'power2.out' }, 4.9)
+        .to(inner, { scale: 1, duration: 0.5, ease: 'power2.inOut' }, 5.5)
+        // --- TRAVEL TO HEADER (progress 0.6 → 1.0), in step with the hero ---
+        // x / y / scale are separate tweens with different eases so the logo
+        // follows a soft organic arc instead of a straight mechanical line.
+        .to(badge, { y: () => corner.y, ease: 'power1.inOut', duration: 4 }, 6.0)
+        .to(badge, { x: () => corner.x, ease: 'power3.inOut', duration: 4 }, 6.0)
+        .to(badge, { scale: () => corner.scale, ease: 'power2.inOut', duration: 4 }, 6.0)
+        .to(['.badge-glow', '.badge-shadow'], { opacity: 0, duration: 2, ease: 'power2.in' }, 6.0)
+        .to('.intro-cue', { opacity: 0, duration: 0.5 }, 0.2)
 
       // ---- 3D depth: mouse tilt + per-layer parallax (on the inner wrapper so
       //      it never fights the corner-travel transform on .brand-badge) ----
@@ -122,10 +135,13 @@ export default function Intro() {
           <img className="logo-layer layer-girl" src="/assets/logo-girl.png" alt="Books Paradise" draggable="false" />
           <svg className="badge-arc" viewBox="0 0 1254 1254" aria-hidden="true">
             <defs>
-              <path id="bp-arc" d="M 255 640 A 372 372 0 0 1 999 640" fill="none" />
+              {/* baseline arc: centred on the ACTUAL ring centre (625,620) with
+                  r=330 — measured from the original logo, whose text ink spans
+                  radius 330→399. Glyphs extend outward from the baseline. */}
+              <path id="bp-arc" d="M 295 620 A 330 330 0 0 1 955 620" fill="none" />
             </defs>
             <text>
-              <textPath href="#bp-arc" startOffset="50%" textAnchor="middle">{BRAND}</textPath>
+              <textPath href="#bp-arc" startOffset="50%" textAnchor="middle">{BRAND.toUpperCase()}</textPath>
             </text>
             <path className="arc-diamond" d="M 627 968 L 640 995 L 627 1022 L 614 995 Z" />
           </svg>
