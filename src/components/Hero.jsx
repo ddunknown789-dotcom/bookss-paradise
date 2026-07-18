@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '../lib/anim'
 import { Divider, ArrowRight, Star4 } from './ui'
+import HeroArt3D from './HeroArt3D'
 
 export default function Hero() {
   const root = useRef(null)
@@ -19,7 +20,7 @@ export default function Hero() {
         .fromTo('.hero .divider', { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.8, ease: 'power2.out' }, '-=0.55')
         .fromTo('.hero-sub', { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }, '-=0.45')
         .fromTo('.hero-cta > *', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, stagger: 0.1, ease: 'power3.out' }, '-=0.5')
-        .fromTo('.hero-art img', { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: 1.2, ease: 'power3.out' }, 0.15)
+        .fromTo('.hero3d-float', { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: 1.2, ease: 'power3.out' }, 0.15)
 
       // soft parallax on the illustration while scrolling through
       gsap.fromTo(
@@ -57,7 +58,7 @@ export default function Hero() {
           </div>
         </div>
         <figure className="hero-art">
-          <img src="/assets/model/model-hero.png" alt="Reader with a book at a café table surrounded by stacks of books" />
+          <HeroArt3D />
         </figure>
       </div>
     </section>

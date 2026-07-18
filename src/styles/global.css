@@ -431,6 +431,82 @@ main { position: relative; z-index: 1; }
   will-change: transform;
 }
 
+/* ---------- hero 3D diorama ---------- */
+.hero3d {
+  position: relative;
+  width: 100%;
+  perspective: 1100px;
+}
+.hero3d-stage {
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.hero3d-float {
+  position: relative;
+  will-change: transform;
+}
+/* warm aura sitting behind the artwork in Z */
+.hero3d-aura {
+  position: absolute;
+  inset: -8% -5% 0;
+  background: radial-gradient(ellipse at 60% 42%,
+    rgba(233, 200, 120, 0.30) 0%,
+    rgba(216, 178, 92, 0.10) 46%,
+    rgba(216, 178, 92, 0) 68%);
+  transform: translateZ(-70px);
+  pointer-events: none;
+}
+/* grounded contact shadow that breathes against the levitation */
+.hero3d-shadow {
+  position: absolute;
+  left: 16%;
+  right: 9%;
+  bottom: -3%;
+  height: 9%;
+  background: radial-gradient(ellipse at 50% 50%,
+    rgba(28, 52, 40, 0.26) 0%,
+    rgba(28, 52, 40, 0.10) 48%,
+    rgba(28, 52, 40, 0) 74%);
+  transform: translateZ(-30px);
+  pointer-events: none;
+}
+/* light sweep clipped to the artwork's alpha */
+.hero3d-sheen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: url('/assets/model/model-hero.png');
+  mask-image: url('/assets/model/model-hero.png');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+.hero3d-sheen i {
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: 0;
+  width: 30%;
+  background: linear-gradient(100deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.30) 42%,
+    rgba(255, 246, 214, 0.48) 50%,
+    rgba(255, 255, 255, 0.30) 58%,
+    rgba(255, 255, 255, 0) 100%);
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+.hero3d-spark {
+  position: absolute;
+  pointer-events: none;
+}
+.sparkle-anim {
+  display: inline-flex;
+  animation: twinkle 2.6s ease-in-out infinite;
+}
+
 /* ---------- offer ---------- */
 .offer { background: #f6f5f1; padding-bottom: 84px; }
 .offer-grid {
