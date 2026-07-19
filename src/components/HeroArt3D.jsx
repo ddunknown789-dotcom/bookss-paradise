@@ -1,10 +1,10 @@
 import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
-import { NOANIM, IS_SMALL } from '../lib/anim'
+import { NOANIM } from '../lib/anim'
 import { Star4 } from './ui'
 
 // Gold sparks scattered around the diorama at different depths — under the
-// mouse tilt they parallax against the artwork, selling real 3D.
+// tilt they parallax against the artwork, selling real 3D.
 const SPARKS = [
   { left: '7%', top: '16%', size: 18, z: 60, delay: 0 },
   { left: '2%', top: '56%', size: 12, z: -40, delay: 0.9 },
@@ -14,45 +14,97 @@ const SPARKS = [
   { left: '15%', top: '3%', size: 10, z: 30, delay: 2.1 },
 ]
 
+const MAX_TILT = 4 // degrees — subtle, per spec
+
 export default function HeroArt3D() {
   const root = useRef(null)
 
   useLayoutEffect(() => {
-    if (NOANIM) return
     const ctx = gsap.context(() => {
       const stage = root.current.querySelector('.hero3d-stage')
+      const float = root.current.querySelector('.hero3d-float')
+      const aura = root.current.querySelector('.hero3d-aura')
+      const shadow = root.current.querySelector('.hero3d-shadow')
+      const sparks = root.current.querySelectorAll('.hero3d-spark')
 
-      // Gentle levitation; the contact shadow breathes in counterpoint so the
-      // motion reads as depth rather than drift.
-      gsap.to('.hero3d-float', {
-        y: -11, rotation: 0.5, duration: 3.6, yoyo: true, repeat: -1, ease: 'sine.inOut',
-      })
-      gsap.to('.hero3d-shadow', {
-        scaleX: 0.9, opacity: 0.65, duration: 3.6, yoyo: true, repeat: -1, ease: 'sine.inOut',
-      })
-
-      // Recurring light sweep across the illustration (masked to its alpha,
-      // so the shine only ever crosses the artwork itself).
-      gsap.fromTo(
-        '.hero3d-sheen i',
-        { xPercent: -280 },
-        { xPercent: 320, duration: 2.4, ease: 'power2.inOut', repeat: -1, repeatDelay: 4.4, delay: 2.2 },
-      )
-
-      // Mouse-tracked perspective tilt (desktop only) — the aura, artwork and
-      // sparks sit at different translateZ depths inside this stage.
-      if (!IS_SMALL) {
-        const rx = gsap.quickTo(stage, 'rotationX', { duration: 0.9, ease: 'power2.out' })
-        const ry = gsap.quickTo(stage, 'rotationY', { duration: 0.9, ease: 'power2.out' })
-        const onMove = (e) => {
-          const r = root.current.getBoundingClientRect()
-          const nx = (e.clientX - (r.left + r.width / 2)) / r.width
-          const ny = (e.clientY - (r.top + r.height / 2)) / r.height
-          ry(gsap.utils.clamp(-13, 13, nx * 11))
-          rx(gsap.utils.clamp(-10, 10, -ny * 8))
+      let ambientStarted = false
+      const startAmbient = () => {
+        if (ambientStarted) return
+        ambientStarted = true
+        // Gentle levitation; the contact shadow breathes in counterpoint so the
+        // motion reads as depth rather than drift.
+        gsap.to(float, { y: -11, rotation: 0.5, duration: 3.6, yoyo: true, repeat: -1, ease: 'sine.inOut' })
+        gsap.to(shadow, { scaleX: 0.9, opacity: 0.65, duration: 3.6, yoyo: true, repeat: -1, ease: 'sine.inOut' })
+        // Recurring light sweep across the illustration (masked to its alpha,
+        // so the shine only ever crosses the artwork itself).
+        const sheen = root.current.querySelector('.hero3d-sheen i')
+        if (sheen) {
+          gsap.fromTo(sheen, { xPercent: -280 }, { xPercent: 320, duration: 2.4, ease: 'power2.inOut', repeat: -1, repeatDelay: 4.4, delay: 0.4 })
         }
-        window.addEventListener('mousemove', onMove)
-        return () => window.removeEventListener('mousemove', onMove)
+      }
+
+      if (NOANIM) {
+        gsap.set([aura, float, shadow, ...sparks], { opacity: 1, scale: 1, y: 0, filter: 'none' })
+        startAmbient()
+      } else {
+        // ---- premium staged reveal, driven by scroll (not a timer) so it
+        //      never "pops" — it fills in exactly as far as you've scrolled,
+        //      starting the instant Slide 1's text starts revealing. ----
+        gsap.set(aura, { opacity: 0, scale: 0.82 })
+        gsap.set(float, { opacity: 0, scale: 0.85, y: 30, filter: 'blur(18px)' })
+        gsap.set(shadow, { opacity: 0, scaleX: 0.55 })
+        gsap.set(sparks, { opacity: 0, scale: 0.3 })
+
+        // NOTE: 'top 97%' (used elsewhere for the text sync) only shows a ~3%
+        // sliver of a tall element when the reveal starts, so it visibly
+        // finishes before the user has scrolled far enough to actually SEE
+        // it. Starting later (top 65%) means roughly a third of the diorama
+        // is already on screen when the fade-in begins, and stretching the
+        // end further (top 6%) gives it a generous scroll distance to
+        // unfold while it's genuinely in view.
+        const reveal = gsap.timeline({
+          scrollTrigger: {
+            trigger: root.current,
+            start: 'top 65%',
+            end: 'top 6%',
+            scrub: 0.7,
+            onLeave: startAmbient,
+          },
+        })
+        reveal
+          .to(aura, { opacity: 1, scale: 1, duration: 1, ease: 'power2.out' }, 0)
+          .to(float, { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)', duration: 1.6, ease: 'power3.out' }, 0.15)
+          .to(shadow, { opacity: 1, scaleX: 1, duration: 1.2, ease: 'power2.out' }, 0.55)
+          .to(sparks, { opacity: 1, scale: 1, duration: 0.8, stagger: 0.12, ease: 'back.out(2)' }, 0.65)
+      }
+
+      // ---- interactive tilt: hover (mouse) AND touch, via unified Pointer
+      //      Events, scoped to the diorama itself. Tilts up to MAX_TILT toward
+      //      the interaction point, then eases back to rest when it ends. ----
+      const rx = gsap.quickTo(stage, 'rotationX', { duration: 0.5, ease: 'power2.out' })
+      const ry = gsap.quickTo(stage, 'rotationY', { duration: 0.5, ease: 'power2.out' })
+
+      const onPointerMove = (e) => {
+        const r = stage.getBoundingClientRect()
+        const nx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2)
+        const ny = (e.clientY - (r.top + r.height / 2)) / (r.height / 2)
+        ry(gsap.utils.clamp(-MAX_TILT, MAX_TILT, nx * MAX_TILT))
+        rx(gsap.utils.clamp(-MAX_TILT, MAX_TILT, -ny * MAX_TILT))
+      }
+      const resetTilt = () => {
+        gsap.to(stage, { rotationX: 0, rotationY: 0, duration: 0.7, ease: 'power2.out' })
+      }
+
+      const el = root.current
+      el.addEventListener('pointermove', onPointerMove)
+      el.addEventListener('pointerleave', resetTilt)
+      el.addEventListener('pointerup', resetTilt)
+      el.addEventListener('pointercancel', resetTilt)
+      return () => {
+        el.removeEventListener('pointermove', onPointerMove)
+        el.removeEventListener('pointerleave', resetTilt)
+        el.removeEventListener('pointerup', resetTilt)
+        el.removeEventListener('pointercancel', resetTilt)
       }
     }, root)
     return () => ctx.revert()

@@ -445,7 +445,7 @@ main { position: relative; z-index: 1; }
 }
 .hero3d-float {
   position: relative;
-  will-change: transform;
+  will-change: transform, opacity, filter;
 }
 /* warm aura sitting behind the artwork in Z */
 .hero3d-aura {

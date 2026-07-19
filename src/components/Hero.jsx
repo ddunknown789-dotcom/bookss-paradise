@@ -20,7 +20,9 @@ export default function Hero() {
         .fromTo('.hero .divider', { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.8, ease: 'power2.out' }, '-=0.55')
         .fromTo('.hero-sub', { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }, '-=0.45')
         .fromTo('.hero-cta > *', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, stagger: 0.1, ease: 'power3.out' }, '-=0.5')
-        .fromTo('.hero3d-float', { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: 1.2, ease: 'power3.out' }, 0.15)
+      // The model's own entrance is handled inside <HeroArt3D> with its own
+      // scroll-scrubbed reveal (see that component) — it starts at the same
+      // 'top 97%' trigger point as this timeline, so both begin together.
 
       // soft parallax on the illustration while scrolling through
       gsap.fromTo(
