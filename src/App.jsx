@@ -14,6 +14,7 @@ import Mission from './components/Mission'
 import Community from './components/Community'
 import Reviews from './components/Reviews'
 import Newsletter from './components/Newsletter'
+import Loader from './components/Loader'
 import { NOANIM, IS_SMALL } from './lib/anim'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -23,6 +24,11 @@ export default function App() {
   // Guard against environments that briefly report a 0-height viewport at
   // mount: ScrollTriggers created at that moment would mis-measure everything.
   const [ready, setReady] = useState(() => typeof window !== 'undefined' && window.innerHeight > 0)
+  // Two flags so the loader and the site overlap for one beat: `siteUp` mounts
+  // the page underneath while the loader is still dissolving, so the logo
+  // intro blooms *through* the fade instead of appearing after a blank frame.
+  const [siteUp, setSiteUp] = useState(NOANIM)
+  const [loaderGone, setLoaderGone] = useState(NOANIM)
 
   useEffect(() => {
     if (ready) return
@@ -35,8 +41,18 @@ export default function App() {
     return () => clearInterval(id)
   }, [ready])
 
+  // Hold the page still while the loader is up, and make sure we always begin
+  // the experience at the very top.
   useEffect(() => {
-    if (!ready) return
+    if (loaderGone) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.scrollTo(0, 0)
+    return () => { document.body.style.overflow = prev }
+  }, [loaderGone])
+
+  useEffect(() => {
+    if (!ready || !siteUp) return
     if (NOANIM) {
       document.body.classList.add('noanim')
       // ?goto=<section-class> jumps straight to a section (verification aid)
@@ -62,12 +78,20 @@ export default function App() {
       gsap.ticker.remove(raf)
       lenis.destroy()
     }
-  }, [ready])
+  }, [ready, siteUp])
 
   if (!ready) return <ParticleField />
 
   return (
     <>
+      {!loaderGone && (
+        <Loader
+          onReveal={() => setSiteUp(true)}
+          onDone={() => setLoaderGone(true)}
+        />
+      )}
+      {!siteUp ? null : (
+      <>
       <ParticleField />
       {/* Runs on desktop (mouse) AND mobile (finger drag). Phones get a
           lighter sim so trails stay smooth and easy on the battery. */}
@@ -96,6 +120,8 @@ export default function App() {
         <Reviews />
         <Newsletter />
       </main>
+      </>
+      )}
     </>
   )
 }
