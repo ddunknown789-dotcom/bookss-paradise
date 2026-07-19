@@ -51,7 +51,10 @@ export default function HeroArt3D() {
         //      never "pops" — it fills in exactly as far as you've scrolled,
         //      starting the instant Slide 1's text starts revealing. ----
         gsap.set(aura, { opacity: 0, scale: 0.82 })
-        gsap.set(float, { opacity: 0, scale: 0.85, y: 30, filter: 'blur(18px)' })
+        // A big blur radius is costly to re-rasterise every scrub frame, so
+        // phones get a lighter one — same look, far cheaper.
+        const startBlur = window.innerWidth <= 680 ? 9 : 18
+        gsap.set(float, { opacity: 0, scale: 0.85, y: 30, filter: `blur(${startBlur}px)` })
         gsap.set(shadow, { opacity: 0, scaleX: 0.55 })
         gsap.set(sparks, { opacity: 0, scale: 0.3 })
 
@@ -84,7 +87,7 @@ export default function HeroArt3D() {
       const rx = gsap.quickTo(stage, 'rotationX', { duration: 0.5, ease: 'power2.out' })
       const ry = gsap.quickTo(stage, 'rotationY', { duration: 0.5, ease: 'power2.out' })
 
-      const onPointerMove = (e) => {
+      const applyTilt = (e) => {
         const r = stage.getBoundingClientRect()
         const nx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2)
         const ny = (e.clientY - (r.top + r.height / 2)) / (r.height / 2)
@@ -95,16 +98,34 @@ export default function HeroArt3D() {
         gsap.to(stage, { rotationX: 0, rotationY: 0, duration: 0.7, ease: 'power2.out' })
       }
 
+      // A finger that merely scrolls PAST the artwork also emits pointermove,
+      // which used to tilt it mid-scroll. So on touch we only tilt while the
+      // user is deliberately pressing on it.
+      let pressed = false
+      const onPointerMove = (e) => {
+        if (e.pointerType === 'touch' && !pressed) return
+        applyTilt(e)
+      }
+      const onPointerDown = (e) => {
+        if (e.pointerType === 'touch') { pressed = true; applyTilt(e) }
+      }
+      const endInteraction = () => { pressed = false; resetTilt() }
+
       const el = root.current
       el.addEventListener('pointermove', onPointerMove)
-      el.addEventListener('pointerleave', resetTilt)
-      el.addEventListener('pointerup', resetTilt)
-      el.addEventListener('pointercancel', resetTilt)
+      el.addEventListener('pointerdown', onPointerDown)
+      el.addEventListener('pointerleave', endInteraction)
+      // pointerup/cancel are bound to the WINDOW: lifting the finger outside
+      // the artwork never fires pointerleave on it, which previously left the
+      // model stuck at an angle forever.
+      window.addEventListener('pointerup', endInteraction)
+      window.addEventListener('pointercancel', endInteraction)
       return () => {
         el.removeEventListener('pointermove', onPointerMove)
-        el.removeEventListener('pointerleave', resetTilt)
-        el.removeEventListener('pointerup', resetTilt)
-        el.removeEventListener('pointercancel', resetTilt)
+        el.removeEventListener('pointerdown', onPointerDown)
+        el.removeEventListener('pointerleave', endInteraction)
+        window.removeEventListener('pointerup', endInteraction)
+        window.removeEventListener('pointercancel', endInteraction)
       }
     }, root)
     return () => ctx.revert()
