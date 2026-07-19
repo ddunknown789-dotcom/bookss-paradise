@@ -47,38 +47,28 @@ export default function HeroArt3D() {
         gsap.set([aura, float, shadow, ...sparks], { opacity: 1, scale: 1, y: 0, filter: 'none' })
         startAmbient()
       } else {
-        // ---- premium staged reveal, driven by scroll (not a timer) so it
-        //      never "pops" — it fills in exactly as far as you've scrolled,
-        //      starting the instant Slide 1's text starts revealing. ----
         gsap.set(aura, { opacity: 0, scale: 0.82 })
-        // A big blur radius is costly to re-rasterise every scrub frame, so
-        // phones get a lighter one — same look, far cheaper.
-        const startBlur = window.innerWidth <= 680 ? 9 : 18
-        gsap.set(float, { opacity: 0, scale: 0.85, y: 30, filter: `blur(${startBlur}px)` })
+        // A big blur radius is costly to re-rasterise, so phones get a
+        // lighter one — same look, far cheaper.
+        const startBlur = window.innerWidth <= 680 ? 8 : 14
+        gsap.set(float, { opacity: 0, scale: 0.9, y: 22, filter: `blur(${startBlur}px)` })
         gsap.set(shadow, { opacity: 0, scaleX: 0.55 })
         gsap.set(sparks, { opacity: 0, scale: 0.3 })
 
-        // NOTE: 'top 97%' (used elsewhere for the text sync) only shows a ~3%
-        // sliver of a tall element when the reveal starts, so it visibly
-        // finishes before the user has scrolled far enough to actually SEE
-        // it. Starting later (top 65%) means roughly a third of the diorama
-        // is already on screen when the fade-in begins, and stretching the
-        // end further (top 6%) gives it a generous scroll distance to
-        // unfold while it's genuinely in view.
+        // A scrubbed reveal only advances as fast as the user scrolls, so on a
+        // slow scroll the model sat half-blurred for ages. This is a one-shot
+        // timeline instead — it plays at a fixed, deliberate pace the moment
+        // the diorama is properly in view, matching how the Slide 1 text
+        // reveals, so the two land together no matter how you scroll.
         const reveal = gsap.timeline({
-          scrollTrigger: {
-            trigger: root.current,
-            start: 'top 65%',
-            end: 'top 6%',
-            scrub: 0.7,
-            onLeave: startAmbient,
-          },
+          scrollTrigger: { trigger: root.current, start: 'top 82%', once: true },
+          onComplete: startAmbient,
         })
         reveal
-          .to(aura, { opacity: 1, scale: 1, duration: 1, ease: 'power2.out' }, 0)
-          .to(float, { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)', duration: 1.6, ease: 'power3.out' }, 0.15)
-          .to(shadow, { opacity: 1, scaleX: 1, duration: 1.2, ease: 'power2.out' }, 0.55)
-          .to(sparks, { opacity: 1, scale: 1, duration: 0.8, stagger: 0.12, ease: 'back.out(2)' }, 0.65)
+          .to(aura, { opacity: 1, scale: 1, duration: 0.8, ease: 'power2.out' }, 0)
+          .to(float, { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)', duration: 1.1, ease: 'power3.out' }, 0.05)
+          .to(shadow, { opacity: 1, scaleX: 1, duration: 0.8, ease: 'power2.out' }, 0.35)
+          .to(sparks, { opacity: 1, scale: 1, duration: 0.5, stagger: 0.07, ease: 'back.out(2)' }, 0.45)
       }
 
       // ---- interactive tilt: hover (mouse) AND touch, via unified Pointer
