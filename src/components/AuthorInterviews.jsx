@@ -2,42 +2,7 @@ import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '../lib/anim'
 import { Divider, ArrowRight } from './ui'
-import { BOOKS, bookHref } from '../data/books'
-
-const INTERVIEWS = [
-  {
-    book: BOOKS[0],
-    title: 'Interview with Lucas Elliot',
-    image: '/assets/interview-1.png',
-    minutes: '12 min read',
-    date: 'May 12, 2024',
-    iso: '2024-05-12',
-  },
-  {
-    book: BOOKS[1],
-    title: 'In Conversation with Nora Elston',
-    image: '/assets/interview-2.png',
-    minutes: '10 min read',
-    date: 'Apr 28, 2024',
-    iso: '2024-04-28',
-  },
-  {
-    book: BOOKS[2],
-    title: 'A Chat with Madilyn Hart',
-    image: '/assets/interview-3.png',
-    minutes: '11 min read',
-    date: 'Apr 15, 2024',
-    iso: '2024-04-15',
-  },
-  {
-    book: BOOKS[3],
-    title: 'Behind the Story with Clara Bennett',
-    image: '/assets/interview-4.png',
-    minutes: '9 min read',
-    date: 'Mar 30, 2024',
-    iso: '2024-03-30',
-  },
-]
+import { INTERVIEWS, interviewHref } from '../data/interviews'
 
 function InterviewBadge() {
   return (
@@ -117,7 +82,7 @@ export default function AuthorInterviews() {
 
       <div className="interviews-grid">
         {INTERVIEWS.map((item) => (
-          <a className="interview-card" key={item.book.slug} href={`${bookHref(item.book)}/review`} aria-label={`${item.title} for ${item.book.title}`}>
+          <a className="interview-card" key={item.slug} href={interviewHref(item)} aria-label={`${item.title} for ${item.book.title}`}>
             <div className="interview-media">
               <img src={item.image} alt={item.title} loading="lazy" />
               <InterviewBadge />

@@ -19,7 +19,9 @@ import Loader from './components/Loader'
 import BooksCollection from './components/BooksCollection'
 import BookPage from './pages/BookPage'
 import BookLongPage from './pages/BookLongPage'
+import InterviewPage from './pages/InterviewPage'
 import { getBook } from './data/books'
+import { getInterview } from './data/interviews'
 import { NOANIM, IS_SMALL } from './lib/anim'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -35,6 +37,9 @@ export default function App() {
   const bookSlug = bookParts[0] || null
   const bookView = bookParts[1] || null // 'review' | 'summary' | null
   const book = bookSlug ? getBook(bookSlug) : null
+  // '/interviews/<slug>'
+  const interviewSlug = path.startsWith('/interviews/') ? path.slice('/interviews/'.length) : null
+  const interview = interviewSlug ? getInterview(interviewSlug) : null
   // Guard against environments that briefly report a 0-height viewport at
   // mount: ScrollTriggers created at that moment would mis-measure everything.
   const [ready, setReady] = useState(() => typeof window !== 'undefined' && window.innerHeight > 0)
@@ -124,6 +129,21 @@ export default function App() {
     }
     if (bookView) return <BookLongPage book={book} kind={bookView} />
     return <BookPage book={book} />
+  }
+
+  // An unknown /interviews/<slug> still needs a real page rather than a
+  // blank screen.
+  if (interviewSlug) {
+    if (!interview) {
+      return (
+        <main className="bp-missing">
+          <h1>Interview not found</h1>
+          <p>We couldn’t find anything at this address.</p>
+          <a className="bp-btn bp-btn-gold bp-btn-lg" href="/#interviews">Back to All Interviews</a>
+        </main>
+      )
+    }
+    return <InterviewPage item={interview} />
   }
 
   return (

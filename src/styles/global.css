@@ -294,6 +294,14 @@ main { position: relative; z-index: 1; }
   height: 54px;
   margin-right: auto;
 }
+/* SiteHeader-only: a real circular logo image, sized to match where the
+   homepage's flying badge parks — standalone pages have no Intro to fly it in. */
+.site-header-logo {
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 6px 16px -6px rgba(31, 70, 52, 0.3);
+}
+.site-header-logo img { width: 100%; height: 100%; object-fit: cover; }
 .nav-links { display: flex; gap: 38px; }
 .nav-links a {
   font-family: var(--sans);
