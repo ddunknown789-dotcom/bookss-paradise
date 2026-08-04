@@ -17,6 +17,7 @@ import Newsletter from './components/Newsletter'
 import Loader from './components/Loader'
 import BooksCollection from './components/BooksCollection'
 import BookPage from './pages/BookPage'
+import BookLongPage from './pages/BookLongPage'
 import { getBook } from './data/books'
 import { NOANIM, IS_SMALL } from './lib/anim'
 
@@ -28,7 +29,10 @@ export default function App() {
   // collection, '/books/<slug>' a single book's detail page.
   const path = typeof window !== 'undefined' ? window.location.pathname.replace(/\/+$/, '') || '/' : '/'
   const isBooksPage = path === '/books'
-  const bookSlug = path.startsWith('/books/') ? path.slice('/books/'.length) : null
+  // '/books/<slug>' and '/books/<slug>/review' | '/books/<slug>/summary'
+  const bookParts = path.startsWith('/books/') ? path.slice('/books/'.length).split('/') : []
+  const bookSlug = bookParts[0] || null
+  const bookView = bookParts[1] || null // 'review' | 'summary' | null
   const book = bookSlug ? getBook(bookSlug) : null
   // Guard against environments that briefly report a 0-height viewport at
   // mount: ScrollTriggers created at that moment would mis-measure everything.
@@ -103,15 +107,21 @@ export default function App() {
   // A /books/<slug> URL that doesn't match any book still needs a real page
   // rather than a blank screen.
   if (bookSlug) {
-    if (!book) {
+    // An unknown slug, or an unknown sub-view, still needs a real page rather
+    // than a blank screen.
+    const knownView = bookView === null || bookView === 'review' || bookView === 'summary'
+    if (!book || !knownView) {
       return (
         <main className="bp-missing">
-          <h1>Book not found</h1>
-          <p>We couldn’t find a book at this address.</p>
-          <a className="bp-btn bp-btn-gold bp-btn-lg" href="/books">Browse all books</a>
+          <h1>{book ? 'Page not found' : 'Book not found'}</h1>
+          <p>We couldn’t find anything at this address.</p>
+          <a className="bp-btn bp-btn-gold bp-btn-lg" href={book ? `/books/${book.slug}` : '/books'}>
+            {book ? `Back to ${book.title}` : 'Browse all books'}
+          </a>
         </main>
       )
     }
+    if (bookView) return <BookLongPage book={book} kind={bookView} />
     return <BookPage book={book} />
   }
 

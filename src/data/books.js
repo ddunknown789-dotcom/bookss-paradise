@@ -420,6 +420,131 @@ const videoSet = (book) => [
   },
 ]
 
+/* ---------------------------------------------------------------------------
+   LONG-FORM PAGES: /books/<slug>/review and /books/<slug>/summary
+
+   Add a `fullReview` / `fullSummary` key to any book above to hand-write its
+   page. Anything without one is composed automatically from that book's own
+   about / summary / review fields, so every book still gets a complete,
+   book-specific page out of the box.
+   ------------------------------------------------------------------------- */
+
+const FULL = {
+  'the-silent-page': {
+    fullReview: {
+      intro: [
+        'The Silent Page is a slow-burning, atmospheric thriller that pulls you in with mystery and holds you captive with secrets layered deep.',
+        'From the very first chapter, Lucas Elliot crafts a world that feels hauntingly real. When journalist Adam Reed stumbles upon a series of unpublished manuscripts, he thinks he’s found a story that could change his career. But as he reads deeper, he realizes these pages hold more than just fiction — they hold the key to a truth someone desperately wants to keep buried.',
+      ],
+      sections: [
+        {
+          title: 'A Story Wrapped in Secrets',
+          body: 'Elliot masterfully weaves past and present, truth and lies, as Adam delves into the life of the manuscript’s reclusive author. Each discovery pulls him further into a dangerous web of hidden motives, forgotten tragedies, and a silence that speaks louder than words.',
+        },
+        {
+          title: 'Atmosphere & Writing',
+          body: 'The writing is crisp, immersive, and beautifully paced. The atmosphere feels alive — dimly lit streets, empty libraries, old diaries, and the constant feeling that someone is watching. Elliot’s attention to detail makes every scene vivid and suspenseful.',
+        },
+        {
+          title: 'Characters That Stay With You',
+          body: 'Adam Reed is a relatable, flawed protagonist. His curiosity, guilt, and determination make him feel real. The supporting characters are layered and complex, each carrying their own secrets that slowly unravel in unexpected ways.',
+        },
+      ],
+      worked: [
+        'Unpredictable twists that keep you guessing',
+        'A gripping revelation in the final act',
+        'Strong emotional depth beneath the suspense',
+        'A chilling yet satisfying ending',
+      ],
+      better: [
+        'The middle section feels slightly slow for some readers',
+        'A few secondary characters could have been explored more',
+      ],
+      verdict:
+        'The Silent Page is a must-read for fans of mystery and psychological thrillers. It’s more than just a story — it’s an experience that lingers long after the last page. Lucas Elliot proves once again that silence can be the most terrifying truth of all.',
+      quote: 'Sometimes the most dangerous stories are the ones that were never meant to be read.',
+      bars: [
+        { label: 'Storyline', value: 4.5 },
+        { label: 'Characters', value: 4.5 },
+        { label: 'Writing Style', value: 4.0 },
+        { label: 'Pacing', value: 4.0 },
+        { label: 'Overall Enjoyment', value: 4.5 },
+      ],
+    },
+    fullSummary: {
+      intro:
+        'The Silent Page by Lucas Elliot is a gripping mystery thriller that unfolds through secrets, lies, and the relentless pursuit of truth.',
+      sections: [
+        {
+          title: 'The Beginning',
+          body: 'The story begins with journalist Adam Reed, who receives an anonymous package containing a single, unsigned manuscript. What he reads shocks him — a detailed account of crimes that have never been reported. As he digs deeper, Adam realizes the manuscript is not fiction but a confession from someone in his life.',
+        },
+        {
+          title: 'The Investigation',
+          body: 'Adam’s curiosity turns into obsession. With every page, he uncovers connections between the manuscript and unsolved cases from years ago. The deeper he goes, the more he puts his career, relationships, and even his life at risk.',
+        },
+        {
+          title: 'The Secrets Unfold',
+          body: 'The manuscript reveals long-buried truths — corruption, betrayal, and a powerful network that silenced voices to stay hidden. Adam discovers that the author of the manuscript is closer to him than he ever imagined.',
+        },
+        {
+          title: 'The Turning Point',
+          body: 'When Adam pieces together the final clues, he confronts the person behind the manuscript. In a tense showdown, the truth comes out, but at a cost that changes everything.',
+        },
+        {
+          title: 'The Conclusion',
+          body: 'The truth is finally exposed, the guilty are held accountable, and Adam chooses a new path — one where he writes not just stories, but the truth that others are afraid to tell.',
+        },
+      ],
+      quote: 'Sometimes the most dangerous stories are the ones that were never meant to be read.',
+      takeaways: [
+        { icon: 'shield', title: 'Truth Always Surfaces', text: 'No matter how deep it’s buried, the truth always finds its way out.' },
+        { icon: 'people', title: 'Curiosity Has a Price', text: 'Seeking the truth can cost you more than you ever expected.' },
+        { icon: 'eye', title: 'Nothing Is as It Seems', text: 'Behind every quiet story lies a secret waiting to be revealed.' },
+        { icon: 'book', title: 'Words Have Power', text: 'The right words can expose lies, create change, and change lives.' },
+      ],
+    },
+  },
+}
+
+// Fallbacks: composed from the book's own fields so each page is specific to
+// that title even before anyone hand-writes it.
+const deriveReview = (b) => ({
+  intro: [b.review.text, b.about],
+  sections: [
+    { title: 'A Story Worth Following', body: b.summaryBody },
+    { title: 'Atmosphere & Writing', body: `${b.special[3]?.text || ''} ${b.author} writes with a control of tone that keeps ${b.title} vivid from first page to last.`.trim() },
+    { title: 'Characters That Stay With You', body: `${b.special[2]?.text || ''} They carry the story’s weight without ever feeling like devices.`.trim() },
+  ],
+  worked: b.review.loved,
+  better: b.review.better,
+  verdict: `${b.title} is a rewarding read for anyone drawn to ${b.genres.slice(0, 2).join(' and ').toLowerCase()}. ${b.summaryBody}`,
+  quote: b.pull.join(' '),
+  bars: [
+    { label: 'Storyline', value: b.review.overall },
+    { label: 'Characters', value: Math.min(5, b.review.overall + 0.1) },
+    { label: 'Writing Style', value: Math.max(3.5, b.review.overall - 0.2) },
+    { label: 'Pacing', value: Math.max(3.5, b.review.overall - 0.4) },
+    { label: 'Overall Enjoyment', value: b.review.overall },
+  ],
+})
+
+const deriveSummary = (b) => ({
+  intro: `${b.title} by ${b.author} is a ${b.genre.toLowerCase()} that ${b.summaryBody.charAt(0).toLowerCase()}${b.summaryBody.slice(1)}`,
+  sections: [
+    { title: 'The Beginning', body: b.about },
+    { title: 'What Drives It', body: `${b.summaryLines.join(' ')} These threads set the story in motion and rarely let it settle.` },
+    { title: 'The Heart of the Book', body: b.special[0]?.text ? `${b.special[0].text} ${b.special[1]?.text || ''}`.trim() : b.summaryBody },
+    { title: 'The Conclusion', body: b.review.text },
+  ],
+  quote: b.pull.join(' '),
+  takeaways: (b.special || []).map((s, i) => ({
+    icon: ['shield', 'people', 'eye', 'book'][i] || 'book',
+    title: s.title,
+    text: s.text,
+  })),
+})
+
 export const BOOKS = RAW_BOOKS.map((b) => ({
   ...DEFAULTS,
   ...b,
@@ -427,7 +552,19 @@ export const BOOKS = RAW_BOOKS.map((b) => ({
   videos: b.videos || videoSet(b),
 }))
 
+// Attach the long-form pages once the base book objects exist, so the derived
+// versions can read the finished fields.
+BOOKS.forEach((b) => {
+  const hand = FULL[b.slug] || {}
+  b.fullReview = hand.fullReview || deriveReview(b)
+  b.fullSummary = hand.fullSummary || deriveSummary(b)
+})
+
 export const getBook = (slug) => BOOKS.find((b) => b.slug === slug)
+
+// Three other titles for the "More Books You'll Love" rail.
+export const relatedBooks = (slug, count = 3) =>
+  BOOKS.filter((b) => b.slug !== slug).slice(0, count)
 
 // Small helper so link markup stays consistent everywhere.
 export const bookHref = (book) => `/books/${book.slug}`
