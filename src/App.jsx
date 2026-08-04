@@ -13,6 +13,7 @@ import TopPicks from './components/TopPicks'
 import Mission from './components/Mission'
 import Community from './components/Community'
 import Reviews from './components/Reviews'
+import AuthorInterviews from './components/AuthorInterviews'
 import Newsletter from './components/Newsletter'
 import Loader from './components/Loader'
 import BooksCollection from './components/BooksCollection'
@@ -158,6 +159,7 @@ export default function App() {
         <Trailer />
         <TopPicks />
         <Reviews />
+        <AuthorInterviews />
         <Mission />
         <Community />
         <Offer />
