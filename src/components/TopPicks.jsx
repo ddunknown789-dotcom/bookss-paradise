@@ -2,14 +2,11 @@ import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '../lib/anim'
 import { Divider, ArrowRight } from './ui'
+import { BOOKS as ALL_BOOKS, bookHref } from '../data/books'
 
-const BOOKS = [
-  { img: 'book-1', title: 'The Silent Page — Lucas Elliot' },
-  { img: 'book-2', title: 'The Beyond The Horizon — Nora Elston' },
-  { img: 'book-3', title: 'The Lost Letters — Madilyn Hart' },
-  { img: 'book-4', title: 'The Whispers of the Past — Clara Bennett' },
-  { img: 'book-5', title: 'The Light Between Worlds — Anna Shah' },
-]
+// The five featured titles, pulled from the shared book data so the covers
+// link straight to each book's own page.
+const BOOKS = ALL_BOOKS.slice(0, 5)
 
 export default function TopPicks() {
   const root = useRef(null)
@@ -62,15 +59,15 @@ export default function TopPicks() {
       <div className="picks-shelf-zone">
         <div className="picks-row">
           {BOOKS.map((b) => (
-            <figure className="pick-book" key={b.img}>
-              <img src={`/assets/${b.img}.png`} alt={b.title} loading="lazy" />
-            </figure>
+            <a className="pick-book" key={b.slug} href={bookHref(b)} aria-label={`${b.title} by ${b.author}`}>
+              <img src={b.coverSrc} alt={`${b.title} by ${b.author}`} loading="lazy" />
+            </a>
           ))}
         </div>
         <img className="picks-shelf" src="/assets/shelf.png" alt="" loading="lazy" />
       </div>
       <div className="picks-cta">
-        <a className="btn btn-gold-bright btn-viewall" href="#books">
+        <a className="btn btn-gold-bright btn-viewall" href="/books">
           View All Books <ArrowRight size={20} />
         </a>
       </div>

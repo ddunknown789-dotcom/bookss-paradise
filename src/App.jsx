@@ -15,12 +15,21 @@ import Community from './components/Community'
 import Reviews from './components/Reviews'
 import Newsletter from './components/Newsletter'
 import Loader from './components/Loader'
+import BooksCollection from './components/BooksCollection'
+import BookPage from './pages/BookPage'
+import { getBook } from './data/books'
 import { NOANIM, IS_SMALL } from './lib/anim'
 
 gsap.registerPlugin(ScrollTrigger)
 if (import.meta.env.DEV && typeof window !== 'undefined') window.gsap = gsap
 
 export default function App() {
+  // Simple pathname routing: '/' is the scroll experience, '/books' the
+  // collection, '/books/<slug>' a single book's detail page.
+  const path = typeof window !== 'undefined' ? window.location.pathname.replace(/\/+$/, '') || '/' : '/'
+  const isBooksPage = path === '/books'
+  const bookSlug = path.startsWith('/books/') ? path.slice('/books/'.length) : null
+  const book = bookSlug ? getBook(bookSlug) : null
   // Guard against environments that briefly report a 0-height viewport at
   // mount: ScrollTriggers created at that moment would mis-measure everything.
   const [ready, setReady] = useState(() => typeof window !== 'undefined' && window.innerHeight > 0)
@@ -81,6 +90,30 @@ export default function App() {
   }, [ready, siteUp])
 
   if (!ready) return <ParticleField />
+
+  if (isBooksPage) {
+    return (
+      <>
+        <ParticleField />
+        <BooksCollection />
+      </>
+    )
+  }
+
+  // A /books/<slug> URL that doesn't match any book still needs a real page
+  // rather than a blank screen.
+  if (bookSlug) {
+    if (!book) {
+      return (
+        <main className="bp-missing">
+          <h1>Book not found</h1>
+          <p>We couldn’t find a book at this address.</p>
+          <a className="bp-btn bp-btn-gold bp-btn-lg" href="/books">Browse all books</a>
+        </main>
+      )
+    }
+    return <BookPage book={book} />
+  }
 
   return (
     <>

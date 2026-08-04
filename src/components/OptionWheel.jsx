@@ -125,7 +125,9 @@ const OptionWheel = ({
   const startLoop = useCallback(() => {
     if (rafRef.current != null) return
     lastRef.current = performance.now()
-    rafRef.current = requestAnimationFrame(runFrame)
+    // Lay out the wheel immediately so the first render is already curved,
+    // then let the rAF chain continue only if the wheel still needs to settle.
+    runFrame(lastRef.current)
   }, [runFrame])
 
   // Optional tick on selection change, throttled so fast scrolling can't spam
@@ -161,6 +163,8 @@ const OptionWheel = ({
         onChangeRef.current?.(idx, cfg.items[idx])
         playTick()
       }
+      // Always kick the frame loop so the initial layout gets its transforms,
+      // even when the default selection does not change.
       startLoop()
     },
     [startLoop, playTick],
