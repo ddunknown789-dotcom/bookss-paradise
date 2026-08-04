@@ -14,11 +14,6 @@ export default function BookLongPage({ book, kind }) {
   const related = relatedBooks(book.slug)
 
   useEffect(() => {
-    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual'
-    window.scrollTo(0, 0)
-  }, [])
-
-  useEffect(() => {
     const prev = document.title
     document.title = `${pageName}: ${book.title} | Books Paradise`
     return () => { document.title = prev }

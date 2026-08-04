@@ -13,6 +13,7 @@ import TopPicks from './components/TopPicks'
 import Mission from './components/Mission'
 import Community from './components/Community'
 import Reviews from './components/Reviews'
+import BooksOfWeek from './components/BooksOfWeek'
 import AuthorInterviews from './components/AuthorInterviews'
 import Newsletter from './components/Newsletter'
 import Loader from './components/Loader'
@@ -20,18 +21,26 @@ import BooksCollection from './components/BooksCollection'
 import BookPage from './pages/BookPage'
 import BookLongPage from './pages/BookLongPage'
 import InterviewPage from './pages/InterviewPage'
+import WeeksPage from './pages/WeeksPage'
 import { getBook } from './data/books'
 import { getInterview } from './data/interviews'
+import { WEEKS_HREF } from './data/weeks'
 import { NOANIM, IS_SMALL } from './lib/anim'
+import { usePath } from './lib/router'
 
 gsap.registerPlugin(ScrollTrigger)
 if (import.meta.env.DEV && typeof window !== 'undefined') window.gsap = gsap
 
 export default function App() {
   // Simple pathname routing: '/' is the scroll experience, '/books' the
-  // collection, '/books/<slug>' a single book's detail page.
-  const path = typeof window !== 'undefined' ? window.location.pathname.replace(/\/+$/, '') || '/' : '/'
+  // collection, '/books/<slug>' a single book's detail page. `usePath` is
+  // reactive (router.js intercepts internal link clicks + back/forward), so
+  // moving between these never remounts the app or replays the loader.
+  const path = usePath()
   const isBooksPage = path === '/books'
+  // '/books-of-the-week' — the full weekly archive. Checked as an exact
+  // match so it never collides with '/books' or '/books/<slug>'.
+  const isWeeksPage = path === WEEKS_HREF
   // '/books/<slug>' and '/books/<slug>/review' | '/books/<slug>/summary'
   const bookParts = path.startsWith('/books/') ? path.slice('/books/'.length).split('/') : []
   const bookSlug = bookParts[0] || null
@@ -92,10 +101,14 @@ export default function App() {
     // re-measure once every asset (fonts, images) has arrived
     const refresh = () => ScrollTrigger.refresh()
     window.addEventListener('load', refresh)
+    // router.js restores scroll position on back/forward navigation; it
+    // needs this to go through Lenis, or Lenis snaps the jump right back.
+    window.__lenis = lenis
     return () => {
       window.removeEventListener('load', refresh)
       gsap.ticker.remove(raf)
       lenis.destroy()
+      window.__lenis = null
     }
   }, [ready, siteUp])
 
@@ -109,6 +122,8 @@ export default function App() {
       </>
     )
   }
+
+  if (isWeeksPage) return <WeeksPage />
 
   // A /books/<slug> URL that doesn't match any book still needs a real page
   // rather than a blank screen.
@@ -179,6 +194,7 @@ export default function App() {
         <Trailer />
         <TopPicks />
         <Reviews />
+        <BooksOfWeek />
         <AuthorInterviews />
         <Mission />
         <Community />

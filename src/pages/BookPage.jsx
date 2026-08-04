@@ -6,14 +6,6 @@ export default function BookPage({ book }) {
   const [wished, setWished] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  // Arriving from a book cover halfway down the home page, the browser would
-  // otherwise restore that scroll position and drop you into the middle of
-  // this page. Always open a book at its title.
-  useEffect(() => {
-    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual'
-    window.scrollTo(0, 0)
-  }, [])
-
   // Keep the tab title in step with the book being viewed.
   useEffect(() => {
     const prev = document.title

@@ -731,87 +731,141 @@ main { position: relative; z-index: 1; }
   color: #a9b2a9;
 }
 
-/* ---------- trailer ---------- */
-.trailer {
-  position: relative;
-  width: min(var(--container), calc(100% - 80px));
-  margin: 110px auto;
-  background: #0b0c10;
-  border-radius: var(--radius);
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: 40% 60%;
-  min-height: 620px;
-  box-shadow: 0 40px 90px -35px rgba(10, 12, 14, 0.55);
+/* ---------- video content ("Stories Brought to Life") ---------- */
+.videos { background: #f8f7f3; padding-bottom: 86px; }
+.videos-kicker {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--gold);
 }
-.trailer-copy {
-  position: relative;
-  z-index: 2;
-  padding: 100px 20px 90px 84px;
+.videos-head .section-title { margin-top: 14px; }
+.videos-sub {
+  max-width: 560px;
+  margin: 16px auto 0;
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--grey);
+}
+
+.videos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 30px;
+  padding: 54px 60px 0;
+}
+.video-card {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  background: var(--card-soft);
+  border: 1px solid rgba(31, 70, 52, 0.07);
+  border-radius: 18px;
+  overflow: hidden; /* also clips the thumbnail's top corners */
+  box-shadow: 0 22px 44px -30px rgba(31, 70, 52, 0.34);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s;
 }
-.trailer-copy h2 {
-  font-family: var(--serif);
-  font-weight: 600;
-  font-size: clamp(42px, 4.2vw, 68px);
-  line-height: 1.03;
-  color: var(--sage);
-  letter-spacing: var(--tracking-tight);
+.video-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 34px 56px -28px rgba(31, 70, 52, 0.4);
 }
-.trailer-copy p {
-  margin-top: 30px;
-  font-size: 18px;
-  line-height: 1.82;
-  color: #c8d2c9;
-  max-width: 420px;
-}
-.btn-watch {
-  margin-top: 44px;
-  align-self: flex-start;
-  padding: 17px 38px;
-  border-radius: 12px;
-  font-size: 13px;
-}
-.trailer-art {
+
+/* The thumbnail doubles as the "screen": a cinematic panel carrying a gold
+   title and a play control. Give a category a `thumb` in Trailer.jsx and the
+   image simply layers over this panel. overflow stays visible so the round
+   badge can straddle the bottom edge. */
+.video-thumb {
   position: relative;
-  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  background:
+    radial-gradient(120% 95% at 50% 26%, rgba(201, 150, 47, 0.26), transparent 62%),
+    linear-gradient(158deg, #16241c 0%, #0b100d 56%, #141c17 100%);
 }
-.trailer-art img {
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
-  object-position: right center;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 16%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 16%);
-}
-.play-ring {
-  position: absolute;
-  left: 33%;
-  top: 44%;
-  width: 130px;
-  height: 130px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  pointer-events: none;
-}
-.play-ring::before, .play-ring::after {
-  content: '';
+.video-thumb img {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.video-screen {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 27%;
+  padding: 0 18px;
+  text-align: center;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(17px, 1.5vw, 21px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #e9c878;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+}
+.video-play {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  transform: translate(-50%, -50%);
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.55);
-  animation: ringPulse 2.6s cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
+  color: #fff;
+  padding-left: 3px; /* optically centre the triangle */
 }
-.play-ring::after { animation-delay: 1.3s; }
-@keyframes ringPulse {
-  0% { transform: scale(0.72); opacity: 0.9; }
-  100% { transform: scale(1.45); opacity: 0; }
+.video-badge {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 50%);
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 10px 22px -10px rgba(31, 70, 52, 0.6);
 }
+
+.video-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 50px 30px 32px; /* top clears the straddling badge */
+}
+.video-body h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 27px;
+  line-height: 1.2;
+  color: var(--green);
+  letter-spacing: var(--tracking-tight);
+}
+.video-body .divider { margin: 12px auto 0; }
+.video-body p {
+  margin-top: 16px;
+  /* guarantees a gap when the card has no spare height for the button's
+     auto margin to absorb (single-column mobile) */
+  margin-bottom: 24px;
+  font-size: 15px;
+  line-height: 1.72;
+  color: var(--grey);
+}
+.video-btn {
+  margin-top: auto;
+  padding: 16px 34px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  white-space: nowrap; /* "Watch Summaries" would otherwise break in two */
+}
+.video-btn svg { margin-top: 1px; }
 
 /* ---------- top picks ---------- */
 .picks { background: #f7f6f2; padding-bottom: 90px; }
@@ -850,6 +904,88 @@ main { position: relative; z-index: 1; }
 }
 .picks-cta { text-align: center; margin-top: 40px; }
 .btn-viewall {
+  padding: 19px 46px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-family: var(--sans);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+}
+
+/* ---------- book of the week ---------- */
+.botw { background: #f7f6f2; padding-bottom: 92px; }
+.botw-sub {
+  max-width: 760px;
+  margin: 20px auto 0;
+  font-size: 18px;
+  line-height: 1.82;
+  color: var(--grey);
+}
+/* Covers are bottom-aligned inside a fixed `--botw-cover-h` box so every
+   title below them lands on the same baseline regardless of small
+   differences between the cover files. Re-declared per breakpoint — no
+   other numbers need touching. */
+.botw-stage {
+  --botw-cover-h: 320px;
+  --botw-gutter: 52px;
+  position: relative;
+  margin-top: 58px;
+  padding: 0 var(--botw-gutter);
+}
+.botw-row {
+  display: grid;
+  grid-template-columns: repeat(var(--botw-cols, 4), minmax(0, 1fr));
+  gap: 26px;
+}
+.botw-book { display: flex; flex-direction: column; margin: 0; }
+.botw-cover {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: var(--botw-cover-h);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), filter 0.45s;
+}
+.botw-cover img { max-height: 100%; max-width: 100%; width: auto; display: block; }
+a.botw-cover:hover {
+  transform: translateY(-16px) scale(1.035);
+  filter: drop-shadow(0 30px 30px rgba(31, 40, 35, 0.28));
+}
+.botw-caption {
+  margin-top: 20px;
+  text-align: center;
+}
+.botw-caption h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.3;
+  color: var(--green);
+  letter-spacing: var(--tracking-normal);
+}
+.botw-by { margin-top: 6px; font-size: 15px; color: var(--grey); }
+/* The full Genre/Pages/Published string needs ~311px and the site's 1400px
+   container caps these columns at ~304px, so it settles onto two balanced
+   lines. nowrap on the spans keeps breaks at the separators, never
+   mid-phrase. */
+.botw-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: 6px;
+  row-gap: 2px;
+  margin-top: 11px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #4a524a;
+}
+.botw-meta span { white-space: nowrap; }
+.botw-meta em { font-style: normal; font-weight: 600; color: var(--gold); }
+.botw-meta i { width: 3px; height: 3px; border-radius: 50%; background: #c9a24a; }
+.botw-cta { text-align: center; margin-top: 52px; }
+.btn-botw {
   padding: 19px 46px;
   border-radius: 16px;
   font-size: 13px;
@@ -1467,18 +1603,28 @@ main { position: relative; z-index: 1; }
   .community-copy .section-title,
   .news-copy .section-title { text-align: left; }
 
-  .trailer { grid-template-columns: 1fr; min-height: 0; }
-  .trailer-copy { padding: 70px 44px 40px; }
-  .trailer-art { min-height: 400px; }
-  .trailer-art img {
-    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 24%);
-    mask-image: linear-gradient(180deg, transparent 0%, #000 24%);
-    object-position: center 30%;
-  }
-  .play-ring { left: 50%; top: 55%; }
+  /* video content — three-up holds, just tighter */
+  .videos-grid { gap: 20px; padding: 46px 40px 0; }
+  .video-body { padding: 46px 20px 28px; }
+  .video-body h3 { font-size: 22px; }
+  .video-body p { font-size: 14.5px; margin-top: 13px; }
+  .video-btn { padding: 14px 24px; font-size: 11.5px; }
+  .videos-sub { font-size: 16px; }
 
   .reviews-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0 auto; padding: 50px 40px 0; }
   .interviews-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 50px 40px 0; gap: 20px; }
+
+  /* book of the week — shorter covers, same four-up composition */
+  .botw-stage {
+    --botw-cover-h: 210px;
+    --botw-gutter: 40px;
+    margin-top: 46px;
+  }
+  .botw-row { gap: 22px; }
+  .botw-sub { font-size: 16.5px; }
+  .botw-caption h3 { font-size: 17px; }
+  .botw-by { font-size: 14px; }
+  .botw-meta { font-size: 11.5px; gap: 7px; }
 
   .collection-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
@@ -1486,7 +1632,7 @@ main { position: relative; z-index: 1; }
 /* ---- phones (≤680px) ---- */
 @media (max-width: 680px) {
   :root { --radius: 22px; }
-  .card, .trailer { width: calc(100% - 26px); margin: 66px auto; }
+  .card { width: calc(100% - 26px); margin: 66px auto; }
   .section-head { padding-top: 54px; }
   .section-title { font-size: clamp(30px, 8.5vw, 40px); }
 
@@ -1523,12 +1669,14 @@ main { position: relative; z-index: 1; }
   .offer-detail p { font-size: 16px; }
   .offer-hint { margin-top: 18px; font-size: 10.5px; }
 
-  /* trailer */
-  .trailer-copy { padding: 46px 26px 34px; }
-  .trailer-copy h2 { font-size: clamp(30px, 8.5vw, 42px); }
-  .trailer-copy p { font-size: 16.5px; margin-top: 20px; max-width: 100%; }
-  .btn-watch { margin-top: 30px; padding: 14px 30px; font-size: 12px; }
-  .trailer-art { min-height: 320px; }
+  /* video content -> single column */
+  .videos { padding-bottom: 46px; }
+  .videos-grid { grid-template-columns: 1fr; gap: 24px; padding: 40px 22px 0; }
+  .videos-kicker { font-size: 11.5px; }
+  .videos-sub { font-size: 15.5px; margin-top: 14px; }
+  .video-body { padding: 46px 24px 28px; }
+  .video-body h3 { font-size: 23px; }
+  .video-btn { padding: 15px 30px; font-size: 12px; }
 
   /* top picks -> horizontal scroll shelf */
   .picks { padding-bottom: 54px; }
@@ -1550,6 +1698,21 @@ main { position: relative; z-index: 1; }
   .picks-shelf { display: none; }
   .picks-cta { margin-top: 30px; }
   .btn-viewall { padding: 15px 34px; font-size: 12px; }
+
+  /* book of the week -> two-up */
+  .botw { padding-bottom: 54px; }
+  .botw-stage {
+    --botw-cover-h: 186px;
+    --botw-gutter: 22px;
+    margin-top: 36px;
+  }
+  .botw-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 18px; }
+  .botw-caption { margin-top: 14px; }
+  .botw-caption h3 { font-size: 15.5px; }
+  .botw-by { font-size: 13px; margin-top: 4px; }
+  .botw-meta { font-size: 11px; gap: 6px; margin-top: 8px; }
+  .botw-cta { margin-top: 34px; }
+  .btn-botw { padding: 15px 30px; font-size: 11.5px; }
 
   /* mission */
   .mission-copy { padding: 70px 24px 8px; }

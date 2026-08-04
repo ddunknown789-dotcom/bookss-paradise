@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import SiteHeader from '../components/SiteHeader'
 import { Divider } from '../components/ui'
 import { bookHref } from '../data/books'
+import { goBack } from '../lib/router'
 import '../styles/interview.css'
 
 const Icon = {
@@ -19,11 +20,6 @@ export default function InterviewPage({ item }) {
   const [openSet, setOpenSet] = useState(() => new Set(item.qa.map((_, i) => i)))
   const [saved, setSaved] = useState(false)
   const [copied, setCopied] = useState(false)
-
-  useEffect(() => {
-    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual'
-    window.scrollTo(0, 0)
-  }, [])
 
   useEffect(() => {
     const prev = document.title
@@ -54,7 +50,11 @@ export default function InterviewPage({ item }) {
 
       <main className="iv-main">
         <div className="iv-topbar">
-          <a className="iv-back" href="/#interviews">
+          <a
+            className="iv-back"
+            href="/#interviews"
+            onClick={(e) => { e.preventDefault(); goBack('/#interviews') }}
+          >
             <Icon.back width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"
               strokeLinecap="round" strokeLinejoin="round" />
             Back to All Interviews
