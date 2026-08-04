@@ -155,12 +155,12 @@ export default function App() {
       <main>
         <Intro />
         <Hero />
-        <Offer />
         <Trailer />
         <TopPicks />
+        <Reviews />
         <Mission />
         <Community />
-        <Reviews />
+        <Offer />
         <Newsletter />
       </main>
       </>
