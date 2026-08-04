@@ -2,27 +2,10 @@ import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '../lib/anim'
 import { Divider, ArrowRight } from './ui'
+import { BOOKS, bookHref } from '../data/books'
 
-const REVIEWS = [
-  { avatar: 'avatar-1', name: 'Ananya D.', quote: 'A beautifully written story. The emotions felt so real!' },
-  { avatar: 'avatar-2', name: 'Rohan M.', quote: 'Couldn’t put it down! The trailer made me read it instantly.' },
-  { avatar: 'avatar-3', name: 'Neha S.', quote: 'One of the best books I’ve read this year. Highly recommended!' },
-]
-
-function Stars() {
-  return (
-    <span className="stars" aria-label="5 out of 5 stars">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <svg key={i} viewBox="0 0 24 24" width="21" height="21" aria-hidden="true">
-          <path
-            d="M12 1.8L14.9 8.1L21.8 8.9L16.7 13.6L18.1 20.4L12 17L5.9 20.4L7.3 13.6L2.2 8.9L9.1 8.1L12 1.8Z"
-            fill="#E0A32E"
-          />
-        </svg>
-      ))}
-    </span>
-  )
-}
+// The homepage features the first six books in the shared data source.
+const FEATURED_BOOKS = BOOKS.slice(0, 6)
 
 export default function Reviews() {
   const root = useRef(null)
@@ -61,20 +44,23 @@ export default function Reviews() {
   return (
     <section className="reviews card" id="reviews" ref={root}>
       <div className="reviews-head section-head">
-        <h2 className="section-title">Latest Reviews</h2>
+        <h2 className="section-title">Latest Book Reviews</h2>
         <Divider width={300} />
       </div>
       <div className="reviews-grid">
-        {REVIEWS.map((r) => (
-          <article className="review-card" key={r.name}>
-            <div className="review-head">
-              <img className="review-avatar" src={`/assets/${r.avatar}.jpg`} alt={r.name} loading="lazy" />
-              <div>
-                <h3>{r.name}</h3>
-                <Stars />
-              </div>
+        {FEATURED_BOOKS.map((book) => (
+          <article className="review-card review-book-card" key={book.slug}>
+            <div className="review-book-cover">
+              <img src={book.coverSrc} alt={`${book.title} by ${book.author}`} loading="lazy" />
             </div>
-            <p>{r.quote}</p>
+            <div className="review-book-content">
+              <p className="review-book-kicker">{book.genre} · {book.author}</p>
+              <h3>{book.title}</h3>
+              <p className="review-book-excerpt">{book.review.text}</p>
+              <a className="review-book-link" href={`${bookHref(book)}/review`}>
+                Read Full Review <ArrowRight size={17} />
+              </a>
+            </div>
           </article>
         ))}
       </div>
