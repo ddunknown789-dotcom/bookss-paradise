@@ -4,6 +4,10 @@ node_modules/
 # build output
 dist/
 dist-ssr/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
 
 # logs
 *.log
@@ -20,5 +24,9 @@ npm-debug.log*
 .env.*
 !.env.example
 
-# vite cache
+# vite cache (legacy)
 .vite/
+
+# supabase cli
+supabase/.temp/
+supabase/.branches/
