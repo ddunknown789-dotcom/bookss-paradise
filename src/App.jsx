@@ -17,6 +17,7 @@ import BooksOfWeek from './components/BooksOfWeek'
 import AuthorInterviews from './components/AuthorInterviews'
 import Newsletter from './components/Newsletter'
 import Loader from './components/Loader'
+import BPChat from './components/BPChat'
 import BooksCollection from './components/BooksCollection'
 import BookPage from './pages/BookPage'
 import BookLongPage from './pages/BookLongPage'
@@ -114,6 +115,9 @@ export default function App() {
 
   if (!ready) return <ParticleField />
 
+  // Every route resolves through here, so BP (the floating assistant) can be
+  // mounted exactly once — outside the routes — and appear on every page.
+  const renderPage = () => {
   if (isBooksPage) {
     return (
       <>
@@ -203,6 +207,18 @@ export default function App() {
       </main>
       </>
       )}
+    </>
+  )
+  }
+
+  // The homepage hands the screen to the loader first; every other route can
+  // offer the assistant straight away.
+  const isHomePage = !isBooksPage && !isWeeksPage && !bookSlug && !interviewSlug
+
+  return (
+    <>
+      {renderPage()}
+      {(!isHomePage || siteUp) && <BPChat />}
     </>
   )
 }

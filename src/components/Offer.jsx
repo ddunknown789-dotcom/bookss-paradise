@@ -1,21 +1,46 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '../lib/anim'
-import { Divider } from './ui'
-import OptionWheel from './OptionWheel'
+import { Star4 } from './ui'
+import OfferEmblem, { BookOrnament } from './OfferIcons'
 
-const ITEMS = [
-  { icon: 'icon-trailers', label: 'Book Trailers', desc: 'Cinematic trailers that bring stories to life.' },
-  { icon: 'icon-reviews', label: 'Honest Reviews', desc: 'Real opinions from real readers.' },
-  { icon: 'icon-curated', label: 'Curated Books', desc: 'Handpicked books you’ll love.' },
-  { icon: 'icon-authors', label: 'Author Features', desc: 'Spotlight on amazing authors.' },
-  { icon: 'icon-community', label: 'Community', desc: 'A growing community of book lovers.' },
-  { icon: 'icon-updates', label: 'Updates & More', desc: 'Stay updated with new releases.' },
+// Title lines are authored per line so the cards break exactly as designed;
+// they still wrap naturally once the grid narrows.
+const SERVICES = [
+  {
+    glyph: 'social',
+    title: ['Book Features on', 'Instagram, FB,', 'Website & YouTube'],
+    desc: 'Showcase your book to a wider audience across top platforms and drive real engagement.',
+  },
+  {
+    glyph: 'pen',
+    title: ['Honest', 'Book Reviews'],
+    desc: 'Genuine, in-depth reviews that build trust and help readers make their next favorite read.',
+  },
+  {
+    glyph: 'film',
+    title: ['Cinematic', 'Video Content', 'of Book'],
+    desc: 'High-quality, cinematic videos that capture your book’s essence and leave a lasting impression.',
+  },
+  {
+    glyph: 'website',
+    title: ['Website', 'Creation'],
+    desc: 'Professional, author-focused websites that establish your online presence and connect you with readers.',
+  },
+  {
+    glyph: 'author',
+    title: ['Author', 'Features'],
+    desc: 'Highlighting authors, their journey, and their stories to connect with readers on a deeper level.',
+  },
+  {
+    glyph: 'blog',
+    title: ['Book', 'Blogs'],
+    desc: 'Engaging blog posts that inform, inspire, and bring more visibility to your book and brand.',
+  },
 ]
 
 export default function Offer() {
   const root = useRef(null)
-  const [active, setActive] = useState(2)
 
   useLayoutEffect(() => {
     if (NOANIM) return
@@ -29,77 +54,78 @@ export default function Offer() {
         },
       )
       gsap.fromTo(
-        '.offer-stage',
-        { y: 40, opacity: 0 },
+        '.offer-card',
+        { y: 44, opacity: 0 },
         {
-          y: 0, opacity: 1, duration: 1, ease: 'power3.out',
-          scrollTrigger: { trigger: '.offer-stage', start: 'top 82%' },
+          y: 0, opacity: 1, duration: 0.85, stagger: 0.09, ease: 'power3.out',
+          scrollTrigger: { trigger: '.offer-grid', start: 'top 85%' },
+        },
+      )
+      gsap.fromTo(
+        '.offer-foot',
+        { opacity: 0 },
+        {
+          opacity: 1, duration: 0.9, ease: 'power2.out',
+          scrollTrigger: { trigger: '.offer-foot', start: 'top 95%' },
         },
       )
     }, root)
     return () => ctx.revert()
   }, [])
 
-  // Crossfade the detail panel whenever the wheel lands on a new service.
-  const detail = useRef(null)
-  useLayoutEffect(() => {
-    if (NOANIM || !detail.current) return
-    gsap.fromTo(
-      detail.current,
-      { opacity: 0, y: 14 },
-      { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', overwrite: true },
-    )
-  }, [active])
-
-  const current = ITEMS[active]
-
   return (
     <section className="offer card" id="offer" ref={root}>
-      <div className="offer-head section-head">
-        <h2 className="section-title">What We Offer</h2>
-        <Divider width={300} />
-      </div>
-
-      <div className="offer-stage">
-        <OptionWheel
-          items={ITEMS}
-          defaultSelected={2}
-          onChange={(i) => setActive(i)}
-          textColor="#9aa79d"
-          activeColor="#1f4634"
-          fontSize={1.45}
-          spacing={1.65}
-          curve={1}
-          tilt={6}
-          blur={1.6}
-          fade={0.26}
-          smoothing={200}
-          // the curve pushes options leftward, so leave room or they clip
-          inset={54}
-          draggable
-          // the page keeps its own scrolling; the wheel turns by drag/click/keys
-          scrollCapture={false}
-          className="offer-wheel"
-          renderItem={(item) => (
-            <span className="ow-row">
-              <span className="ow-icon">
-                <img src={`/assets/${item.icon}.png`} alt="" loading="lazy" />
-              </span>
-              <span className="ow-label">{item.label}</span>
-            </span>
-          )}
-        />
-
-        <div className="offer-detail" ref={detail} key={active}>
-          <div className="offer-detail-icon">
-            <img src={`/assets/${current.icon}.png`} alt="" />
-          </div>
-          <h3>{current.label}</h3>
-          <p>{current.desc}</p>
+      <div className="offer-head">
+        <p className="offer-kicker">
+          <i aria-hidden="true" />
+          <span>Explore Our Services</span>
+          <i aria-hidden="true" />
+        </p>
+        <h2 className="offer-title">What We Offer</h2>
+        <div className="offer-rule" aria-hidden="true">
+          <i />
+          <Star4 size={15} color="#C39A3E" />
+          <i />
         </div>
+        {/* two spans, not a <br>: the authored break becomes a plain space
+            once the lines are set inline on narrow screens */}
+        <p className="offer-sub">
+          <span>Premium book promotion and content services</span>{' '}
+          <span>designed to bring stories to life.</span>
+        </p>
       </div>
 
-      <p className="offer-hint" aria-hidden="true">Drag or tap to explore</p>
+      <div className="offer-grid">
+        {SERVICES.map((s) => (
+          <article className="offer-card" key={s.glyph}>
+            <span className="offer-card-emblem">
+              <OfferEmblem glyph={s.glyph} />
+            </span>
+            <h3 className="offer-card-title">
+              {s.title.map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+            </h3>
+            <span className="offer-card-rule" aria-hidden="true">
+              <i />
+              <Star4 size={10} color="#C39A3E" />
+              <i />
+            </span>
+            <p className="offer-card-desc">{s.desc}</p>
+          </article>
+        ))}
+      </div>
+
+      <div className="offer-foot">
+        <div className="offer-foot-rule" aria-hidden="true">
+          <i />
+          <Star4 size={12} color="#C39A3E" />
+          <BookOrnament size={34} />
+          <Star4 size={12} color="#C39A3E" />
+          <i />
+        </div>
+        <p className="offer-foot-text">Stories connect. We make them unforgettable.</p>
+      </div>
     </section>
   )
 }

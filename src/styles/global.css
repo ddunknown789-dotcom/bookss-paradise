@@ -17,6 +17,8 @@
   --container: 1400px;
   --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
   --display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  /* high-contrast didone for the letterspaced editorial type in "What We Offer" */
+  --display-hc: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --tracking-tight: -0.05em;
   --tracking-normal: -0.01em;
@@ -657,78 +659,180 @@ main { position: relative; z-index: 1; }
 }
 
 /* ---------- offer ---------- */
-.offer { background: #f6f5f1; padding-bottom: 84px; }
-/* wheel on the left, the focused service's detail on the right */
-.offer-stage {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: center;
-  gap: 40px;
-  padding: 54px 84px 0;
+.offer {
+  --offer-ink: #133227;      /* the deep emerald used for all display type */
+  --offer-gold: #b8892c;
+  --offer-line: #e5d8b8;     /* hairline gold for rules + card borders */
+  background: #fdfcf9;
+  padding-bottom: 68px;
 }
-/* two classes so this beats .option-wheel's own `height:100%`, which would
-   otherwise resolve against an auto (0-height) grid row and clip everything */
-.option-wheel.offer-wheel {
-  height: 420px;
-  padding-left: 8%;
-}
-/* one option = small icon + label, sitting on the wheel's curve */
-.ow-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 18px;
-}
-.ow-icon {
-  flex: 0 0 auto;
-  width: 54px;
-  height: 54px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.ow-icon img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-.ow-label {
-  font-family: var(--sans);
-  font-weight: 500;
-  letter-spacing: var(--tracking-normal);
-}
-/* the selected option reads a touch heavier, per the reference */
-.option-wheel__item--selected .ow-label { font-weight: 700; }
 
-.offer-detail { text-align: left; max-width: 380px; }
-.offer-detail-icon {
-  width: 128px;
-  height: 128px;
+/* --- head: kicker, display title, star rule, two-line subtitle --- */
+.offer-head { text-align: center; padding: 76px clamp(22px, 4vw, 60px) 0; }
+
+.offer-kicker {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 22px;
-}
-.offer-detail-icon img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.offer-detail h3 {
-  font-family: var(--serif);
-  font-size: 30px;
-  font-weight: 600;
-  color: var(--green);
-  margin-bottom: 12px;
-  letter-spacing: var(--tracking-tight);
-}
-.offer-detail p {
-  font-size: 17px;
-  line-height: 1.82;
-  color: var(--grey);
-}
-.offer-hint {
-  margin-top: 26px;
-  text-align: center;
-  font-size: 11.5px;
-  letter-spacing: 0.28em;
+  gap: 20px;
+  width: min(510px, 100%);
+  margin: 0 auto;
+  font-family: var(--display-hc);
+  font-size: clamp(12px, 1.05vw, 15px);
+  font-weight: 500;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: #a9b2a9;
+  color: var(--offer-gold);
+}
+.offer-kicker i {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #cfb375);
+}
+.offer-kicker i:last-child { background: linear-gradient(90deg, #cfb375, transparent); }
+
+.offer-title {
+  margin-top: 14px;
+  font-family: var(--display-hc);
+  font-weight: 500;
+  font-size: clamp(34px, 6vw, 86px);
+  line-height: 1.04;
+  letter-spacing: 0.012em;
+  text-transform: uppercase;
+  color: var(--offer-ink);
+}
+
+.offer-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: min(430px, 82%);
+  margin: 18px auto 0;
+}
+.offer-rule i {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c9a24a);
+}
+.offer-rule i:last-child { background: linear-gradient(90deg, #c9a24a, transparent); }
+
+.offer-sub {
+  margin-top: 20px;
+  font-family: var(--display-hc);
+  font-size: clamp(13px, 1.18vw, 17px);
+  font-weight: 400;
+  line-height: 1.75;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #2c4b3c;
+}
+.offer-sub span { display: block; }
+
+/* --- the six service cards --- */
+.offer-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(12px, 1.5vw, 20px);
+  padding: clamp(34px, 4vw, 58px) clamp(20px, 2.6vw, 36px) 0;
+}
+
+.offer-card {
+  /* type + emblem scale off the card, not the viewport, so the authored title
+     line breaks survive every column count without re-tuning breakpoints */
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: clamp(26px, 2.6vw, 40px) clamp(10px, 0.86vw, 13px) clamp(24px, 2.4vw, 34px);
+  background: #faf8f3;
+  border: 1px solid #ede6d8;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(31, 70, 52, 0.03);
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.45s ease,
+    background 0.45s ease;
+}
+.offer-card:hover {
+  transform: translateY(-8px);
+  background: #fdfbf7;
+  border-color: #dcc48a;
+  box-shadow:
+    0 26px 46px -26px rgba(31, 70, 52, 0.3),
+    0 3px 12px rgba(31, 70, 52, 0.05);
+}
+
+.offer-card-emblem {
+  display: block;
+  width: clamp(92px, 9.2vw, 138px);
+  width: min(74cqi, 152px);
+  margin-bottom: clamp(16px, 1.6vw, 24px);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.offer-card-emblem svg { width: 100%; height: auto; display: block; }
+.offer-card:hover .offer-card-emblem { transform: scale(1.045); }
+
+.offer-card-title {
+  font-family: var(--display-hc);
+  font-weight: 600;
+  font-size: clamp(13.5px, 1.2vw, 17.5px);
+  font-size: clamp(12px, 8.9cqi, 19px);
+  line-height: 1.52;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+  color: var(--offer-ink);
+}
+.offer-card-title span { display: block; }
+
+.offer-card-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 74%;
+  margin: clamp(12px, 1.2vw, 17px) 0 clamp(13px, 1.3vw, 18px);
+}
+.offer-card-rule i {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d3b779);
+}
+.offer-card-rule i:last-child { background: linear-gradient(90deg, #d3b779, transparent); }
+
+.offer-card-desc {
+  font-family: var(--sans);
+  font-size: clamp(12.5px, 1.03vw, 14.5px);
+  font-size: clamp(12.4px, 7.2cqi, 15px);
+  line-height: 1.95;
+  color: #57685d;
+}
+
+/* --- closing ornament --- */
+.offer-foot { padding: clamp(34px, 4vw, 56px) clamp(22px, 3.4vw, 48px) 0; text-align: center; }
+.offer-foot-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: min(700px, 100%);
+  margin: 0 auto;
+}
+.offer-foot-rule i {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d3b779);
+}
+.offer-foot-rule i:last-child { background: linear-gradient(90deg, #d3b779, transparent); }
+.offer-foot-text {
+  margin-top: 18px;
+  font-family: var(--display-hc);
+  font-size: clamp(12px, 1.05vw, 15px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--offer-ink);
 }
 
 /* ---------- video content ("Stories Brought to Life") ---------- */
@@ -1571,16 +1675,11 @@ a.botw-cover:hover {
   .nav-drawer { display: flex; }
   .nav-inner { width: calc(100% - 60px); }
 
-  /* stack the wheel above its detail panel */
-  .offer-stage {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 44px 40px 0;
-    justify-items: center;
-  }
-  .option-wheel.offer-wheel { height: 360px; padding-left: 0; }
-  .offer-detail { text-align: center; max-width: 460px; }
-  .offer-detail-icon { margin-left: auto; margin-right: auto; }
+  /* offer — six-up is too tight below this, fold to three columns */
+  .offer-head { padding-top: 58px; }
+  /* type/emblem keep sizing off the card via the container query above */
+  .offer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); padding-left: 40px; padding-right: 40px; }
+  .offer-foot { padding-left: 40px; padding-right: 40px; }
 
   .hero-inner, .mission-inner, .community-inner, .news-inner { grid-template-columns: 1fr; }
   /* grid children default to min-width:auto and would expand to the wide
@@ -1629,6 +1728,12 @@ a.botw-cover:hover {
   .collection-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
+/* ---- small tablets: three service cards get cramped, drop to two ---- */
+@media (max-width: 900px) {
+  .offer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-left: 30px; padding-right: 30px; }
+  .offer-foot { padding-left: 30px; padding-right: 30px; }
+}
+
 /* ---- phones (≤680px) ---- */
 @media (max-width: 680px) {
   :root { --radius: 22px; }
@@ -1658,16 +1763,26 @@ a.botw-cover:hover {
   .hero-art { padding: 8px 20px 24px; }
   .hero-art img { max-height: 400px; }
 
-  /* offer */
-  .offer { padding-bottom: 46px; }
-  .offer-stage { padding: 34px 22px 0; gap: 4px; }
-  .option-wheel.offer-wheel { height: 290px; }
-  .ow-icon { width: 42px; height: 42px; }
-  .ow-row { gap: 13px; }
-  .offer-detail-icon { width: 96px; height: 96px; margin-bottom: 16px; }
-  .offer-detail h3 { font-size: 24px; }
-  .offer-detail p { font-size: 16px; }
-  .offer-hint { margin-top: 18px; font-size: 10.5px; }
+  /* offer — single column, full-width cards */
+  .offer { padding-bottom: 44px; }
+  .offer-head { padding: 52px 22px 0; }
+  .offer-kicker { gap: 14px; letter-spacing: 0.22em; font-size: 11px; }
+  .offer-title { font-size: clamp(30px, 9.4vw, 46px); }
+  .offer-rule { width: min(300px, 86%); margin-top: 15px; }
+  .offer-sub { margin-top: 16px; font-size: 12.5px; letter-spacing: 0.09em; line-height: 1.85; }
+  /* the authored line break belongs to the wide layout only */
+  .offer-sub span { display: inline; }
+
+  .offer-grid { grid-template-columns: 1fr; gap: 16px; padding: 32px 22px 0; }
+  .offer-card { padding: 30px 24px 28px; }
+  .offer-card-emblem { width: 118px; margin-bottom: 18px; }
+  .offer-card-title { font-size: 17px; }
+  .offer-card-desc { font-size: 14.5px; line-height: 1.85; max-width: 34ch; }
+  .offer-card-rule { width: 58%; }
+
+  .offer-foot { padding: 34px 22px 0; }
+  .offer-foot-rule { gap: 12px; }
+  .offer-foot-text { margin-top: 14px; font-size: 11px; letter-spacing: 0.16em; }
 
   /* video content -> single column */
   .videos { padding-bottom: 46px; }
