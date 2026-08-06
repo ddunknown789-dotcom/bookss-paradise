@@ -16,7 +16,10 @@ export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request })
 
   const { pathname } = request.nextUrl
-  const isLogin = pathname === '/admin/login' || pathname.startsWith('/admin/auth')
+  // Match on a path BOUNDARY, not a bare prefix: `startsWith('/admin/auth')`
+  // also matches `/admin/authors`, which would bounce the Authors screen back
+  // to the dashboard for every signed-in user.
+  const isLogin = pathname === '/admin/login' || pathname.startsWith('/admin/auth/')
 
   // Without Supabase configured there is no session to check; let the page
   // render its own "not configured yet" state rather than redirect-looping.

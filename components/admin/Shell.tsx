@@ -74,7 +74,7 @@ export default function Shell({
     <ToastHost>
       <div className={`ad ${menuOpen ? 'is-menu-open' : ''}`}>
         <div className="ad-shell">
-          <aside className="ad-side">
+          <aside className={`ad-side ${menuOpen ? 'is-open' : ''}`}>
             <div className="ad-brand">
               <span className="ad-brand-mark">BP</span>
               <span className="ad-brand-text">

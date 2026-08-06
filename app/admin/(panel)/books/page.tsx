@@ -104,8 +104,8 @@ export default async function BooksPage({
                         </div>
                       </td>
                       <td className="ad-tight"><Badge value={row.status} /></td>
-                      <td className="ad-tight">{row.rating ? `★ ${row.rating}` : <span className="ad-faint">—</span>}</td>
-                      <td className="ad-tight ad-faint">{row.sort_order}</td>
+                      <td className="ad-tight ad-meta" data-label="Rating">{row.rating ? `★ ${row.rating}` : <span className="ad-faint">—</span>}</td>
+                      <td className="ad-tight ad-faint ad-meta" data-label="Order">{row.sort_order}</td>
                       <td className="ad-tight">
                         <BookRowActions id={row.id} slug={row.slug} title={row.title} status={row.status} />
                       </td>

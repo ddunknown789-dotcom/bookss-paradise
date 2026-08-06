@@ -77,6 +77,7 @@ export default function CollectionEditor({
 
       {rows.length > 0 && (
         <div
+          className="ad-ce-head"
           style={{
             display: 'grid', gridTemplateColumns: grid, gap: 8, padding: '0 0 6px',
             fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase',
@@ -93,6 +94,7 @@ export default function CollectionEditor({
         {rows.map((row, i) => (
           <div
             key={(row.id as string) ?? `new-${i}`}
+            className="ad-ce-row"
             draggable
             onDragStart={() => setDragging(i)}
             onDragEnd={() => setDragging(null)}
@@ -116,33 +118,36 @@ export default function CollectionEditor({
               const value = row[col.key]
               if (col.type === 'toggle') {
                 return (
-                  <label key={col.key} className="ad-check" style={{ justifyContent: 'center' }}>
+                  <label key={col.key} className="ad-ce-cell ad-check" data-label={col.label} style={{ justifyContent: 'center' }}>
                     <input type="checkbox" checked={Boolean(value)} onChange={(e) => set(i, { [col.key]: e.target.checked })} />
                   </label>
                 )
               }
               if (col.type === 'select') {
                 return (
-                  <select key={col.key} className="ad-select" value={String(value ?? '')} onChange={(e) => set(i, { [col.key]: e.target.value })}>
-                    {(col.options ?? []).map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
+                  <span key={col.key} className="ad-ce-cell" data-label={col.label}>
+                    <select className="ad-select" value={String(value ?? '')} onChange={(e) => set(i, { [col.key]: e.target.value })}>
+                      {(col.options ?? []).map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  </span>
                 )
               }
               if (col.type === 'textarea') {
                 return (
-                  <textarea
-                    key={col.key}
-                    className="ad-textarea"
-                    style={{ minHeight: 40 }}
-                    value={String(value ?? '')}
-                    placeholder={col.placeholder}
-                    onChange={(e) => set(i, { [col.key]: e.target.value })}
-                  />
+                  <span key={col.key} className="ad-ce-cell" data-label={col.label}>
+                    <textarea
+                      className="ad-textarea"
+                      style={{ minHeight: 40 }}
+                      value={String(value ?? '')}
+                      placeholder={col.placeholder}
+                      onChange={(e) => set(i, { [col.key]: e.target.value })}
+                    />
+                  </span>
                 )
               }
               return (
+                <span key={col.key} className="ad-ce-cell" data-label={col.label}>
                 <input
-                  key={col.key}
                   className="ad-input"
                   type={col.type === 'number' ? 'number' : 'text'}
                   required={col.required}
@@ -160,6 +165,7 @@ export default function CollectionEditor({
                     set(i, patch)
                   }}
                 />
+                </span>
               )
             })}
 

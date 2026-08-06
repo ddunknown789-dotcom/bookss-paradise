@@ -440,7 +440,14 @@
 .ad-spin { animation: ad-spin 1s linear infinite; }
 @keyframes ad-spin { to { transform: rotate(360deg) } }
 
-/* ----------------------------- responsive ------------------------------- */
+/* ============================== responsive ==============================
+   The admin is a dense tool built around tables and two-column forms, neither
+   of which survive a 375px screen. Below 900px the sidebar becomes a drawer;
+   below 760px every table turns into a stack of cards so nothing is clipped
+   off the right edge, and each field carries its own label.
+   ====================================================================== */
+
+/* --------------------------- tablet (≤900px) --------------------------- */
 
 @media (max-width: 900px) {
   .ad-shell { grid-template-columns: 1fr; }
@@ -448,12 +455,139 @@
     position: fixed; inset: 0 auto 0 0; width: var(--ad-sidebar); z-index: 100;
     transform: translateX(-100%); transition: transform .24s cubic-bezier(.22,1,.36,1);
   }
-  .ad.is-menu-open .ad-side { transform: none; box-shadow: 0 0 60px rgba(0,0,0,.4); }
-  .ad-menu-veil { position: fixed; inset: 0; z-index: 99; background: rgba(0,0,0,.35); }
+    /* The open state lives on the element itself rather than on an ancestor —
+     one less thing between the click and the rule that has to be true. */
+  .ad-side.is-open { transform: translateX(0); box-shadow: 0 0 60px rgba(0,0,0,.45); }
+  .ad-menu-veil { position: fixed; inset: 0; z-index: 99; background: rgba(0,0,0,.4); }
   .ad-burger { display: inline-flex !important; }
+
   .ad-split { grid-template-columns: 1fr; }
-  .ad-body { padding: 18px 15px 60px; }
-  .ad-top { padding: 11px 15px; }
-  .ad-sticky-save { margin: 18px -15px -60px; }
+  .ad-body { padding: 16px 14px 90px; }
+  .ad-top { padding: 10px 14px; }
+  .ad-sticky-save { margin: 18px -14px -90px; padding: 11px 14px; }
 }
+
+/* ---------------------------- phone (≤760px) --------------------------- */
+
+@media (max-width: 760px) {
+  /* Page header stacks so a long title never squeezes its action button. */
+  .ad-body > div:first-child { flex-direction: column; align-items: stretch !important; }
+  .ad-body > div:first-child > div:last-child { margin-left: 0 !important; }
+  .ad-body > div:first-child .ad-btn { justify-content: center; }
+
+  .ad-panel-head { flex-wrap: wrap; gap: 8px; }
+  .ad-panel-head .ad-right { margin-left: 0; width: 100%; flex-wrap: wrap; }
+  .ad-panel-head form.ad-right { margin-left: 0 !important; }
+  .ad-search input { width: 100% !important; }
+
+  /* --- tables become cards ------------------------------------------- */
+  .ad-table-wrap { overflow-x: visible; }
+  .ad-table, .ad-table tbody, .ad-table tr, .ad-table td { display: block; width: 100%; }
+  .ad-table thead { display: none; }
+  .ad-table tr {
+    border: 1px solid var(--ad-line);
+    border-radius: 10px;
+    margin: 0 0 8px;
+    padding: 11px 12px;
+    background: #fff;
+  }
+  .ad-table tbody tr:hover { background: #fff; }
+  .ad-table td { border: none; padding: 0; }
+  .ad-table td.ad-tight { width: auto; white-space: normal; }
+
+  /* the first cell is the identity of the row; the rest sit under it as meta */
+  .ad-table td:first-child { margin-bottom: 9px; }
+  .ad-table td:not(:first-child):not(:last-child) {
+    display: inline-flex; align-items: center;
+    margin: 0 8px 6px 0; font-size: 12.6px;
+  }
+  /* a bare number is meaningless once the header row is gone */
+  .ad-table td.ad-meta::before {
+    content: attr(data-label) ':';
+    margin-right: 5px;
+    font-size: 11px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--ad-faint);
+  }
+  /* the action cell gets its own full-width row, right-aligned */
+  .ad-table td:last-child {
+    display: flex; justify-content: flex-end;
+    padding-top: 8px; margin-top: 3px;
+    border-top: 1px solid var(--ad-line-soft);
+  }
+  .ad-row-actions { gap: 2px; }
+  .ad-cell-main { align-items: flex-start; }
+  .ad-cell-title b { font-size: 14px; line-height: 1.35; }
+  .ad-cell-title span { font-size: 12px; word-break: break-word; }
+
+  /* --- collection editor becomes a labelled stack --------------------- */
+  .ad-ce-head { display: none !important; }
+  .ad-ce-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    padding: 12px !important;
+    background: #fff !important;
+    border-color: var(--ad-line) !important;
+  }
+  .ad-ce-cell { display: block; }
+  .ad-ce-cell::before {
+    content: attr(data-label);
+    display: block; margin-bottom: 4px;
+    font-size: 11px; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--ad-faint);
+  }
+  .ad-ce-cell.ad-check { justify-content: flex-start !important; align-items: center; gap: 9px; }
+  .ad-ce-cell.ad-check::before { margin: 0; }
+  .ad-ce-row > .ad-drag { display: none; }   /* drag needs a pointer; use the arrows */
+  .ad-ce-row > div:last-child { justify-content: flex-start !important; }
+
+  /* --- homepage section rows ------------------------------------------ */
+  .ad-sec { flex-wrap: wrap; gap: 9px; padding: 12px; }
+  /* dragging needs a pointer; the arrows do the job on touch */
+  .ad-sec > .ad-drag { display: none; }
+  /* position already conveys the order, so the bare index is just noise */
+  .ad-sec > .ad-mono { display: none; }
+  .ad-sec-name { flex: 1 1 100%; order: -1; }
+  .ad-sec-actions { width: 100%; justify-content: flex-end; }
+
+  /* --- forms ---------------------------------------------------------- */
+  .ad-row { grid-template-columns: 1fr; }
+  .ad-row .ad-field + .ad-field { margin-top: 14px; }
+  .ad-grid-2, .ad-grid-3, .ad-grid-4 { grid-template-columns: 1fr; }
+  .ad-rep-item { padding: 12px; }
+
+  /* --- modals: a phone has no room for a floating dialog -------------- */
+  .ad-modal-veil { padding: 0; place-items: stretch; }
+  .ad-modal, .ad-modal-lg { width: 100%; max-height: 100dvh; height: 100dvh; border-radius: 0; }
+  .ad-modal-body { padding: 15px; }
+  .ad-modal-foot { flex-wrap: wrap; }
+  .ad-modal-foot .ad-btn { flex: 1; justify-content: center; }
+
+  /* --- sticky save ---------------------------------------------------- */
+  .ad-sticky-save { flex-wrap: wrap; gap: 9px; }
+  .ad-sticky-save > span:first-child { flex: 1 1 100%; font-size: 12px; }
+  .ad-sticky-save .ad-right { width: 100%; }
+  .ad-sticky-save .ad-right .ad-btn { flex: 1; justify-content: center; }
+
+  /* --- media ---------------------------------------------------------- */
+  .ad-media-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+  .ad-drop { padding: 20px 14px; }
+  .ad-pick { flex-wrap: wrap; }
+  .ad-pick-body { flex: 1 1 100%; order: 3; }
+
+  /* --- misc ----------------------------------------------------------- */
+  .ad-tabs { gap: 0; }
+  .ad-tab { padding: 8px 11px; font-size: 12.8px; }
+  .ad-stat b { font-size: 22px; }
+  .ad-toasts { left: 12px; right: 12px; bottom: 12px; }
+  .ad-toast { width: 100%; }
+  /* iOS zooms any input under 16px on focus, which breaks the layout */
+  .ad-input, .ad-select, .ad-textarea { font-size: 16px; }
+}
+
+@media (max-width: 420px) {
+  .ad-body { padding: 13px 11px 90px; }
+  .ad-sticky-save { margin: 16px -11px -90px; }
+  .ad-cell-main img { width: 30px; height: 40px; }
+}
+
 .ad-burger { display: none; }
