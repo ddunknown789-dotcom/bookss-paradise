@@ -10,7 +10,7 @@ import { NOANIM } from '@/lib/anim'
 import '@/styles/weeks.css'
 
 /* The full Book of the Week archive. Every row is one entry from
-   src/data/weeks.js — add, edit or delete weeks there and this page
+   the CMS — add, edit or delete weeks in Admin → Book of the Week and this page
    follows without any layout changes. */
 
 export default function WeeksPage({ weeks }: { weeks: WeekView[] }) {

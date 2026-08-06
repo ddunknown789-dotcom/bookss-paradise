@@ -9,7 +9,7 @@ import { NOANIM } from '@/lib/anim'
 import { Divider, ArrowRight } from './ui'
 
 /* The homepage "Book of the Week" shelf. Content comes entirely from the
-   first entry in src/data/weeks.js — add a new week there and this section
+   first week in the CMS — manage them under Admin → Book of the Week
    follows automatically. */
 
 export default function BooksOfWeek({ content, week }: { content: BookOfWeekContent; week: WeekView | null }) {
