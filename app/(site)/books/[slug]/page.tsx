@@ -4,6 +4,9 @@ import { notFound } from 'next/navigation'
 import BookPage from '@/components/BookPage'
 import { buildMetadata } from '@/lib/cms/metadata'
 import { getBook, getBookSlugs, getPageQuote } from '@/lib/cms/queries'
+import JsonLd from '@/components/JsonLd'
+import { breadcrumbSchema, graph, webPageSchema } from '@/lib/seo/schema'
+import { NODE } from '@/lib/seo/schema'
 
 export const revalidate = 3600
 export const dynamicParams = true
@@ -37,7 +40,6 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 
   // Search engines get the real Book record, not just a page of text.
   const jsonLd = {
-    '@context': 'https://schema.org',
     '@type': 'Book',
     name: book.title,
     author: { '@type': 'Person', name: book.author },
@@ -53,9 +55,29 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
       : undefined,
   }
 
+  const pageGraph = graph(
+    { ...jsonLd, '@context': undefined, publisher: { '@id': NODE.organization } },
+    webPageSchema({
+      path: `/books/${slug}`,
+      name: `${book.title} — ${book.author}`,
+      description: book.summaryBody || book.about.slice(0, 160),
+      type: 'ItemPage',
+      image: book.coverSrc || undefined,
+      breadcrumbPath: `/books/${slug}`,
+    }),
+    breadcrumbSchema(
+      [
+        { name: 'Home', path: '/' },
+        { name: 'Books', path: '/books' },
+        { name: book.title, path: `/books/${slug}` },
+      ],
+      `/books/${slug}`,
+    ),
+  )
+
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <JsonLd id="book-graph" json={pageGraph} />
       <BookPage book={book} quote={quote} related={book.related} />
     </>
   )

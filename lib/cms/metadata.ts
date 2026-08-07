@@ -3,6 +3,7 @@ import 'server-only'
 import type { Metadata } from 'next'
 
 import { getSeo, getSettings } from './queries'
+import { SITE_URL } from '@/lib/site'
 
 type BuildArgs = {
   entityType: 'global' | 'page' | 'book' | 'author' | 'interview' | 'collection'
@@ -36,7 +37,14 @@ export async function buildMetadata({ entityType, entityId, fallback = {}, path 
   ])
 
   const siteName = str(settings['site.name'], 'Books Paradise')
-  const siteUrl = str(settings['site.url']).replace(/\/$/, '')
+
+  // The canonical origin, in order of trust. A localhost or preview value is
+  // rejected outright: it would otherwise be baked into every canonical,
+  // Open Graph and Twitter URL the crawler sees in production.
+  const configured = str(settings['site.url']).replace(/\/$/, '')
+  const siteUrl = /^https:\/\/[^/]+\.[a-z]{2,}/i.test(configured) && !/localhost|127\.0\.0\.1/.test(configured)
+    ? configured
+    : SITE_URL
   const template = str(settings['seo.titleTemplate'], '%s | Books Paradise')
   const indexingOn = bool(settings['seo.indexingEnabled'], true)
 
@@ -59,7 +67,15 @@ export async function buildMetadata({ entityType, entityId, fallback = {}, path 
 
   return {
     metadataBase: siteUrl ? new URL(siteUrl) : undefined,
-    title: entityType === 'global' ? { default: title, template } : title,
+    // A page whose title already contains the site name must opt out of the
+    // "%s | Books Paradise" template, or it renders as
+    // "… Books Paradise | Books Paradise".
+    title:
+      entityType === 'global'
+        ? { default: title, template }
+        : title.toLowerCase().includes(siteName.toLowerCase())
+          ? { absolute: title }
+          : title,
     description: description || undefined,
     keywords: seo?.keywords?.length ? seo.keywords : globalSeo.keywords.length ? globalSeo.keywords : undefined,
     alternates: canonical ? { canonical } : undefined,
@@ -86,7 +102,13 @@ export async function buildMetadata({ entityType, entityId, fallback = {}, path 
       creator: seo?.twitterCreator || globalSeo.twitterCreator || undefined,
       images: image ? [absolute(image)] : undefined,
     },
-    icons: str(settings['site.favicon']) ? { icon: str(settings['site.favicon']) } : undefined,
+    // app/icon.png + app/apple-icon.png are picked up by Next's file
+    // convention and emit their own tags. Only override when an editor has
+    // pointed the setting somewhere else, or the page gets two icon links.
+    icons:
+      str(settings['site.favicon']) && str(settings['site.favicon']) !== '/icon.png'
+        ? { icon: str(settings['site.favicon']) }
+        : undefined,
   }
 }
 

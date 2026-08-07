@@ -1,0 +1,226 @@
+/* ============================================================================
+   About page.
+
+   Scoped under .ab so nothing here can reach an existing section. It reuses
+   the site's palette, type scale and card radius, so the page reads as part of
+   the same site without touching any shared rule.
+   ========================================================================== */
+
+.ab {
+  position: relative;
+  z-index: 1;
+  padding-top: 118px;   /* clears the fixed site header */
+}
+
+.ab-wrap { width: min(880px, calc(100% - 48px)); margin: 0 auto; }
+
+/* -------------------------------- hero ---------------------------------- */
+
+.ab-hero {
+  width: min(820px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 42px 0 64px;
+  text-align: center;
+}
+
+.ab-kicker {
+  font-family: var(--display-hc);
+  font-size: clamp(11px, 1vw, 13px);
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.ab-title {
+  font-family: var(--display-hc);
+  font-size: clamp(38px, 6vw, 74px);
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: #133227;
+}
+
+/* Divider takes a fixed pixel width as a prop; cap it so it can never
+   outrun the hero on a narrow screen. */
+.ab-hero .divider { margin-left: auto; margin-right: auto; max-width: 100%; }
+
+.ab-type {
+  margin-top: 20px;
+  font-family: var(--display-hc);
+  font-size: clamp(13px, 1.2vw, 16px);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #2c4b3c;
+}
+
+.ab-lede {
+  margin: 22px auto 0;
+  max-width: 660px;
+  font-size: clamp(15px, 1.35vw, 17.5px);
+  line-height: 1.82;
+  color: var(--grey);
+}
+
+/* ------------------------------ sections -------------------------------- */
+
+.ab-section { padding: 58px 0; }
+.ab-section-tint { background: #f6f5f1; }
+
+.ab-h2 {
+  font-family: var(--serif);
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: var(--green);
+  margin-bottom: 20px;
+}
+
+.ab-sub {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--grey);
+  max-width: 620px;
+  margin-bottom: 28px;
+}
+
+.ab-prose p {
+  font-size: 16.5px;
+  line-height: 1.88;
+  color: var(--grey);
+  max-width: 680px;
+}
+.ab-prose p + p { margin-top: 18px; }
+.ab-prose strong { color: var(--ink); font-weight: 600; }
+
+.ab-more {
+  margin-top: 26px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--grey);
+}
+.ab-more a, .ab-prose a {
+  color: var(--green);
+  font-weight: 500;
+  border-bottom: 1px solid rgba(201, 150, 47, 0.45);
+  transition: border-color 0.28s ease, color 0.28s ease;
+}
+.ab-more a:hover, .ab-prose a:hover { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* ------------------------------- stats ---------------------------------- */
+
+.ab-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 18px;
+}
+
+.ab-stat {
+  background: #fdfcf9;
+  border: 1px solid #ede6d8;
+  border-radius: 12px;
+  padding: 26px 22px;
+}
+.ab-stat b {
+  display: block;
+  font-family: var(--display-hc);
+  font-size: 34px;
+  font-weight: 600;
+  color: #133227;
+  line-height: 1.1;
+}
+.ab-stat h3 {
+  margin-top: 8px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.ab-stat p {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--grey);
+}
+
+/* ------------------------------ services -------------------------------- */
+
+.ab-services {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px 26px;
+}
+.ab-services li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15.5px;
+  color: var(--ink);
+  padding: 11px 0;
+  border-bottom: 1px solid #ece5d8;
+}
+.ab-services li span {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+/* ------------------------------- contact -------------------------------- */
+
+.ab-contact {
+  font-style: normal;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.ab-contact-card {
+  background: #fdfcf9;
+  border: 1px solid #ede6d8;
+  border-radius: 12px;
+  padding: 24px 22px;
+}
+.ab-contact-card h3 {
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.ab-contact-card a {
+  font-family: var(--display-hc);
+  font-size: 19px;
+  font-weight: 500;
+  color: #133227;
+  border-bottom: 1px solid rgba(201, 150, 47, 0.4);
+  transition: color 0.28s ease, border-color 0.28s ease;
+  word-break: break-word;
+}
+.ab-contact-card a:hover { color: var(--gold); border-bottom-color: var(--gold); }
+.ab-contact-card p {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--grey);
+}
+
+/* ------------------------------ responsive ------------------------------ */
+
+@media (max-width: 680px) {
+  .ab { padding-top: 96px; }
+  .ab-wrap, .ab-hero { width: calc(100% - 36px); }
+  .ab-hero { padding: 28px 0 44px; }
+  .ab-section { padding: 44px 0; }
+  .ab-prose p { font-size: 15.5px; }
+  .ab-stat { padding: 22px 18px; }
+}

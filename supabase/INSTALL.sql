@@ -1293,17 +1293,17 @@ on conflict (key) do nothing;
 insert into settings (key, group_name, label, value) values
   ('site.name',        'general', 'Site name',        '"Books Paradise"'),
   ('site.tagline',     'general', 'Tagline',          '"Stories That Stay With You Forever"'),
-  ('site.url',         'general', 'Site URL',         '"https://bookss-paradise.vercel.app"'),
+  ('site.url',         'general', 'Site URL',         '"https://bookssparadise.com"'),
   ('site.logo',        'general', 'Logo',             '"/assets/logo.png"'),
-  ('site.favicon',     'general', 'Favicon',          '"/favicon.ico"'),
+  ('site.favicon',     'general', 'Favicon',          '"/icon.png"'),
 
-  ('contact.email',    'contact', 'Contact email',    '""'),
+  ('contact.email',    'contact', 'Contact email',    '"contact@bookssparadise.com"'),
   ('contact.phone',    'contact', 'Contact phone',    '""'),
   ('contact.address',  'contact', 'Address',          '""'),
 
   ('footer.blurb',     'footer',  'Footer blurb',
    '"A paradise for readers — handpicked books, cinematic trailers, honest reviews and the people who love them."'),
-  ('footer.copyright', 'footer',  'Copyright line',   '"© {year} Books Paradise. All rights reserved."'),
+  ('footer.copyright', 'footer',  'Copyright line',   '"© {year} Books Paradise. All Rights Reserved."'),
   ('footer.newsletterHeading', 'footer', 'Footer newsletter heading', '"Stay in the Loop"'),
   ('footer.newsletterBody',    'footer', 'Footer newsletter body',
    '"New reviews, trailers and weekly picks — straight to your inbox."'),

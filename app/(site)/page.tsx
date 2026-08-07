@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import JsonLd from '@/components/JsonLd'
 import HomeShell from '@/components/HomeShell'
 import SectionRenderer from '@/components/SectionRenderer'
 import { buildMetadata } from '@/lib/cms/metadata'
@@ -15,6 +16,7 @@ import {
   getVideos,
 } from '@/lib/cms/queries'
 import type { SectionContentMap } from '@/lib/cms/sections'
+import { graph, webPageSchema } from '@/lib/seo/schema'
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata({ entityType: 'page', fallback: {}, path: '/' })
@@ -45,7 +47,20 @@ export default async function HomePage() {
 
   const showIntro = wants.has('intro')
 
+  // Organization + WebSite live in the (site) layout; the home page adds only
+  // its own WebPage node, which references them by @id.
+  const pageGraph = graph(
+    webPageSchema({
+      path: '/',
+      name: 'Books Paradise — Literary Marketing Agency & Book Review Platform',
+      description:
+        'Handpicked books, cinematic trailers, honest reviews, and a community that lives for stories.',
+    }),
+  )
+
   return (
+    <>
+    <JsonLd id="home-graph" json={pageGraph} />
     <HomeShell
       menu={menu}
       settings={settings}
@@ -57,5 +72,6 @@ export default async function HomePage() {
         data={{ books, reviewBooks, videos, week, interviews, services }}
       />
     </HomeShell>
+    </>
   )
 }

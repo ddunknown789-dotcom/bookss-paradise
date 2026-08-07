@@ -1,14 +1,17 @@
 import type { MetadataRoute } from 'next'
 
 import { getBookSlugs, getInterviews, getSetting } from '@/lib/cms/queries'
+import { SITE_URL } from '@/lib/site'
 
 /**
  * Built from published content, so a book that goes live is in the sitemap on
  * the next request — nothing to regenerate by hand.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = (await getSetting<string>('site.url', process.env.NEXT_PUBLIC_SITE_URL ?? '')).replace(/\/$/, '')
-  if (!base) return []
+  // Falls back to the canonical origin rather than an env var, so a sitemap
+  // can never be generated with localhost URLs in it.
+  const configured = (await getSetting<string>('site.url', '')).replace(/\/$/, '')
+  const base = /^https:\/\//i.test(configured) && !/localhost|127\.0\.0\.1/.test(configured) ? configured : SITE_URL
 
   const [books, interviews] = await Promise.all([getBookSlugs(), getInterviews(200)])
   const now = new Date()
@@ -16,6 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${base}/`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
     { url: `${base}/books`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${base}/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/books-of-the-week`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
   ]
 
