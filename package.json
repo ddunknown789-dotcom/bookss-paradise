@@ -3,9 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "next dev -p 5180",
+    "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 5180",
+    "start": "next start",
     "typecheck": "tsc --noEmit",
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --project-id \"$SUPABASE_PROJECT_ID\" --schema public > lib/supabase/database.types.ts",
