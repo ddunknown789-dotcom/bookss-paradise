@@ -1,11 +1,10 @@
 import type { MetadataRoute } from 'next'
 
 import { getSetting } from '@/lib/cms/queries'
-import { SITE_URL } from '@/lib/site'
+import { canonicalOrigin } from '@/lib/site'
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
-  const configured = (await getSetting<string>('site.url', '')).replace(/\/$/, '')
-  const base = /^https:\/\//i.test(configured) && !/localhost|127\.0\.0\.1/.test(configured) ? configured : SITE_URL
+  const base = canonicalOrigin(await getSetting<string>('site.url', ''))
   const indexing = await getSetting<boolean>('seo.indexingEnabled', true)
 
   // The admin is never crawlable, whatever the site-wide setting says.

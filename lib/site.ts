@@ -80,3 +80,24 @@ export function absoluteUrl(path = '/', base: string = SITE_URL): string {
   const origin = base.replace(/\/$/, '')
   return `${origin}${path.startsWith('/') ? path : `/${path}`}`
 }
+
+/**
+ * Is `url` a real, public, canonical origin?
+ *
+ * Deployment domains are excluded on purpose. A *.vercel.app host is a
+ * deployment address, never a site's identity — letting one become the
+ * canonical origin splits the site across two hosts in Google's index, which
+ * is the classic way to manufacture a duplicate-content problem.
+ */
+export function isCanonicalOrigin(url: string): boolean {
+  return (
+    /^https:\/\/[^/]+\.[a-z]{2,}/i.test(url) &&
+    !/localhost|127\.0\.0\.1|\.vercel\.app|\.netlify\.app|ngrok/i.test(url)
+  )
+}
+
+/** The origin to use for canonicals, sitemap and robots — never a preview host. */
+export function canonicalOrigin(configured?: string | null): string {
+  const clean = (configured ?? '').replace(/\/$/, '')
+  return isCanonicalOrigin(clean) ? clean : SITE_URL
+}

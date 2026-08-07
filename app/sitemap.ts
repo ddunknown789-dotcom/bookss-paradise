@@ -1,17 +1,16 @@
 import type { MetadataRoute } from 'next'
 
 import { getBookSlugs, getInterviews, getSetting } from '@/lib/cms/queries'
-import { SITE_URL } from '@/lib/site'
+import { canonicalOrigin } from '@/lib/site'
 
 /**
  * Built from published content, so a book that goes live is in the sitemap on
  * the next request — nothing to regenerate by hand.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Falls back to the canonical origin rather than an env var, so a sitemap
-  // can never be generated with localhost URLs in it.
-  const configured = (await getSetting<string>('site.url', '')).replace(/\/$/, '')
-  const base = /^https:\/\//i.test(configured) && !/localhost|127\.0\.0\.1/.test(configured) ? configured : SITE_URL
+  // Same guard as the canonical tags — a sitemap listing a preview domain
+  // would tell Google the site lives at two different addresses.
+  const base = canonicalOrigin(await getSetting<string>('site.url', ''))
 
   const [books, interviews] = await Promise.all([getBookSlugs(), getInterviews(200)])
   const now = new Date()

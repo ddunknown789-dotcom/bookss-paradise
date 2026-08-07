@@ -3,7 +3,7 @@ import 'server-only'
 import type { Metadata } from 'next'
 
 import { getSeo, getSettings } from './queries'
-import { SITE_URL } from '@/lib/site'
+import { canonicalOrigin } from '@/lib/site'
 
 type BuildArgs = {
   entityType: 'global' | 'page' | 'book' | 'author' | 'interview' | 'collection'
@@ -38,13 +38,8 @@ export async function buildMetadata({ entityType, entityId, fallback = {}, path 
 
   const siteName = str(settings['site.name'], 'Books Paradise')
 
-  // The canonical origin, in order of trust. A localhost or preview value is
-  // rejected outright: it would otherwise be baked into every canonical,
-  // Open Graph and Twitter URL the crawler sees in production.
-  const configured = str(settings['site.url']).replace(/\/$/, '')
-  const siteUrl = /^https:\/\/[^/]+\.[a-z]{2,}/i.test(configured) && !/localhost|127\.0\.0\.1/.test(configured)
-    ? configured
-    : SITE_URL
+  // Never a deployment domain — see canonicalOrigin() for why that matters.
+  const siteUrl = canonicalOrigin(str(settings['site.url']))
   const template = str(settings['seo.titleTemplate'], '%s | Books Paradise')
   const indexingOn = bool(settings['seo.indexingEnabled'], true)
 
