@@ -5,11 +5,17 @@
    the collection page (/books) and each detail page (/books/<slug>) both read
    from here.
 
-   TO ADD A BOOK: copy any entry, give it a NEW unique `slug`, and it appears
-   automatically. Anything you leave out falls back to DEFAULTS below.
+   TO ADD A BOOK: copy any entry, give it a NEW unique `slug`, drop a cover at
+   /public/assets/books/<slug>.jpg, and it appears automatically. Anything you
+   leave out falls back to DEFAULTS below.
 
-   NOTE: these are fictional titles, so all details (blurbs, ratings, page
-   counts, dates) are authored placeholder copy meant to be replaced.
+   ORDER MATTERS: the homepage "Top Picks for You" shelf shows the first twelve
+   entries, and the "Latest Book Reviews" grid shows the first six. Reorder the
+   array to change either.
+
+   NOTE: the blurbs and review copy below are written for this site. The
+   numeric metadata (rating, reviewCount, pages, published) is editorial
+   placeholder — swap in the real figures once you have them.
    ========================================================================== */
 
 // Shared bits every book inherits unless it overrides them.
@@ -36,363 +42,399 @@ export const PAGE_QUOTE = {
 
 const RAW_BOOKS = [
   {
-    slug: 'the-silent-page',
-    cover: 'book-1',
-    title: 'The Silent Page',
-    author: 'Lucas Elliot',
-    genres: ['Thriller', 'Mystery', 'Suspense'],
-    genre: 'Thriller',
-    rating: 4.6,
-    reviewCount: 128,
-    pages: 352,
-    published: 'Jan 12, 2023',
-    pull: ['Some stories are written in ink.', 'Others in silence.'],
-    about:
-      'When a reclusive author dies under mysterious circumstances, journalist Adam Reed discovers a series of unpublished manuscripts that were never meant to be read. As he delves deeper, the lines between fiction and reality blur, pulling him into a world of secrets, lies, and a truth that could cost him everything.',
-    summaryLines: ['A mysterious death.', 'A hidden manuscript.', 'A journalist chasing the truth.'],
-    summaryBody:
-      'In a world where words can be more dangerous than weapons, The Silent Page is a haunting thriller that will keep you on the edge of your seat till the last page.',
-    special: [
-      { icon: 'spark', title: 'Gripping Story', text: 'A page-turner that keeps you hooked until the very end.' },
-      { icon: 'twist', title: 'Unpredictable Twists', text: 'Every chapter brings a new twist you won’t see coming.' },
-      { icon: 'people', title: 'Deep Characters', text: 'Real, flawed, and unforgettable characters.' },
-      { icon: 'quill', title: 'Atmospheric Writing', text: 'Hauntingly beautiful prose that stays with you.' },
-    ],
-    review: {
-      text: 'The Silent Page grips you from the very first chapter and never lets go. Lucas Elliot crafts a chilling atmosphere filled with secrets, twists, and a final reveal that will leave you speechless.',
-      overall: 4.5,
-      loved: ['Gripping storyline', 'Unpredictable twists', 'Strong characters'],
-      better: ['Slow start in the beginning', 'Some chapters feel long'],
-    },
-  },
-  {
-    slug: 'beyond-the-horizon',
-    cover: 'book-2',
-    title: 'The Beyond The Horizon',
-    author: 'Nora Elston',
-    genres: ['Adventure', 'Fantasy', 'Epic'],
-    genre: 'Adventure',
-    rating: 4.8,
-    reviewCount: 214,
-    pages: 418,
-    published: 'Mar 04, 2023',
-    pull: ['Every map ends somewhere.', 'Every story begins there.'],
-    about:
-      'Cartographer Mira Vale is handed a map of a coastline that no ship has ever charted. Chasing it past the edge of the known world, she finds a horizon that moves when she looks away, and a crew who each carry a reason for never turning back. A sweeping tale about the pull of the unknown and the cost of following it.',
-    summaryLines: ['An impossible map.', 'A coastline that moves.', 'A crew with everything to lose.'],
-    summaryBody:
-      'Beyond The Horizon is an expansive, warm-hearted adventure about curiosity, courage, and the strange comfort of not knowing what comes next.',
-    special: [
-      { icon: 'spark', title: 'Vivid World', text: 'A world so richly drawn you can smell the sea air.' },
-      { icon: 'twist', title: 'Constant Wonder', text: 'Every island brings a discovery you didn’t expect.' },
-      { icon: 'people', title: 'A Crew You Love', text: 'Found-family bonds that feel genuinely earned.' },
-      { icon: 'quill', title: 'Lyrical Prose', text: 'Writing that reads like light on open water.' },
-    ],
-    review: {
-      text: 'Nora Elston writes horizons the way other authors write characters — alive, restless, and impossible to ignore. This is the rare adventure that earns its scale through heart rather than spectacle.',
-      overall: 4.7,
-      loved: ['Breathtaking world-building', 'Memorable crew', 'Beautiful ending'],
-      better: ['Large cast takes time', 'Middle act meanders'],
-    },
-  },
-  {
-    slug: 'the-lost-letters',
-    cover: 'book-3',
-    title: 'The Lost Letters',
-    author: 'Madilyn Hart',
-    genres: ['Drama', 'Romance', 'Historical'],
-    genre: 'Drama',
-    rating: 4.5,
-    reviewCount: 96,
-    pages: 296,
-    published: 'Sep 21, 2022',
-    pull: ['Some words wait decades', 'to find the right reader.'],
-    about:
-      'A bundle of undelivered letters surfaces behind the wall of a shuttered post office, each addressed to the same woman and never signed. As archivist Elena Reyes traces their author across sixty years, she uncovers a quiet love story that history was never meant to keep — and begins rewriting the ending of her own.',
-    summaryLines: ['Letters never delivered.', 'A sender with no name.', 'Sixty years of silence.'],
-    summaryBody:
-      'The Lost Letters is a tender, patient novel about the things we almost say, and what it costs to finally say them.',
-    special: [
-      { icon: 'spark', title: 'Quiet Power', text: 'A story that moves gently and hits hard.' },
-      { icon: 'twist', title: 'Dual Timelines', text: 'Past and present braid together beautifully.' },
-      { icon: 'people', title: 'Aching Romance', text: 'Longing written with real restraint.' },
-      { icon: 'quill', title: 'Period Detail', text: 'A richly researched, lived-in setting.' },
-    ],
-    review: {
-      text: 'Madilyn Hart understands that the most devastating love stories are the ones held just out of reach. The Lost Letters is unhurried, precise, and quietly heartbreaking.',
-      overall: 4.4,
-      loved: ['Gorgeous dual timeline', 'Emotional payoff', 'Elegant prose'],
-      better: ['Deliberately slow pace', 'Sparse plot momentum'],
-    },
-  },
-  {
-    slug: 'whispers-of-the-past',
-    cover: 'book-4',
-    title: 'The Whispers of the Past',
-    author: 'Clara Bennett',
-    genres: ['Historical', 'Mystery', 'Gothic'],
-    genre: 'Historical',
-    rating: 4.4,
-    reviewCount: 152,
-    pages: 384,
-    published: 'Oct 30, 2022',
-    pull: ['The house remembered', 'what everyone agreed to forget.'],
-    about:
-      'Restoring a crumbling manor for its new owners, conservator Ada Wren keeps finding a name scratched beneath the wallpaper — a girl no record admits existed. As the house gives up its layers, so does the village that buried her, and Ada learns that some restorations are really excavations.',
-    summaryLines: ['A name beneath the wallpaper.', 'A girl no record admits.', 'A village that agreed to forget.'],
-    summaryBody:
-      'The Whispers of the Past is an atmospheric gothic mystery about inherited silence, and what surfaces when a house is finally allowed to speak.',
-    special: [
-      { icon: 'spark', title: 'Rich Atmosphere', text: 'Dread that builds in the walls, room by room.' },
-      { icon: 'twist', title: 'Layered Mystery', text: 'Each discovery reframes the one before it.' },
-      { icon: 'people', title: 'A Haunting Lead', text: 'Ada is stubborn, exacting, and easy to root for.' },
-      { icon: 'quill', title: 'Gothic Texture', text: 'Damp plaster, cold rooms, immaculate detail.' },
-    ],
-    review: {
-      text: 'Clara Bennett builds dread the way her heroine strips wallpaper — one careful layer at a time. It is patient, immersive, and genuinely unsettling by the final act.',
-      overall: 4.3,
-      loved: ['Superb atmosphere', 'Clever structure', 'Satisfying reveal'],
-      better: ['Slow-burn tension', 'Dense period detail'],
-    },
-  },
-  {
-    slug: 'the-light-between-worlds',
-    cover: 'book-5',
-    title: 'The Light Between Worlds',
-    author: 'Anna Shah',
-    genres: ['Fantasy', 'Adventure', 'Magic'],
-    genre: 'Fantasy',
-    rating: 4.7,
-    reviewCount: 189,
-    pages: 402,
-    published: 'Feb 14, 2023',
-    pull: ['Two worlds, one doorway,', 'and a light that refuses to close it.'],
-    about:
-      'Every winter solstice a thin seam of light opens between two worlds, and for one hour anything may cross. When Ira crosses to find her missing brother, the seam closes early — leaving her a stranger in a place where her memories are currency and daylight is rationed.',
-    summaryLines: ['A seam of light.', 'One hour to cross.', 'A world that trades in memory.'],
-    summaryBody:
-      'The Light Between Worlds is an inventive portal fantasy about what we surrender to get home, and whether home survives the trade.',
-    special: [
-      { icon: 'spark', title: 'Original Magic', text: 'A memory-as-currency system with real stakes.' },
-      { icon: 'twist', title: 'Relentless Pace', text: 'The clock never stops ticking once she crosses.' },
-      { icon: 'people', title: 'Fierce Heroine', text: 'Ira is sharp, flawed, and impossible to forget.' },
-      { icon: 'quill', title: 'Luminous Imagery', text: 'Light and dark rendered with real beauty.' },
-    ],
-    review: {
-      text: 'Anna Shah has built one of the most inventive magic systems we have read this year, then had the nerve to make it hurt. Luminous, propulsive, and surprisingly moving.',
-      overall: 4.6,
-      loved: ['Inventive magic system', 'Relentless pacing', 'Emotional core'],
-      better: ['Dense opening chapters', 'Ending leaves threads open'],
-    },
-  },
-  {
-    slug: 'golden-hour-pages',
-    cover: 'book-2',
-    title: 'Golden Hour Pages',
-    author: 'Ira Coleman',
-    genres: ['Literary', 'Contemporary'],
+    slug: 'fair-game',
+    title: 'Fair Game',
+    author: 'George Chu',
+    genres: ['Literary', 'Sports Fiction', 'Coming of Age'],
     genre: 'Literary',
-    rating: 4.3,
-    reviewCount: 74,
-    pages: 268,
-    published: 'Jun 08, 2023',
-    pull: ['An hour of light,', 'and everything it forgives.'],
-    about:
-      'Told across a single summer of golden hours, this quiet novel follows three neighbours whose lives overlap only at dusk. A study of proximity, loneliness, and the small mercies strangers hand each other without noticing.',
-    summaryLines: ['One summer.', 'Three neighbours.', 'The hour before dark.'],
-    summaryBody:
-      'Golden Hour Pages is a warm, observational novel about the people we almost know, and the light that makes us generous.',
-    special: [
-      { icon: 'spark', title: 'Gentle Warmth', text: 'A book that leaves you kinder than it found you.' },
-      { icon: 'twist', title: 'Braided Lives', text: 'Three stories that meet in unexpected places.' },
-      { icon: 'people', title: 'Ordinary People', text: 'Characters drawn with unusual tenderness.' },
-      { icon: 'quill', title: 'Precise Prose', text: 'Not a sentence wasted, not a note forced.' },
-    ],
-    review: {
-      text: 'Ira Coleman writes small moments with the weight of large ones. There is no spectacle here, just extraordinary attention — and it is more than enough.',
-      overall: 4.2,
-      loved: ['Beautiful observation', 'Warm tone', 'Elegant structure'],
-      better: ['Very little plot', 'Understated ending'],
-    },
-  },
-  {
-    slug: 'a-door-left-open',
-    cover: 'book-4',
-    title: 'A Door Left Open',
-    author: 'Maya Rhodes',
-    genres: ['Suspense', 'Thriller'],
-    genre: 'Suspense',
-    rating: 4.5,
-    reviewCount: 133,
-    pages: 340,
-    published: 'Apr 18, 2023',
-    pull: ['She locked it every night.', 'This morning it was open.'],
-    about:
-      'A woman returns from a weekend away to find her front door open and nothing taken. No forced entry, no witnesses, nothing disturbed — except the growing certainty that someone has been living in her house while she sleeps.',
-    summaryLines: ['An open door.', 'Nothing stolen.', 'Someone still inside.'],
-    summaryBody:
-      'A Door Left Open is a claustrophobic domestic thriller that turns the safest room in the world into the least safe.',
-    special: [
-      { icon: 'spark', title: 'Instant Hook', text: 'A premise that grabs you on page one.' },
-      { icon: 'twist', title: 'Creeping Dread', text: 'Tension that tightens a notch every chapter.' },
-      { icon: 'people', title: 'Unreliable Narrator', text: 'You will second-guess her, then yourself.' },
-      { icon: 'quill', title: 'Lean Writing', text: 'Short, sharp chapters built for one sitting.' },
-    ],
-    review: {
-      text: 'Maya Rhodes weaponises the ordinary — a hallway, a latch, a sound at 3am. Read it in daylight, and maybe check the door first.',
-      overall: 4.4,
-      loved: ['Brilliant premise', 'Unbearable tension', 'Fast chapters'],
-      better: ['Ending divides readers', 'Thin side characters'],
-    },
-  },
-  {
-    slug: 'the-last-bookmark',
-    cover: 'book-1',
-    title: 'The Last Bookmark',
-    author: 'Noah Venn',
-    genres: ['Mystery', 'Cozy'],
-    genre: 'Mystery',
-    rating: 4.2,
-    reviewCount: 88,
-    pages: 312,
-    published: 'Nov 02, 2022',
-    pull: ['Every borrowed book', 'came back with a message.'],
-    about:
-      'A retiring librarian notices that returned books keep coming back with handwritten bookmarks tucked inside — each quoting a line from a crime that has not happened yet. A charming, bookish mystery for anyone who reads with a pencil in hand.',
-    summaryLines: ['Handwritten bookmarks.', 'Quotes from crimes.', 'None of them committed yet.'],
-    summaryBody:
-      'The Last Bookmark is a cosy, clever mystery that turns a small-town library into the most interesting place in the world.',
-    special: [
-      { icon: 'spark', title: 'Bookish Charm', text: 'A love letter to libraries and their regulars.' },
-      { icon: 'twist', title: 'Fair-Play Clues', text: 'Everything you need is on the page.' },
-      { icon: 'people', title: 'Delightful Cast', text: 'A town full of people worth revisiting.' },
-      { icon: 'quill', title: 'Light Touch', text: 'Warm and witty without losing the puzzle.' },
-    ],
-    review: {
-      text: 'Noah Venn has written the rare cosy mystery that respects its reader — the clues are all there, hidden in plain sight, and the solution is genuinely satisfying.',
-      overall: 4.1,
-      loved: ['Clever clueing', 'Charming setting', 'Great cast'],
-      better: ['Low stakes throughout', 'Gentle pacing'],
-    },
-  },
-  {
-    slug: 'midnight-atlas',
-    cover: 'book-5',
-    title: 'Midnight Atlas',
-    author: 'Elena Noor',
-    genres: ['Fantasy', 'Mythic'],
-    genre: 'Fantasy',
-    rating: 4.6,
-    reviewCount: 167,
-    pages: 436,
-    published: 'Jul 25, 2023',
-    pull: ['The atlas only works', 'after everyone is asleep.'],
-    about:
-      'An atlas that redraws itself at midnight leads a sleepless apprentice to cities that exist for one night only. Each has a rule, and each rule has a price — and the atlas is running out of pages.',
-    summaryLines: ['A map that redraws itself.', 'Cities that last one night.', 'An atlas running out of pages.'],
-    summaryBody:
-      'Midnight Atlas is a dreamlike, myth-soaked fantasy about wandering, insomnia, and the geography of the things we avoid.',
-    special: [
-      { icon: 'spark', title: 'Dreamlike Tone', text: 'Reads like a beautiful, coherent dream.' },
-      { icon: 'twist', title: 'A New City Each Night', text: 'Endlessly inventive set pieces.' },
-      { icon: 'people', title: 'Quiet Protagonist', text: 'An observer you come to care about deeply.' },
-      { icon: 'quill', title: 'Mythic Voice', text: 'Prose with the cadence of old folktales.' },
-    ],
-    review: {
-      text: 'Elena Noor writes like a cartographer of the subconscious. Midnight Atlas is strange, gorgeous, and lingers far longer than its page count suggests.',
-      overall: 4.5,
-      loved: ['Stunning imagination', 'Mythic prose', 'Haunting imagery'],
-      better: ['Loose central plot', 'Dreamlike logic won’t suit all'],
-    },
-  },
-  {
-    slug: 'letters-from-elsewhere',
-    cover: 'book-3',
-    title: 'Letters From Elsewhere',
-    author: 'June Parker',
-    genres: ['Romance', 'Contemporary'],
-    genre: 'Romance',
     rating: 4.4,
-    reviewCount: 121,
-    pages: 288,
-    published: 'May 12, 2023',
-    pull: ['They agreed to write', 'until one of them stopped.'],
+    reviewCount: 61,
+    pages: 328,
+    published: 'Sep 12, 2023',
+    pull: ['Everyone calls it a fair game.', 'Nobody agrees on what fair means.'],
     about:
-      'Two strangers on opposite ends of a mistaken correspondence agree to keep writing anyway. Over two years of letters they fall in love with a version of each other neither has met — and then one of them books a ticket.',
-    summaryLines: ['A wrong address.', 'Two years of letters.', 'One ticket booked.'],
+      'A novel about the two spotlights a young life can get caught between — the one over a stadium and the one waiting above a music stand. George Chu writes talent as a form of pressure: what a family expects, what a team demands, and what a person quietly wants instead. Fair Game asks what the word fair actually means once ambition, loyalty and identity are all standing on the same field.',
+    summaryLines: ['A game that asks for everything.', 'A gift that asks for something else.', 'One player caught between both.'],
     summaryBody:
-      'Letters From Elsewhere is a swooning epistolary romance about the person you become on paper, and whether they survive the arrivals hall.',
+      'Fair Game is a warm, sharply observed novel about ambition and belonging — and about how rarely the thing we are good at and the thing we love turn out to be the same thing.',
+    verdict:
+      'Fair Game is a rewarding read for anyone who has ever been good at something they did not choose. George Chu writes ambition and affection with the same steady hand, and the closing chapters land exactly where they should.',
+    summaryIntro:
+      'Fair Game follows one young athlete through a season in which the field and the music stand begin asking for the same hours, from the same person.',
     special: [
-      { icon: 'spark', title: 'Instant Chemistry', text: 'Their letters crackle from the very first page.' },
-      { icon: 'twist', title: 'Epistolary Form', text: 'Told almost entirely in letters, beautifully.' },
-      { icon: 'people', title: 'Two Real People', text: 'Both voices are distinct and fully alive.' },
-      { icon: 'quill', title: 'Genuinely Funny', text: 'Sharp, warm humour throughout.' },
+      { icon: 'spark', title: 'Two Worlds, One Voice', text: 'The locker room and the rehearsal room, written with equal care.' },
+      { icon: 'twist', title: 'Quiet Turns', text: 'The shifts here come from character rather than contrivance.' },
+      { icon: 'people', title: 'Characters With Weight', text: 'Teammates, parents and rivals who all want something real.' },
+      { icon: 'quill', title: 'Clean, Confident Prose', text: 'Unshowy writing that trusts the reader completely.' },
     ],
     review: {
-      text: 'June Parker nails the particular intimacy of writing to someone you have never met. Funny, generous, and completely disarming by the final letter.',
-      overall: 4.3,
-      loved: ['Wonderful letters', 'Real humour', 'Earned ending'],
-      better: ['Slim outside the letters', 'Predictable final act'],
+      text: 'Fair Game earns its title slowly. George Chu keeps the stakes human — a scholarship, a solo, a parent’s approval — and that restraint is exactly what makes the final act land.',
+      overall: 4.4,
+      loved: ['Sharp, believable dialogue', 'A genuinely felt sense of place', 'An ending that resists the easy note'],
+      better: ['Deliberate, unhurried pacing', 'Game scenes assume some familiarity'],
     },
   },
   {
-    slug: 'horizon-keepers',
-    cover: 'book-2',
-    title: 'Horizon Keepers',
-    author: 'Sam Arlen',
-    genres: ['Adventure', 'Survival'],
-    genre: 'Adventure',
+    slug: 'daddys-home',
+    title: 'Daddy’s Home',
+    author: 'A.K. Alexander',
+    genres: ['Thriller', 'Mystery', 'Crime'],
+    genre: 'Thriller',
     rating: 4.3,
-    reviewCount: 102,
+    reviewCount: 142,
     pages: 364,
-    published: 'Aug 09, 2023',
-    pull: ['Someone has to keep', 'the last light burning.'],
+    published: 'Mar 07, 2023',
+    pull: ['Two words you once ran toward.', 'Now the last thing you want to hear.'],
     about:
-      'The lighthouse keepers of a disappearing coast refuse the order to abandon their posts. As the sea takes the road, then the village, then the ground beneath them, they keep the lamps lit for ships that may no longer be coming.',
-    summaryLines: ['A disappearing coast.', 'An order to abandon.', 'Keepers who refuse.'],
+      'A house at the end of a wet road, every light burning, and no good reason for it. Daddy’s Home opens the Holly Jennings series in the place thrillers are most dangerous — the family home — and turns a phrase every child once ran toward into something you dread hearing. A.K. Alexander builds the tension out of ordinary things: a porch light, an empty mailbox, a door that should have been locked.',
+    summaryLines: ['A house that should be empty.', 'Every light left on.', 'Someone who never really left.'],
     summaryBody:
-      'Horizon Keepers is a windswept survival story about stubbornness as a form of love, and duty long after anyone is watching.',
+      'Daddy’s Home is a dark, fast-moving thriller that takes the safest three words in a family’s vocabulary and makes them the last thing anyone wants to hear.',
+    verdict:
+      'Daddy’s Home is a strong series opener and an easy recommendation for readers who like their thrillers domestic, fast and genuinely tense. Start it early in the evening.',
+    summaryIntro:
+      'Daddy’s Home opens the Holly Jennings series with a house that should be empty, a family that will not talk, and a phrase that stops meaning what it used to.',
     special: [
-      { icon: 'spark', title: 'Elemental Power', text: 'The sea is the best-drawn character here.' },
-      { icon: 'twist', title: 'Rising Stakes', text: 'The ground literally shrinks beneath them.' },
-      { icon: 'people', title: 'Hard-Won Bonds', text: 'Camaraderie forged in genuinely bad weather.' },
-      { icon: 'quill', title: 'Muscular Prose', text: 'Spare, salt-worn, and quietly moving.' },
+      { icon: 'spark', title: 'Hooks on Page One', text: 'The opening chapter offers no graceful way out.' },
+      { icon: 'twist', title: 'Escalating Dread', text: 'Every chapter closes a little tighter than the last.' },
+      { icon: 'people', title: 'A Lead Worth Following', text: 'Holly Jennings is capable, bruised and stubbornly human.' },
+      { icon: 'quill', title: 'Lean, Cinematic Chapters', text: 'Short scenes built for reading well past midnight.' },
     ],
     review: {
-      text: 'Sam Arlen writes weather better than most writers write people — and then writes people who are worth the weather. Bracing, sad, and quietly heroic.',
-      overall: 4.2,
-      loved: ['Vivid setting', 'Strong ensemble', 'Powerful final chapter'],
-      better: ['Bleak in the middle', 'Sparse dialogue'],
+      text: 'A.K. Alexander knows that the most frightening room in a thriller is the one you grew up in. Daddy’s Home is relentless, well plotted and genuinely uncomfortable in the best way.',
+      overall: 4.3,
+      loved: ['A premise that grabs immediately', 'Tight, propulsive chapters', 'A lead worth following into the series'],
+      better: ['Bleak in places', 'A few threads held back for later books'],
     },
   },
   {
-    slug: 'the-ember-archive',
-    cover: 'book-4',
-    title: 'The Ember Archive',
-    author: 'Claire Moss',
-    genres: ['Historical', 'Wartime'],
-    genre: 'Historical',
+    slug: 'deep-end',
+    title: 'Deep End',
+    author: 'Ali Hazelwood',
+    genres: ['Romance', 'Contemporary', 'Sports Romance'],
+    genre: 'Romance',
     rating: 4.5,
-    reviewCount: 145,
-    pages: 396,
-    published: 'Dec 01, 2022',
-    pull: ['They saved the books', 'by memorising them.'],
+    reviewCount: 231,
+    pages: 400,
+    published: 'Feb 04, 2025',
+    pull: ['She spent her life aiming for the water.', 'Nobody warned her about the fall.'],
     about:
-      'As the archive burns, a group of clerks begins committing its holdings to memory — one person, one book. Decades later, an interviewer tracks down the last surviving keeper to record what she still carries, and what she chose to leave out.',
-    summaryLines: ['A burning archive.', 'One person, one book.', 'The last keeper left.'],
+      'Ali Hazelwood moves from the laboratory to the pool deck for a romance about control — who asks for it, who offers it, and how much honesty that actually takes. Deep End pairs a diver rebuilding her nerve after injury with a swimmer whose whole reputation rests on discipline, and lets the tension come from two people negotiating out loud exactly what they want. It is her most candid book, and one of her most tender.',
+    summaryLines: ['A diver rebuilding her nerve.', 'A swimmer who does nothing halfway.', 'An arrangement neither expected to feel like this.'],
     summaryBody:
-      'The Ember Archive is a devastating historical novel about memory as resistance, and the quiet editorial power of whoever survives to tell it.',
+      'Deep End is a smart, steamy, disarmingly gentle romance about trust as a negotiation — and about how much courage it takes to say the true thing first.',
+    verdict:
+      'Deep End is Ali Hazelwood at her most candid: funny, warm and unusually honest about what people need from one another. Recommended for readers who want their romance direct.',
+    summaryIntro:
+      'Deep End follows a college diver and a swimmer through a season, an arrangement, and the slow work of learning to say what they actually want.',
     special: [
-      { icon: 'spark', title: 'Unforgettable Premise', text: 'People as libraries — and all it costs them.' },
-      { icon: 'twist', title: 'Late Revelations', text: 'What she left out matters most.' },
-      { icon: 'people', title: 'Extraordinary Lead', text: 'One of the great recent heroines.' },
-      { icon: 'quill', title: 'Restrained Power', text: 'Never sentimental, always devastating.' },
+      { icon: 'spark', title: 'Electric Chemistry', text: 'The tension arrives early and never loses its footing.' },
+      { icon: 'twist', title: 'Honest About Desire', text: 'A romance that lets its leads say what they want out loud.' },
+      { icon: 'people', title: 'Two Real Athletes', text: 'The training, the injuries and the fear are all taken seriously.' },
+      { icon: 'quill', title: 'Warm, Funny Voice', text: 'Hazelwood’s banter, doing what Hazelwood’s banter does.' },
     ],
     review: {
-      text: 'Claire Moss asks what a book is actually for, then answers it with a character who becomes one. The final thirty pages are extraordinary.',
-      overall: 4.6,
-      loved: ['Stunning premise', 'Devastating ending', 'Immaculate research'],
-      better: ['Heavy subject matter', 'Non-linear structure'],
+      text: 'Hazelwood has always written clever women who overthink their way into love. Deep End adds something braver — a romance about asking plainly for what you need, and being met there.',
+      overall: 4.4,
+      loved: ['Genuinely swoony chemistry', 'A refreshingly frank central dynamic', 'Sharp, funny narration'],
+      better: ['Steam level will not suit every reader', 'Third-act conflict resolves quickly'],
+    },
+  },
+  {
+    slug: 'deaths-heir',
+    title: 'Death’s Heir',
+    author: 'Day Parker',
+    genres: ['Fantasy', 'Gothic', 'Dark Fantasy'],
+    genre: 'Fantasy',
+    rating: 4.2,
+    reviewCount: 87,
+    pages: 386,
+    published: 'Oct 24, 2023',
+    pull: ['Some titles are given.', 'This one comes to collect.'],
+    about:
+      'A silhouette filled with dark trees, a raven keeping watch, and a girl walking a path she did not choose. Death’s Heir is a gothic fantasy about inheritance in its oldest sense — a title, a duty and a debt that arrive whether or not you are ready for them. Day Parker writes the forest as something patient rather than cruel, and the result unsettles more than it frightens.',
+    summaryLines: ['An inheritance nobody asks for.', 'A forest that waits.', 'An heir who walks in anyway.'],
+    summaryBody:
+      'Death’s Heir is an atmospheric, myth-tinged fantasy about duty, grief, and the strange dignity of accepting a role that was never offered as a choice.',
+    verdict:
+      'Death’s Heir is for readers who want atmosphere first and answers second. Day Parker has built somewhere worth staying, and the patience it asks for is repaid.',
+    summaryIntro:
+      'Death’s Heir follows an unwilling heir into a forest, a title, and a duty that has been waiting a very long time for someone to accept it.',
+    special: [
+      { icon: 'spark', title: 'Immersive Atmosphere', text: 'Moonlight, old trees and a quiet that presses in.' },
+      { icon: 'twist', title: 'Folkloric Logic', text: 'The rules feel inherited rather than invented.' },
+      { icon: 'people', title: 'A Heroine With Spine', text: 'She carries the weight without being crushed by it.' },
+      { icon: 'quill', title: 'Lush, Measured Prose', text: 'Written with the cadence of an old story told well.' },
+    ],
+    review: {
+      text: 'Day Parker builds a world that feels older than its own plot. Death’s Heir is patient, atmospheric fantasy for readers who want dread and beauty in the same sentence.',
+      overall: 4.2,
+      loved: ['Gorgeous gothic atmosphere', 'A strong sense of folklore', 'A memorable central figure'],
+      better: ['Slow-burn opening chapters', 'Some answers held back for the sequel'],
+    },
+  },
+  {
+    slug: 'the-zen-monkey-and-the-lotus-flower',
+    title: 'The Zen Monkey and the Lotus Flower',
+    author: 'Tenpa Yeshe',
+    genres: ['Mindfulness', 'Self-Help', 'Short Stories'],
+    genre: 'Mindfulness',
+    rating: 4.5,
+    reviewCount: 176,
+    pages: 264,
+    published: 'Jan 18, 2023',
+    pull: ['The monkey never stops moving.', 'The lotus never hurries.'],
+    about:
+      'Fifty-two short stories, one for each week of the year, written in the tradition of the teaching tale — a small scene, a turn, and a thought you keep carrying afterwards. Tenpa Yeshe writes about attention, anger, patience and letting go without ever raising his voice, and the brevity is the point: each piece is short enough for a spare five minutes and slow enough to sit with for days.',
+    summaryLines: ['Fifty-two short stories.', 'One for every week.', 'None longer than a quiet moment.'],
+    summaryBody:
+      'The Zen Monkey and the Lotus Flower is a calm, generous collection of teaching stories about presence, patience and perspective — made to be read slowly and returned to often.',
+    verdict:
+      'The Zen Monkey and the Lotus Flower is best kept somewhere visible and read one story at a time. Taken that way it is among the quietly most useful books on the shelf.',
+    summaryIntro:
+      'The Zen Monkey and the Lotus Flower gathers fifty-two short teaching stories, each built around a single idea about attention, patience or letting go.',
+    special: [
+      { icon: 'spark', title: 'A Story a Week', text: 'Built for a year of small, deliberate reading.' },
+      { icon: 'twist', title: 'Gentle Reframes', text: 'Each tale turns on a thought you did not see coming.' },
+      { icon: 'people', title: 'Open to Everyone', text: 'No background in Buddhist practice required.' },
+      { icon: 'quill', title: 'Plain, Unhurried Language', text: 'Simple sentences doing patient work.' },
+    ],
+    review: {
+      text: 'This is a book that refuses to hurry you. Tenpa Yeshe trusts the old form — a short story, lightly told, left to do its own work — and it proves far more effective than another list of habits.',
+      overall: 4.3,
+      loved: ['Perfect length for daily reading', 'Calming, unpreachy tone', 'Stories that genuinely stay with you'],
+      better: ['Some lessons repeat across the year', 'Best in small doses, not one sitting'],
+    },
+  },
+  {
+    slug: 'a-mission-without-borders',
+    title: 'A Mission Without Borders',
+    author: 'Chad Robichaux',
+    genres: ['Memoir', 'Nonfiction', 'Inspirational'],
+    genre: 'Memoir',
+    rating: 4.7,
+    reviewCount: 118,
+    pages: 256,
+    published: 'Sep 10, 2024',
+    pull: ['Nobody asked them to go.', 'They went.'],
+    about:
+      'A former Force Recon Marine and his son travel into a war zone with no mandate, no cover and a list of people who need to get out. Written with Craig Borlase, A Mission Without Borders is the account of that decision and everything it cost, carried throughout by one question: what do you owe a stranger in the worst week of their life? It is a book about rescue work, faith, and the particular strain of doing dangerous things alongside your own child.',
+    summaryLines: ['A father and a son.', 'A border nobody should have to cross.', 'A list of people waiting on the other side.'],
+    summaryBody:
+      'A Mission Without Borders is a first-hand account of humanitarian rescue work in Ukraine — unsentimental about the danger, and clear-eyed about why they went anyway.',
+    verdict:
+      'A Mission Without Borders is a compelling account of a rescue effort most readers will never have heard about, told by the people who carried it out. Worth reading for the civilians at its centre alone.',
+    summaryIntro:
+      'A Mission Without Borders recounts a father and son’s decision to enter Ukraine as civilians, and the rescue work that followed.',
+    special: [
+      { icon: 'spark', title: 'First-Hand Account', text: 'Written by the people who were actually there.' },
+      { icon: 'twist', title: 'Father and Son', text: 'A family story running underneath the mission.' },
+      { icon: 'people', title: 'The People Being Helped', text: 'Civilians given names and pages, not statistics.' },
+      { icon: 'quill', title: 'Direct, Unadorned Telling', text: 'Reported plainly, which makes it hit harder.' },
+    ],
+    review: {
+      text: 'Robichaux writes about extraordinary risk in an ordinary register, and that is the book’s strength. The father-and-son thread turns a rescue account into something considerably more personal.',
+      overall: 4.5,
+      loved: ['Gripping first-hand reporting', 'A moving father-and-son core', 'Real respect for the people being helped'],
+      better: ['Faith framing is central throughout', 'The timeline jumps in places'],
+    },
+  },
+  {
+    slug: 'check-and-mate',
+    title: 'Check & Mate',
+    author: 'Ali Hazelwood',
+    genres: ['Young Adult', 'Romance', 'Contemporary'],
+    genre: 'Young Adult',
+    rating: 4.4,
+    reviewCount: 264,
+    pages: 368,
+    published: 'Nov 07, 2023',
+    pull: ['She swore she was finished with the board.', 'The board disagreed.'],
+    about:
+      'Mallory Greenleaf quit chess, and she had good reasons. A charity tournament, one careless afternoon and a win against the reigning world champion drag her straight back into a game she associates with the worst year of her life. Check & Mate is Ali Hazelwood’s first novel for younger readers: a rivals-to-lovers romance built on a genuinely well-drawn sport, and on a girl working out how much of her family she is allowed to put down.',
+    summaryLines: ['A game she walked away from.', 'One match she was not supposed to win.', 'A rival who will not let her leave again.'],
+    summaryBody:
+      'Check & Mate is a bright, funny rivals-to-lovers romance about talent, family obligation, and the difficulty of wanting something for yourself.',
+    verdict:
+      'Check & Mate is a sharp, funny, satisfying romance and a genuinely good sports novel underneath it. An easy recommendation for readers of any age.',
+    summaryIntro:
+      'Check & Mate follows Mallory Greenleaf from a charity match she never wanted to play back into the game, and toward the champion she beat.',
+    special: [
+      { icon: 'spark', title: 'Rivals to Lovers, Done Right', text: 'Slow-building tension that pays off properly.' },
+      { icon: 'twist', title: 'Chess That Works', text: 'The matches are tense even if you have never played.' },
+      { icon: 'people', title: 'A Great Found Family', text: 'Sisters, friends and mentors who all feel real.' },
+      { icon: 'quill', title: 'Fast, Funny Narration', text: 'Mallory’s voice carries the whole book.' },
+    ],
+    review: {
+      text: 'Hazelwood’s move into young adult loses none of the banter and gains a real ache underneath it. Mallory’s guilt about her family is the engine here, and the romance is better for it.',
+      overall: 4.4,
+      loved: ['A wonderful lead voice', 'Genuine tension over the board', 'A satisfying, earned romance'],
+      better: ['Predictable beats in the middle', 'Some side characters underused'],
+    },
+  },
+  {
+    slug: 'his-name-everywhere',
+    title: 'His Name Everywhere',
+    author: 'Howard Kane',
+    genres: ['Legal Thriller', 'Suspense', 'Family Drama'],
+    genre: 'Legal Thriller',
+    rating: 4.3,
+    reviewCount: 96,
+    pages: 312,
+    published: 'Jun 20, 2024',
+    pull: ['She spent years unlearning that name.', 'Now it is on every page of the file.'],
+    about:
+      'The fifth book in The Daughter of a Drunk turns the series toward the courtroom. A name that should have stayed buried is suddenly on every document, every witness list and every headline — and the woman who spent years getting free of it has to decide whether facing him publicly is worth what it will cost. Howard Kane writes legal suspense with the emotional machinery of a recovery story, and that combination is what makes the series work.',
+    summaryLines: ['A name she buried.', 'A case that digs it up.', 'A courtroom with nowhere to look away.'],
+    summaryBody:
+      'His Name Everywhere is a legal suspense thriller about confronting the past on the record, where every answer becomes evidence.',
+    verdict:
+      'His Name Everywhere rewards readers who have followed the series and closes its central question with real conviction. Start at book one, then come here.',
+    summaryIntro:
+      'His Name Everywhere brings the series into a courtroom, where the name at the centre of it finally has to be spoken on the record.',
+    special: [
+      { icon: 'spark', title: 'Courtroom Pressure', text: 'The legal scenes carry real tension.' },
+      { icon: 'twist', title: 'Series Payoff', text: 'Threads from the earlier books finally close.' },
+      { icon: 'people', title: 'A Survivor, Not a Victim', text: 'The lead is written with hard-won agency.' },
+      { icon: 'quill', title: 'Direct, Unsparing Voice', text: 'Plain prose about difficult things.' },
+    ],
+    review: {
+      text: 'Kane keeps the legal procedure tight without ever losing the personal stakes underneath it. Five books in, the series has earned the weight this one carries.',
+      overall: 4.2,
+      loved: ['Strong courtroom sequences', 'Real emotional continuity', 'A hard-won ending'],
+      better: ['Best read after the earlier books', 'Heavy subject matter throughout'],
+    },
+  },
+  {
+    slug: 'exactly-like-my-father',
+    title: 'Exactly Like My Father',
+    author: 'Howard Kane',
+    genres: ['Memoir', 'Recovery', 'Family Drama'],
+    genre: 'Memoir',
+    rating: 4.4,
+    reviewCount: 108,
+    pages: 244,
+    published: 'Feb 15, 2023',
+    pull: ['The worst thing anyone said about him', 'was that she was just like him.'],
+    about:
+      'The second book in The Daughter of a Drunk takes on the sentence adult children of alcoholics dread most — that they will turn out exactly like the parent they spent years trying to escape. Howard Kane writes about inherited patterns without excusing them, and about the daily, unglamorous work of proving that sentence wrong. It is written for anyone who grew up listening for a car in the driveway.',
+    summaryLines: ['A fear that arrives in your own voice.', 'A pattern nobody chose.', 'The work of breaking it anyway.'],
+    summaryBody:
+      'Exactly Like My Father is a raw, hopeful book about growing up with an alcoholic parent, and about refusing to accept inheritance as a verdict.',
+    verdict:
+      'Exactly Like My Father is not a comfortable book, but it is a generous one. For anyone who grew up in a house like this, it reads like being told the truth kindly.',
+    summaryIntro:
+      'Exactly Like My Father works through the fear that gives the book its title, and the daily practice of proving it wrong.',
+    special: [
+      { icon: 'spark', title: 'Painfully Honest', text: 'Written without flinching and without self-pity.' },
+      { icon: 'twist', title: 'Hope Without Tidiness', text: 'Recovery here is slow, and treated as such.' },
+      { icon: 'people', title: 'You Will Recognise Someone', text: 'Family dynamics rendered with real accuracy.' },
+      { icon: 'quill', title: 'Plain, Direct Writing', text: 'Clear enough to read on a difficult day.' },
+    ],
+    review: {
+      text: 'This is a hard book that never makes hardship the point. Kane writes about inherited harm with enough clarity that the hope at the end feels earned rather than offered.',
+      overall: 4.4,
+      loved: ['Unflinching honesty', 'A genuinely useful perspective', 'Hope that feels earned'],
+      better: ['Heavy going in places', 'Some repetition between chapters'],
+    },
+  },
+  {
+    slug: 'becoming-dad',
+    title: 'Becoming Dad',
+    author: 'Justin P. Hairston',
+    genres: ['Parenting', 'Memoir', 'Inspirational'],
+    genre: 'Parenting',
+    rating: 4.4,
+    reviewCount: 64,
+    pages: 168,
+    published: 'May 09, 2023',
+    pull: ['Anyone can be called Dad.', 'Becoming one takes longer.'],
+    about:
+      'Becoming a father happens in an afternoon. Becoming Dad, Justin P. Hairston argues, takes considerably longer. This is a short, personal book about the gap between the two — about the version of fatherhood a man inherits, the version he is told to perform, and the one he has to build himself, usually at three in the morning with nobody watching.',
+    summaryLines: ['A title given in a day.', 'An identity built over years.', 'The distance between the two.'],
+    summaryBody:
+      'Becoming Dad is a reflective, encouraging book about fatherhood as something learned rather than granted — written for men still working out what kind of father they want to be.',
+    verdict:
+      'Becoming Dad is a short, sincere book that does exactly what it sets out to do. Give it to a new father quietly wondering whether he is getting it right.',
+    summaryIntro:
+      'Becoming Dad traces one man’s shift from being called a father to understanding what he wanted that word to mean.',
+    special: [
+      { icon: 'spark', title: 'Honest and Personal', text: 'Written from experience rather than theory.' },
+      { icon: 'twist', title: 'Identity Over Instruction', text: 'Less a how-to, more a hard look in the mirror.' },
+      { icon: 'people', title: 'For New and Older Fathers', text: 'Useful at any point on the road.' },
+      { icon: 'quill', title: 'Warm, Conversational Tone', text: 'Reads like a long talk with a friend.' },
+    ],
+    review: {
+      text: 'Hairston avoids the two usual traps of fatherhood books — the checklist and the highlight reel. What is left is honest, quiet and worth handing to a friend who has just become a dad.',
+      overall: 4.3,
+      loved: ['Sincere and grounded', 'Short enough to actually finish', 'Encouraging without being preachy'],
+      better: ['Light on practical guidance', 'A faith perspective throughout'],
+    },
+  },
+  {
+    slug: 'shine-my-amazing-girl',
+    title: 'Shine, My Amazing Girl',
+    author: 'Emma Meyer',
+    genres: ['Children’s', 'Confidence', 'Growing Up'],
+    genre: 'Children’s',
+    rating: 4.6,
+    reviewCount: 92,
+    pages: 40,
+    published: 'Apr 02, 2024',
+    pull: ['She practised being small.', 'It never once fit.'],
+    about:
+      'A school corridor, a crowd, and a girl deciding whether to make herself smaller. Shine, My Amazing Girl is a warm illustrated story about confidence at exactly the age it starts to wobble — the years when being noticed and being liked stop feeling like the same thing. Emma Meyer writes for girls who are quietly brilliant and not yet sure that is allowed.',
+    summaryLines: ['A crowded hallway.', 'A girl deciding how much to show.', 'A reason to stand up straight.'],
+    summaryBody:
+      'Shine, My Amazing Girl is an encouraging story about self-belief, kindness and taking up your own space — written for growing girls and the adults cheering them on.',
+    verdict:
+      'Shine, My Amazing Girl is a lovely gift for a girl at the age when confidence gets complicated. Read it together, more than once.',
+    summaryIntro:
+      'Shine, My Amazing Girl follows a bright, quiet girl through the school year in which she decides to stop shrinking.',
+    special: [
+      { icon: 'spark', title: 'Confidence Building', text: 'Encouragement that never talks down.' },
+      { icon: 'twist', title: 'A Real School Feeling', text: 'Corridors, cliques and courage, all recognisable.' },
+      { icon: 'people', title: 'A Girl Worth Rooting For', text: 'Shy, bright and drawn with real affection.' },
+      { icon: 'quill', title: 'Bright, Readable Voice', text: 'Simple language and a great deal of heart.' },
+    ],
+    review: {
+      text: 'A gentle, well-judged book about the moment a girl learns she is allowed to be seen. It earns its message by letting the nerves be real first.',
+      overall: 4.4,
+      loved: ['Genuinely encouraging', 'Lovely illustrations', 'A message that lands without lecturing'],
+      better: ['Short for older readers', 'A familiar structure'],
+    },
+  },
+  {
+    slug: 'im-7-and-thats-amazing',
+    title: 'I’m 7 and That’s Amazing!',
+    author: 'Emily Monroe',
+    genres: ['Children’s', 'Birthday', 'Picture Book'],
+    genre: 'Children’s',
+    rating: 4.6,
+    reviewCount: 74,
+    pages: 36,
+    published: 'Jan 30, 2025',
+    pull: ['Seven is not just a number.', 'Ask anyone who has just turned it.'],
+    about:
+      'A birthday book for seven-year-olds, built around the small, specific things that make seven worth celebrating — reading whole chapters alone, having actual opinions, and being trusted with things you were not trusted with at six. Emily Monroe keeps it bright, kind and firmly on the child’s side.',
+    summaryLines: ['Seven whole years.', 'A hundred new small skills.', 'Every reason to be proud of them.'],
+    summaryBody:
+      'I’m 7 and That’s Amazing! is a cheerful celebration of turning seven — a birthday gift book about growing up, trying hard, and being proud of both.',
+    verdict:
+      'I’m 7 and That’s Amazing! is exactly the right book for exactly one birthday, and it makes the most of it. Wrap it up and hand it over.',
+    summaryIntro:
+      'I’m 7 and That’s Amazing! walks through everything that is new, hard and brilliant about being seven years old.',
+    special: [
+      { icon: 'spark', title: 'A Perfect Birthday Gift', text: 'Made to be handed over with a bow on it.' },
+      { icon: 'twist', title: 'Small, Specific Wins', text: 'Celebrates what seven-year-olds actually care about.' },
+      { icon: 'people', title: 'Squarely on the Child’s Side', text: 'Encouraging without a single lecture.' },
+      { icon: 'quill', title: 'Sunny, Simple Writing', text: 'Easy enough for a new reader to manage alone.' },
+    ],
+    review: {
+      text: 'Exactly what a birthday book should be — short, warm, and specific enough that a seven-year-old recognises themselves on every page.',
+      overall: 4.5,
+      loved: ['Lovely, warm illustrations', 'An ideal gift book', 'Reads well aloud or alone'],
+      better: ['Outgrown quickly', 'Very short'],
     },
   },
 ]
@@ -425,87 +467,11 @@ const videoSet = (book) => [
 
    Add a `fullReview` / `fullSummary` key to any book above to hand-write its
    page. Anything without one is composed automatically from that book's own
-   about / summary / review fields, so every book still gets a complete,
-   book-specific page out of the box.
+   about / summary / review / verdict fields, so every book still gets a
+   complete, book-specific page out of the box.
    ------------------------------------------------------------------------- */
 
-const FULL = {
-  'the-silent-page': {
-    fullReview: {
-      intro: [
-        'The Silent Page is a slow-burning, atmospheric thriller that pulls you in with mystery and holds you captive with secrets layered deep.',
-        'From the very first chapter, Lucas Elliot crafts a world that feels hauntingly real. When journalist Adam Reed stumbles upon a series of unpublished manuscripts, he thinks he’s found a story that could change his career. But as he reads deeper, he realizes these pages hold more than just fiction — they hold the key to a truth someone desperately wants to keep buried.',
-      ],
-      sections: [
-        {
-          title: 'A Story Wrapped in Secrets',
-          body: 'Elliot masterfully weaves past and present, truth and lies, as Adam delves into the life of the manuscript’s reclusive author. Each discovery pulls him further into a dangerous web of hidden motives, forgotten tragedies, and a silence that speaks louder than words.',
-        },
-        {
-          title: 'Atmosphere & Writing',
-          body: 'The writing is crisp, immersive, and beautifully paced. The atmosphere feels alive — dimly lit streets, empty libraries, old diaries, and the constant feeling that someone is watching. Elliot’s attention to detail makes every scene vivid and suspenseful.',
-        },
-        {
-          title: 'Characters That Stay With You',
-          body: 'Adam Reed is a relatable, flawed protagonist. His curiosity, guilt, and determination make him feel real. The supporting characters are layered and complex, each carrying their own secrets that slowly unravel in unexpected ways.',
-        },
-      ],
-      worked: [
-        'Unpredictable twists that keep you guessing',
-        'A gripping revelation in the final act',
-        'Strong emotional depth beneath the suspense',
-        'A chilling yet satisfying ending',
-      ],
-      better: [
-        'The middle section feels slightly slow for some readers',
-        'A few secondary characters could have been explored more',
-      ],
-      verdict:
-        'The Silent Page is a must-read for fans of mystery and psychological thrillers. It’s more than just a story — it’s an experience that lingers long after the last page. Lucas Elliot proves once again that silence can be the most terrifying truth of all.',
-      quote: 'Sometimes the most dangerous stories are the ones that were never meant to be read.',
-      bars: [
-        { label: 'Storyline', value: 4.5 },
-        { label: 'Characters', value: 4.5 },
-        { label: 'Writing Style', value: 4.0 },
-        { label: 'Pacing', value: 4.0 },
-        { label: 'Overall Enjoyment', value: 4.5 },
-      ],
-    },
-    fullSummary: {
-      intro:
-        'The Silent Page by Lucas Elliot is a gripping mystery thriller that unfolds through secrets, lies, and the relentless pursuit of truth.',
-      sections: [
-        {
-          title: 'The Beginning',
-          body: 'The story begins with journalist Adam Reed, who receives an anonymous package containing a single, unsigned manuscript. What he reads shocks him — a detailed account of crimes that have never been reported. As he digs deeper, Adam realizes the manuscript is not fiction but a confession from someone in his life.',
-        },
-        {
-          title: 'The Investigation',
-          body: 'Adam’s curiosity turns into obsession. With every page, he uncovers connections between the manuscript and unsolved cases from years ago. The deeper he goes, the more he puts his career, relationships, and even his life at risk.',
-        },
-        {
-          title: 'The Secrets Unfold',
-          body: 'The manuscript reveals long-buried truths — corruption, betrayal, and a powerful network that silenced voices to stay hidden. Adam discovers that the author of the manuscript is closer to him than he ever imagined.',
-        },
-        {
-          title: 'The Turning Point',
-          body: 'When Adam pieces together the final clues, he confronts the person behind the manuscript. In a tense showdown, the truth comes out, but at a cost that changes everything.',
-        },
-        {
-          title: 'The Conclusion',
-          body: 'The truth is finally exposed, the guilty are held accountable, and Adam chooses a new path — one where he writes not just stories, but the truth that others are afraid to tell.',
-        },
-      ],
-      quote: 'Sometimes the most dangerous stories are the ones that were never meant to be read.',
-      takeaways: [
-        { icon: 'shield', title: 'Truth Always Surfaces', text: 'No matter how deep it’s buried, the truth always finds its way out.' },
-        { icon: 'people', title: 'Curiosity Has a Price', text: 'Seeking the truth can cost you more than you ever expected.' },
-        { icon: 'eye', title: 'Nothing Is as It Seems', text: 'Behind every quiet story lies a secret waiting to be revealed.' },
-        { icon: 'book', title: 'Words Have Power', text: 'The right words can expose lies, create change, and change lives.' },
-      ],
-    },
-  },
-}
+const FULL = {}
 
 // Fallbacks: composed from the book's own fields so each page is specific to
 // that title even before anyone hand-writes it.
@@ -518,7 +484,7 @@ const deriveReview = (b) => ({
   ],
   worked: b.review.loved,
   better: b.review.better,
-  verdict: `${b.title} is a rewarding read for anyone drawn to ${b.genres.slice(0, 2).join(' and ').toLowerCase()}. ${b.summaryBody}`,
+  verdict: b.verdict || `${b.title} is a rewarding read. ${b.summaryBody}`,
   quote: b.pull.join(' '),
   bars: [
     { label: 'Storyline', value: b.review.overall },
@@ -530,7 +496,7 @@ const deriveReview = (b) => ({
 })
 
 const deriveSummary = (b) => ({
-  intro: `${b.title} by ${b.author} is a ${b.genre.toLowerCase()} that ${b.summaryBody.charAt(0).toLowerCase()}${b.summaryBody.slice(1)}`,
+  intro: b.summaryIntro || b.summaryBody,
   sections: [
     { title: 'The Beginning', body: b.about },
     { title: 'What Drives It', body: `${b.summaryLines.join(' ')} These threads set the story in motion and rarely let it settle.` },
@@ -548,7 +514,7 @@ const deriveSummary = (b) => ({
 export const BOOKS = RAW_BOOKS.map((b) => ({
   ...DEFAULTS,
   ...b,
-  coverSrc: `/assets/${b.cover}.png`,
+  coverSrc: b.coverSrc || `/assets/books/${b.slug}.jpg`,
   videos: b.videos || videoSet(b),
 }))
 
