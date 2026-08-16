@@ -1,10 +1,24 @@
 'use client'
 
-import { useLayoutEffect, useRef } from 'react'
+import { Fragment, useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
+import { ORG } from '@/lib/site'
 
 const BRAND = 'Books Paradise'
+
+// The three copy beats that reveal under the badge, one per scroll beat.
+const PROMISE = 'Paradise is a library of stories waiting to be read.'
+const KICKER = 'Discover, Read, & Love Books'
+
+/** Splits a line into masked words — the same reveal idiom as the hero headline. */
+const words = (line: string) =>
+  line.split(' ').map((w, i) => (
+    <Fragment key={`${w}-${i}`}>
+      {i > 0 && ' '}
+      <span className="il-w"><span>{w}</span></span>
+    </Fragment>
+  ))
 
 export default function Intro() {
   const root = useRef<any>(null)
@@ -25,6 +39,11 @@ export default function Intro() {
       if (NOANIM) {
         gsap.set([girl, cream, green], { opacity: 1, scale: 1, rotate: 0 })
         gsap.set(['.badge-glow', '.badge-shadow', arc], { opacity: 1 })
+        // The copy sits where the "Scroll" cue does, and with animation off the
+        // cue never fades — so drop the cue rather than let the two collide.
+        gsap.set(['.il', '.il-dot', '.il-ig'], { autoAlpha: 1, scale: 1, y: 0 })
+        gsap.set('.il-w > span', { yPercent: 0 })
+        gsap.set('.intro-cue', { autoAlpha: 0 })
         return
       }
 
@@ -58,6 +77,13 @@ export default function Intro() {
       gsap.set(green, { opacity: 0, scale: 0.66, rotate: 16, transformOrigin: '50% 50%' })
       gsap.set(arc, { opacity: 0 })
       gsap.set('.badge-shadow', { opacity: 0, scale: 0.7 })
+
+      // ---- initial: the three copy beats are parked below the badge, each one
+      //      masked word-by-word so it can rise into view on its own beat ----
+      gsap.set('.il', { autoAlpha: 0, y: 18 })
+      gsap.set('.il-w > span', { yPercent: 108 })
+      gsap.set('.il-dot', { autoAlpha: 0, scale: 0.4 })
+      gsap.set('.il-ig', { autoAlpha: 0, scale: 0.55 })
 
       // ---- load: the girl blooms into a pure-white frame ----
       gsap.timeline({ defaults: { ease: 'power3.out' } })
@@ -101,6 +127,31 @@ export default function Intro() {
         .to(badge, { scale: () => corner.scale, ease: 'power2.inOut', duration: 4 }, 6.0)
         .to(['.badge-glow', '.badge-shadow'], { opacity: 0, duration: 2, ease: 'power2.in' }, 6.0)
         .to('.intro-cue', { opacity: 0, duration: 0.5 }, 0.2)
+
+      // --- COPY BEATS: one line per scroll beat, sharing the assembly range ---
+      // The beats run 0.4→1.9, 2.2→3.5 and 3.9→5.0, so each one lands in a
+      // clear gap after the last — a distinct reveal per stretch of scroll.
+      // 1 — the promise, rising with the cream ring
+      tl.to('.il-1', { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.9 }, 0.4)
+        .to('.il-1 .il-w > span', { yPercent: 0, ease: 'power3.out', duration: 1.0, stagger: 0.055 }, 0.4)
+        // 2 — the kicker, with the gold diamonds popping in after the words
+        .to('.il-2', { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.8 }, 2.2)
+        .to('.il-2 .il-w > span', { yPercent: 0, ease: 'power3.out', duration: 0.95, stagger: 0.055 }, 2.2)
+        .to('.il-dot', { autoAlpha: 1, scale: 1, ease: 'back.out(2)', duration: 0.85 }, 2.65)
+        // 3 — the handle, the icon blooming the way the badge layers do
+        .to('.il-3', { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.8 }, 3.9)
+        .to('.il-ig', { autoAlpha: 1, scale: 1, ease: 'back.out(1.7)', duration: 0.95 }, 3.9)
+        .to('.il-3 .il-w > span', { yPercent: 0, ease: 'power3.out', duration: 0.95 }, 4.05)
+        // --- and away: they lift and dissolve just before the badge leaves for
+        //     the header. Bottom line first, and the lift is big enough that
+        //     every line is gone before the rising hero card reaches its slot. ---
+        .to(['.il-1', '.il-2', '.il-3'], {
+          autoAlpha: 0,
+          y: -48,
+          ease: 'power2.in',
+          duration: 0.6,
+          stagger: { each: 0.11, from: 'end' },
+        }, 5.95)
 
       // ---- 3D depth: mouse tilt + per-layer parallax (on the inner wrapper so
       //      it never fights the corner-travel transform on .brand-badge) ----
@@ -148,6 +199,29 @@ export default function Intro() {
             <path className="arc-diamond" d="M 627 968 L 640 995 L 627 1022 L 614 995 Z" />
           </svg>
         </div>
+      </div>
+      {/* copy beats — revealed one per scroll beat while the badge assembles */}
+      <div className="intro-lines">
+        <p className="il il-1">{words(PROMISE)}</p>
+        <p className="il il-2">
+          <i className="il-dot" aria-hidden="true">•</i>
+          {words(KICKER)}
+          <i className="il-dot" aria-hidden="true">•</i>
+        </p>
+        <a
+          className="il il-3"
+          href={ORG.social.instagram.url}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`${ORG.social.instagram.handle} on Instagram`}
+        >
+          <svg className="il-ig" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="5.2" />
+            <circle cx="12" cy="12" r="4.1" />
+            <circle cx="17.2" cy="6.8" r="1.15" fill="currentColor" stroke="none" />
+          </svg>
+          <span className="il-w"><span>{ORG.social.instagram.handle}</span></span>
+        </a>
       </div>
       <div className="intro-cue">
         <span>Scroll</span>

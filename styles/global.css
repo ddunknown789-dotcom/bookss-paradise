@@ -403,7 +403,10 @@ main { position: relative; z-index: 1; }
 /* .intro is a tall scroll spacer; the badge itself is position:fixed and is
    driven from centre-large to top-left-small by a scrubbed timeline, then
    holds there as the persistent header logo. */
-.intro { position: relative; z-index: 2; height: 250vh; }
+/* --badge-size mirrors the .brand-badge width below; .intro-lines positions
+   itself off it so the copy always sits just under the disc. Keep the two in
+   step if either is retuned. */
+.intro { position: relative; z-index: 2; height: 250vh; --badge-size: min(46vh, 500px, 78vw); }
 .brand-badge {
   position: fixed;
   top: 50%;
@@ -508,6 +511,86 @@ main { position: relative; z-index: 1; }
   45% { transform: scaleY(1); transform-origin: top; }
   55% { transform: scaleY(1); transform-origin: bottom; }
   100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* ---------- intro copy (three beats revealed under the badge) ---------- */
+/* Fixed like the badge and anchored to its lower edge, so the stack never
+   drifts as the disc resizes. Hidden until the scrubbed timeline reveals each
+   line, then lifted away as the badge travels to the header. */
+.intro-lines {
+  position: fixed;
+  top: calc(50% + var(--badge-size) / 2 + clamp(14px, 3vh, 34px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 780px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(10px, 1.7vh, 18px);
+  text-align: center;
+  z-index: 44;
+  pointer-events: none;
+}
+.il {
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+}
+/* per-word mask, same idiom as the hero headline; the padding/margin pair keeps
+   descenders out of the clip */
+.il-w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.18em;
+  margin-bottom: -0.18em;
+}
+.il-w > span { display: inline-block; will-change: transform; }
+
+.il-1 {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(18px, 2.05vw, 29px);
+  line-height: 1.3;
+  letter-spacing: var(--tracking-normal);
+  color: var(--green-heading);
+}
+.il-2 {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(10.5px, 0.98vw, 13px);
+  line-height: 1.5;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+.il-dot {
+  display: inline-block;
+  margin: 0 0.42em;
+  font-style: normal;
+  font-size: 1.1em;
+  line-height: 1;
+  color: var(--gold);
+  will-change: transform, opacity;
+}
+.il-3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(13px, 1.05vw, 15px);
+  letter-spacing: 0.02em;
+  color: var(--green-deep);
+  pointer-events: auto;
+  transition: color 0.3s ease;
+}
+.il-3:hover { color: var(--gold); }
+.il-ig {
+  width: 1.3em;
+  height: 1.3em;
+  flex: none;
+  will-change: transform, opacity;
 }
 
 /* ---------- hero ---------- */
@@ -1746,9 +1829,20 @@ a.botw-cover:hover {
   .nav-inner { width: calc(100% - 36px); }
   .nav-logo { font-size: 20px; }
 
-  /* intro badge */
+  /* intro badge — keep --badge-size and .brand-badge width identical */
+  .intro { --badge-size: min(74vw, 370px); }
   .brand-badge { width: min(74vw, 370px); }
   .intro-cue { bottom: 34px; }
+
+  /* intro copy — tighter stack so all three beats clear the short viewport */
+  .intro-lines {
+    top: calc(50% + var(--badge-size) / 2 + clamp(12px, 2.4vh, 26px));
+    width: min(90vw, 460px);
+    gap: clamp(9px, 1.5vh, 15px);
+  }
+  .il-1 { font-size: clamp(16px, 4.6vw, 21px); line-height: 1.34; }
+  .il-2 { font-size: clamp(9.5px, 2.7vw, 11.5px); letter-spacing: 0.2em; }
+  .il-3 { font-size: clamp(12.5px, 3.4vw, 14px); gap: 8px; }
 
   /* hero */
   .hero-copy { padding: 84px 24px 8px; }
