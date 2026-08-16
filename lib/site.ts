@@ -46,13 +46,24 @@ export const ORG = {
 
   /**
    * `sameAs` is how Google links this entity to profiles it already knows.
-   * Only Instagram is confirmed; the rest are placeholders on the real
-   * handle and should be corrected or removed once the accounts exist —
+   * Instagram and Facebook are confirmed; the rest are placeholders on the
+   * real handle and should be corrected or removed once the accounts exist —
    * a `sameAs` pointing at a 404 is worse than omitting it.
+   *
+   * `handle` is the display text wherever an account is shown (the intro
+   * beats, the footer, the About page); `url` is the fallback the site uses
+   * until a `social_links` row overrides it from the CMS. An empty `url` means
+   * "account exists, link not known yet" — it renders as plain text, never as
+   * a dead link, and is left out of `sameAs`.
    */
   social: {
     instagram: { handle: '@bookss.paradise', url: 'https://www.instagram.com/bookss.paradise/', confirmed: true },
-    facebook: { handle: 'bookssparadise', url: 'https://www.facebook.com/bookssparadise', confirmed: false },
+    facebook: {
+      handle: 'Bookss.Paradise',
+      url: 'https://www.facebook.com/share/1912T1r9Xs/?mibextid=wwXIfr',
+      confirmed: true,
+    },
+    youtube: { handle: 'BOOKSS PARADISE', url: '', confirmed: false },
     twitter: { handle: '@bookssparadise', url: 'https://x.com/bookssparadise', confirmed: false },
   },
 
@@ -67,12 +78,16 @@ export const ORG = {
   ],
 } as const
 
-/** Every profile URL, in the order Google prefers to see them. */
+/**
+ * Every profile URL, in the order Google prefers to see them. Accounts whose
+ * URL isn't known yet drop out rather than emit an empty `sameAs` entry.
+ */
 export const SAME_AS: string[] = [
   ORG.social.instagram.url,
   ORG.social.facebook.url,
+  ORG.social.youtube.url,
   ORG.social.twitter.url,
-]
+].filter(Boolean)
 
 /** Absolute URL for a site-relative path. Never returns a localhost URL. */
 export function absoluteUrl(path = '/', base: string = SITE_URL): string {

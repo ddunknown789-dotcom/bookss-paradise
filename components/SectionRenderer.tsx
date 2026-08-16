@@ -14,7 +14,14 @@ import Newsletter from './Newsletter'
 
 import type { SectionRow } from '@/lib/cms/queries'
 import type { SectionContentMap } from '@/lib/cms/sections'
-import type { BookCardView, InterviewView, ServiceView, VideoCardView, WeekView } from '@/lib/cms/types'
+import type {
+  BookCardView,
+  InterviewView,
+  ServiceView,
+  SocialLinkView,
+  VideoCardView,
+  WeekView,
+} from '@/lib/cms/types'
 
 export type SectionData = {
   books: BookCardView[]
@@ -23,6 +30,7 @@ export type SectionData = {
   week: WeekView | null
   interviews: InterviewView[]
   services: ServiceView[]
+  socials: SocialLinkView[]
 }
 
 /**
@@ -39,7 +47,7 @@ export default function SectionRenderer({ sections, data }: { sections: SectionR
         const c = section.content as SectionContentMap[typeof section.type]
         switch (section.type) {
           case 'intro':
-            return <Intro key={section.id} />
+            return <Intro key={section.id} socials={data.socials} />
           case 'hero':
             return <Hero key={section.id} content={c as SectionContentMap['hero']} />
           case 'videos':

@@ -50,8 +50,10 @@ export default async function FooterPage() {
       <div className="ad-alert ad-alert-info">
         <Ic n="alert" style={{ width: 16, height: 16, flexShrink: 0, marginTop: 1 }} />
         <span>
-          The current design has no footer bar on the page — this content is stored and ready, so a footer can be
-          switched on without re-entering any of it.
+          The current design has no footer bar on the page — the text and link columns are stored and ready, so a
+          footer can be switched on without re-entering any of it. <b>Social accounts are live now</b>: their URLs
+          drive the Instagram, Facebook and YouTube row under the logo on the homepage, and the profiles Google is
+          told about.
         </span>
       </div>
 
@@ -103,6 +105,11 @@ export default async function FooterPage() {
       <section className="ad-panel">
         <div className="ad-panel-head"><h2>Social accounts</h2></div>
         <div className="ad-panel-body">
+          <p className="ad-hint" style={{ marginBottom: 14 }}>
+            Keep <b>Platform</b> exactly <code>instagram</code>, <code>facebook</code> or <code>youtube</code> — that
+            word is how the homepage picks the right icon. Leave a URL blank and that account still shows under the
+            logo, just not as a link. Changes go live within the hour.
+          </p>
           <CollectionEditor
             rows={(socials ?? []) as never}
             columns={SOCIAL_COLUMNS}

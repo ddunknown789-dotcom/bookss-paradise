@@ -4,6 +4,7 @@ import { Fragment, useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
 import { ORG } from '@/lib/site'
+import type { SocialLinkView } from '@/lib/cms/types'
 
 const BRAND = 'Books Paradise'
 
@@ -20,8 +21,64 @@ const words = (line: string) =>
     </Fragment>
   ))
 
-export default function Intro() {
+/**
+ * Outline container + filled mark, so the three read as one set rather than
+ * three borrowed brand glyphs. Instagram and Facebook share the same rounded
+ * square; YouTube keeps its wider plate because that shape *is* the logo.
+ */
+const SOCIAL_ICONS: Record<string, React.ReactNode> = {
+  instagram: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="5.2" />
+      <circle cx="12" cy="12" r="4.1" />
+      <circle cx="17.2" cy="6.8" r="1.15" fill="currentColor" stroke="none" />
+    </>
+  ),
+  facebook: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="5.2" />
+      {/* the footer's "f", scaled to sit inside the plate and land on its floor */}
+      <g transform="translate(2.05 2.67) scale(0.833)" fill="currentColor" stroke="none">
+        <path d="M14.5 8.5h2.2V5.2h-2.6c-2.8 0-4.4 1.7-4.4 4.6v2.1H7.2v3.4h2.5V22h3.6v-6.7h2.6l.5-3.4h-3.1V9.9c0-1 .4-1.4 1.2-1.4z" />
+      </g>
+    </>
+  ),
+  youtube: (
+    <>
+      <rect x="2.5" y="5.5" width="19" height="13" rx="4" />
+      <path d="M10.2 9.4v5.2l4.6-2.6z" fill="currentColor" stroke="none" />
+    </>
+  ),
+}
+
+/** The accounts the intro shows, in order, with the name screen readers hear. */
+const SOCIAL_ORDER = [
+  ['instagram', 'Instagram'],
+  ['facebook', 'Facebook'],
+  ['youtube', 'YouTube'],
+] as const
+
+/**
+ * Display text is fixed in `lib/site.ts`; the URL comes from the CMS
+ * `social_links` row for that platform when there is one, so an editor can set
+ * or change a link under /admin/footer → Social accounts without a deploy.
+ * An account with no URL yet renders as plain text instead of a dead link.
+ */
+const resolveSocials = (rows: SocialLinkView[] = []) =>
+  SOCIAL_ORDER.map(([platform, name]) => {
+    const cms = rows.find((r) => r.platform.toLowerCase() === platform)
+    const fallback = ORG.social[platform]
+    return {
+      platform,
+      name,
+      label: fallback.handle,
+      url: (cms?.url || fallback.url || '').trim(),
+    }
+  })
+
+export default function Intro({ socials }: { socials?: SocialLinkView[] }) {
   const root = useRef<any>(null)
+  const accounts = resolveSocials(socials)
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -41,7 +98,7 @@ export default function Intro() {
         gsap.set(['.badge-glow', '.badge-shadow', arc], { opacity: 1 })
         // The copy sits where the "Scroll" cue does, and with animation off the
         // cue never fades — so drop the cue rather than let the two collide.
-        gsap.set(['.il', '.il-dot', '.il-ig'], { autoAlpha: 1, scale: 1, y: 0 })
+        gsap.set(['.il', '.il-dot', '.il-soc', '.il-soc-ic'], { autoAlpha: 1, scale: 1, y: 0 })
         gsap.set('.il-w > span', { yPercent: 0 })
         gsap.set('.intro-cue', { autoAlpha: 0 })
         return
@@ -83,7 +140,8 @@ export default function Intro() {
       gsap.set('.il', { autoAlpha: 0, y: 18 })
       gsap.set('.il-w > span', { yPercent: 108 })
       gsap.set('.il-dot', { autoAlpha: 0, scale: 0.4 })
-      gsap.set('.il-ig', { autoAlpha: 0, scale: 0.55 })
+      gsap.set('.il-soc', { autoAlpha: 0, y: 12 })
+      gsap.set('.il-soc-ic', { autoAlpha: 0, scale: 0.55 })
 
       // ---- load: the girl blooms into a pure-white frame ----
       gsap.timeline({ defaults: { ease: 'power3.out' } })
@@ -138,10 +196,13 @@ export default function Intro() {
         .to('.il-2', { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.8 }, 2.2)
         .to('.il-2 .il-w > span', { yPercent: 0, ease: 'power3.out', duration: 0.95, stagger: 0.055 }, 2.2)
         .to('.il-dot', { autoAlpha: 1, scale: 1, ease: 'back.out(2)', duration: 0.85 }, 2.65)
-        // 3 — the handle, the icon blooming the way the badge layers do
-        .to('.il-3', { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.8 }, 3.9)
-        .to('.il-ig', { autoAlpha: 1, scale: 1, ease: 'back.out(1.7)', duration: 0.95 }, 3.9)
-        .to('.il-3 .il-w > span', { yPercent: 0, ease: 'power3.out', duration: 0.95 }, 4.05)
+        // 3 — the accounts, cascading left to right; each icon blooms the way
+        //     the badge layers do. The three sub-tweens share one stagger so an
+        //     account's plate, handle and row always arrive together.
+        .to('.il-3', { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.4 }, 3.9)
+        .to('.il-soc', { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.7, stagger: 0.24 }, 3.9)
+        .to('.il-soc-ic', { autoAlpha: 1, scale: 1, ease: 'back.out(1.7)', duration: 0.8, stagger: 0.24 }, 3.9)
+        .to('.il-3 .il-w > span', { yPercent: 0, ease: 'power3.out', duration: 0.85, stagger: 0.24 }, 4.0)
         // --- and away: they lift and dissolve just before the badge leaves for
         //     the header. Bottom line first, and the lift is big enough that
         //     every line is gone before the rising hero card reaches its slot. ---
@@ -208,20 +269,35 @@ export default function Intro() {
           {words(KICKER)}
           <i className="il-dot" aria-hidden="true">•</i>
         </p>
-        <a
-          className="il il-3"
-          href={ORG.social.instagram.url}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`${ORG.social.instagram.handle} on Instagram`}
-        >
-          <svg className="il-ig" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
-            <rect x="3" y="3" width="18" height="18" rx="5.2" />
-            <circle cx="12" cy="12" r="4.1" />
-            <circle cx="17.2" cy="6.8" r="1.15" fill="currentColor" stroke="none" />
-          </svg>
-          <span className="il-w"><span>{ORG.social.instagram.handle}</span></span>
-        </a>
+        <div className="il il-3">
+          {accounts.map(({ platform, name, label, url }) => {
+            const inner = (
+              <>
+                <svg className="il-soc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+                  {SOCIAL_ICONS[platform]}
+                </svg>
+                <span className="il-w"><span>{label}</span></span>
+              </>
+            )
+            // No URL yet — show the account, but never as a link to nowhere.
+            return url ? (
+              <a
+                className="il-soc"
+                key={platform}
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`${label} on ${name}`}
+              >
+                {inner}
+              </a>
+            ) : (
+              <span className="il-soc il-soc-flat" key={platform} aria-label={`${label} on ${name}`} role="img">
+                {inner}
+              </span>
+            )
+          })}
+        </div>
       </div>
       <div className="intro-cue">
         <span>Scroll</span>

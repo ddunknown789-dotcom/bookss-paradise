@@ -13,6 +13,7 @@ import {
   getPageSections,
   getServices,
   getSettings,
+  getSocialLinks,
   getVideos,
 } from '@/lib/cms/queries'
 import type { SectionContentMap } from '@/lib/cms/sections'
@@ -34,7 +35,7 @@ export default async function HomePage() {
     return c?.limit ?? fallback
   }
 
-  const [menu, settings, books, reviewBooks, videos, week, interviews, services] = await Promise.all([
+  const [menu, settings, books, reviewBooks, videos, week, interviews, services, socials] = await Promise.all([
     getMenu('primary'),
     getSettings(),
     wants.has('top_picks') ? getBooks(limitOf('top_picks', 12)) : Promise.resolve([]),
@@ -43,6 +44,9 @@ export default async function HomePage() {
     wants.has('book_of_week') ? getCurrentWeek() : Promise.resolve(null),
     wants.has('interviews') ? getInterviews(limitOf('interviews', 4)) : Promise.resolve([]),
     wants.has('offer') ? getServices() : Promise.resolve([]),
+    // The intro's account row reads these, so an editor can set a link
+    // under /admin/footer → Social accounts without a deploy.
+    wants.has('intro') ? getSocialLinks() : Promise.resolve([]),
   ])
 
   const showIntro = wants.has('intro')
@@ -69,7 +73,7 @@ export default async function HomePage() {
     >
       <SectionRenderer
         sections={sections}
-        data={{ books, reviewBooks, videos, week, interviews, services }}
+        data={{ books, reviewBooks, videos, week, interviews, services, socials }}
       />
     </HomeShell>
     </>
