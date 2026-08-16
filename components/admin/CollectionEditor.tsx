@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { ConfirmButton, Ic, Submit, useToast } from './ui'
+import MediaBrowser, { type Folder, type MediaItem } from './MediaBrowser'
+import { ConfirmButton, Ic, Modal, Submit, useToast } from './ui'
 
 /* ============================================================================
    A whole small table edited on one screen: add rows, reorder by drag, delete,
@@ -14,14 +15,19 @@ import { ConfirmButton, Ic, Submit, useToast } from './ui'
 export type ColumnSpec = {
   key: string
   label: string
-  type: 'text' | 'textarea' | 'slug' | 'select' | 'toggle' | 'number' | 'url'
+  type: 'text' | 'textarea' | 'slug' | 'select' | 'toggle' | 'number' | 'url' | 'date' | 'media'
   /** For `slug`: which column to derive from until edited by hand. */
   from?: string
   options?: { value: string; label: string }[]
+  /** For `media`: which kind of file the library offers. */
+  accept?: 'image' | 'video' | 'pdf' | 'all'
   width?: string
   required?: boolean
   placeholder?: string
 }
+
+/** Passed once by the page when any column is a `media` column. */
+export type MediaLibrary = { items: MediaItem[]; folders: Folder[]; supabaseUrl: string }
 
 export type Row = Record<string, unknown> & { id?: string }
 
@@ -36,6 +42,7 @@ export default function CollectionEditor({
   addLabel = 'Add row',
   emptyText = 'Nothing here yet.',
   note,
+  media,
 }: {
   rows: Row[]
   columns: ColumnSpec[]
@@ -44,11 +51,15 @@ export default function CollectionEditor({
   addLabel?: string
   emptyText?: string
   note?: React.ReactNode
+  /** Required when any column has type `media`. */
+  media?: MediaLibrary
 }) {
   const router = useRouter()
   const toast = useToast()
   const [rows, setRows] = useState<Row[]>(initial)
   const [dragging, setDragging] = useState<number | null>(null)
+  // Which cell has the library open, as "<row index>:<column key>".
+  const [picking, setPicking] = useState<string | null>(null)
 
   const set = (i: number, patch: Row) => setRows((r) => r.map((x, n) => (n === i ? { ...x, ...patch } : x)))
   const move = (from: number, to: number) => {
@@ -64,6 +75,7 @@ export default function CollectionEditor({
   const grid = `28px ${columns.map((c) => c.width ?? '1fr').join(' ')} 74px`
 
   return (
+    <>
     <form
       action={async () => {
         const res = await onSave(rows)
@@ -132,6 +144,36 @@ export default function CollectionEditor({
                   </span>
                 )
               }
+              if (col.type === 'media') {
+                // The cell stores the media id; the filename beside it comes
+                // from the library that is already loaded on the page, so
+                // nothing extra has to be selected or carried on the row.
+                const picked = media?.items.find((m) => m.id === value) ?? null
+                return (
+                  <span key={col.key} className="ad-ce-cell" data-label={col.label}>
+                    <span className="ad-ce-media">
+                      <button
+                        type="button"
+                        className="ad-btn ad-btn-sm"
+                        onClick={() => setPicking(`${i}:${col.key}`)}
+                        title={picked?.filename}
+                      >
+                        {picked ? picked.filename : 'Choose file'}
+                      </button>
+                      {picked && (
+                        <button
+                          type="button"
+                          className="ad-btn ad-btn-ghost ad-btn-icon"
+                          onClick={() => set(i, { [col.key]: '' })}
+                          aria-label={`Remove ${col.label.toLowerCase()}`}
+                        >
+                          <Ic n="x" />
+                        </button>
+                      )}
+                    </span>
+                  </span>
+                )
+              }
               if (col.type === 'textarea') {
                 return (
                   <span key={col.key} className="ad-ce-cell" data-label={col.label}>
@@ -149,7 +191,7 @@ export default function CollectionEditor({
                 <span key={col.key} className="ad-ce-cell" data-label={col.label}>
                 <input
                   className="ad-input"
-                  type={col.type === 'number' ? 'number' : 'text'}
+                  type={col.type === 'number' ? 'number' : col.type === 'date' ? 'date' : 'text'}
                   required={col.required}
                   placeholder={col.placeholder}
                   value={String(value ?? '')}
@@ -199,6 +241,27 @@ export default function CollectionEditor({
         <span className="ad-muted" style={{ fontSize: 12.6 }}>Reorder by dragging. Changes go live when you save.</span>
         <span className="ad-right"><Submit /></span>
       </div>
+
     </form>
+
+    {/* Outside the form on purpose: the library has its own form for editing a
+        file's details, and one form nested inside another is not something a
+        browser is obliged to make sense of. */}
+    {media && (
+      <Modal open={!!picking} onClose={() => setPicking(null)} title="Choose a file" wide>
+        <MediaBrowser
+          items={media.items}
+          folders={media.folders}
+          supabaseUrl={media.supabaseUrl}
+          accept={columns.find((c) => c.key === picking?.split(':')[1])?.accept ?? 'all'}
+          pick={(item) => {
+            const [index, key] = (picking ?? '').split(':')
+            if (key) set(Number(index), { [key]: item.id })
+            setPicking(null)
+          }}
+        />
+      </Modal>
+    )}
+    </>
   )
 }

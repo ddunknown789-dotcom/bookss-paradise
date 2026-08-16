@@ -1,0 +1,332 @@
+/* ============ video galleries (/watch/reviews · summaries · trailers) ======
+
+   Every card carries its own aspect ratio in `--a` and gets its height from
+   that alone, so a 16:9 review, a 9:16 Reel and a square teaser can share a
+   page without any of them being cropped or padded to match the others. The
+   cards flow down masonry columns, which close up against whatever heights
+   they are given — which is why a new video of an unfamiliar shape can never
+   open a hole in the layout, and why nothing here sets a card height.
+
+   The only thing the page decides is how many columns to run: three at full
+   width, fewer as the viewport narrows, and fewer again when the gallery
+   itself holds fewer than three videos (the [data-count] rules), so two videos
+   never sit beside an empty third column.
+   ========================================================================== */
+
+.wv {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: var(--sans);
+  color: var(--ink);
+}
+
+.wv-main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 122px 40px 96px; /* top clears the fixed SiteHeader */
+}
+
+/* ---------- back link ---------- */
+.wv-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  transition: gap 0.3s ease;
+}
+.wv-back:hover { gap: 13px; }
+
+/* ---------- page head ---------- */
+.wv-head { text-align: center; margin-top: 30px; }
+.wv-head .divider { margin-top: 20px; }
+.wv-kicker {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.wv-title {
+  margin-top: 14px;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(34px, 4vw, 54px);
+  line-height: 1.05;
+  color: var(--green);
+  letter-spacing: var(--tracking-tight);
+}
+.wv-sub {
+  max-width: 620px;
+  margin: 18px auto 0;
+  font-size: 16.5px;
+  line-height: 1.75;
+  color: var(--grey);
+}
+
+/* ---------- the gallery ---------- */
+.wv-grid {
+  margin: 52px auto 0;
+  column-count: 3;
+  column-gap: 30px;
+}
+/* A gallery of one or two videos narrows to fit them rather than leaving the
+   remaining columns standing empty. */
+.wv-grid[data-count='1'] { column-count: 1; max-width: 620px; }
+.wv-grid[data-count='2'] { column-count: 2; max-width: 900px; }
+
+.wv-card {
+  /* A card is never split across a column break — half a video at the foot of
+     one column and half at the head of the next. */
+  break-inside: avoid;
+  page-break-inside: avoid;
+  display: flow-root;
+  margin-bottom: 30px;
+  background: var(--card-soft);
+  border: 1px solid rgba(31, 70, 52, 0.07);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 22px 44px -30px rgba(31, 70, 52, 0.34);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s;
+}
+.wv-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 34px 56px -28px rgba(31, 70, 52, 0.4);
+}
+/* Lifting a card that is playing would drag the video out from under the
+   pointer mid-scrub. */
+.wv-card.is-playing:hover { transform: none; }
+
+/* The frame IS the aspect ratio: width comes from the column, height from
+   `--a`, and the space is reserved before the poster or the player loads, so
+   nothing on the page jumps as media arrives. */
+.wv-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--a, 1.778);
+  background:
+    radial-gradient(120% 95% at 50% 26%, rgba(201, 150, 47, 0.2), transparent 62%),
+    linear-gradient(158deg, #16241c 0%, #0b100d 56%, #141c17 100%);
+}
+
+/* Both players fill the frame. `contain` is the promise that the video itself
+   is never cropped: on the rare file whose real shape differs from the one the
+   card reserved, it is scaled to fit whole. */
+.wv-embed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+  object-fit: contain;
+  background: #0b100d;
+}
+
+/* ---------- poster / play control ---------- */
+.wv-cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+}
+/* The poster is a still, not the video — filling the frame with it is what
+   keeps a card from opening with a band of dead space. The video that plays
+   underneath is still shown whole. */
+.wv-cover img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s;
+}
+.wv-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8, 12, 9, 0.06) 0%, rgba(8, 12, 9, 0.42) 100%);
+  transition: opacity 0.4s;
+}
+.wv-card:hover .wv-cover img { transform: scale(1.04); }
+
+.wv-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: rgba(12, 18, 14, 0.28);
+  color: #fff;
+  padding-left: 3px; /* optically centre the triangle */
+  backdrop-filter: blur(2px);
+  transition: background 0.35s, border-color 0.35s, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.wv-cover:hover .wv-play,
+.wv-cover:focus-visible .wv-play {
+  transform: translate(-50%, -50%) scale(1.08);
+  background: var(--gold-bright);
+  border-color: var(--gold-bright);
+}
+.wv-cover:focus-visible { outline: 3px solid var(--gold-bright); outline-offset: -3px; }
+
+.wv-time {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1;
+  padding: 5px 9px;
+  border-radius: 7px;
+  background: rgba(10, 14, 11, 0.72);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+/* ---------- caption ---------- */
+.wv-body { padding: 20px 22px 24px; }
+.wv-body h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.28;
+  color: var(--green);
+  letter-spacing: var(--tracking-tight);
+}
+.wv-body p {
+  margin-top: 9px;
+  font-size: 14.5px;
+  line-height: 1.66;
+  color: var(--grey);
+}
+.wv-body .wv-meta {
+  margin-top: 11px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* ---------- nothing published yet ---------- */
+.wv-empty {
+  margin: 56px auto 0;
+  max-width: 560px;
+  padding: 54px 34px;
+  text-align: center;
+  background: var(--card);
+  border: 1px solid rgba(31, 70, 52, 0.08);
+  border-radius: 20px;
+}
+.wv-empty h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 24px;
+  color: var(--green);
+  letter-spacing: var(--tracking-tight);
+}
+.wv-empty p { margin-top: 10px; font-size: 15px; color: var(--grey); }
+
+/* ---------- the other two galleries ---------- */
+.wv-more {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 72px;
+  padding-top: 44px;
+  border-top: 1px solid rgba(31, 70, 52, 0.1);
+}
+.wv-more-link {
+  padding: 26px 28px;
+  border: 1px solid rgba(31, 70, 52, 0.09);
+  border-radius: 16px;
+  background: var(--card-soft);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.4s, box-shadow 0.4s;
+}
+.wv-more-link:hover {
+  transform: translateY(-4px);
+  border-color: rgba(201, 150, 47, 0.45);
+  box-shadow: 0 24px 40px -30px rgba(31, 70, 52, 0.4);
+}
+.wv-more-kicker {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--grey);
+}
+.wv-more-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--green);
+  letter-spacing: var(--tracking-tight);
+}
+.wv-more-link:hover .wv-more-title { color: var(--gold); }
+
+/* ---------- responsive ----------
+   Column counts drop with the viewport. The [data-count] rules repeat inside
+   each breakpoint because they carry the same specificity as the rule above
+   them — a small gallery must not be widened back out by a breakpoint. */
+@media (max-width: 1080px) {
+  .wv-main { padding: 112px 32px 80px; }
+  .wv-grid { column-count: 2; column-gap: 24px; }
+  .wv-grid[data-count='1'] { column-count: 1; max-width: 560px; }
+  .wv-grid[data-count='2'] { column-count: 2; max-width: none; }
+  .wv-card { margin-bottom: 24px; }
+}
+
+@media (max-width: 720px) {
+  .wv-main { padding: 104px 20px 64px; }
+  .wv-head { margin-top: 24px; }
+  .wv-sub { font-size: 15.5px; }
+  .wv-grid,
+  .wv-grid[data-count='1'],
+  .wv-grid[data-count='2'] {
+    column-count: 1;
+    max-width: 540px;
+  }
+  .wv-grid { margin-top: 40px; }
+  .wv-play { width: 52px; height: 52px; }
+  .wv-body { padding: 17px 18px 20px; }
+  .wv-body h2 { font-size: 18.5px; }
+  .wv-body p { font-size: 14px; }
+  .wv-more { grid-template-columns: 1fr; margin-top: 54px; padding-top: 34px; }
+  .wv-more-link { padding: 22px 22px; }
+  .wv-more-title { font-size: 20px; }
+}
+
+/* A card that lifts on hover reads as a touch target that moved. */
+@media (hover: none) {
+  .wv-card:hover { transform: none; }
+  .wv-card:hover .wv-cover img { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wv-card,
+  .wv-cover img,
+  .wv-play,
+  .wv-more-link { transition: none; }
+}

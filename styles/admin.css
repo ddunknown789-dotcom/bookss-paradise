@@ -222,6 +222,20 @@
 .ad-drag { cursor: grab; color: var(--ad-faint); display: grid; place-items: center; width: 22px; }
 .ad-drag:active { cursor: grabbing; }
 
+/* A media cell in a collection editor: the chosen file's name, and a way to
+   clear it. The name is truncated rather than allowed to widen the column —
+   the full one is in the button's tooltip. */
+.ad-ce-media { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.ad-ce-media > .ad-btn:first-child {
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
 /* ------------------------------- tables --------------------------------- */
 
 .ad-table-wrap { overflow-x: auto; }

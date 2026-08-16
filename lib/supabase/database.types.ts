@@ -310,6 +310,23 @@ export type VideoRow = Stamps & {
   sort_order: number
 }
 
+/** One video on a /watch gallery page. See 0006_watch_galleries.sql. */
+export type VideoItem = Stamps & {
+  id: string
+  category: 'review' | 'summary' | 'trailer'
+  title: string
+  description: string | null
+  duration: string | null
+  published_at: string | null
+  video_url: string | null
+  media_id: string | null
+  poster_id: string | null
+  poster_url: string | null
+  aspect: string
+  status: ContentStatus
+  sort_order: number
+}
+
 export type Service = Stamps & {
   id: string
   key: string
@@ -440,6 +457,7 @@ export interface Database {
       weeks: Table<Week, 'key' | 'label'>
       week_books: Table<WeekBook, 'week_id' | 'title'>
       videos: Table<VideoRow, 'key' | 'title'>
+      video_items: Table<VideoItem, 'category' | 'title'>
       services: Table<Service, 'key'>
       pages: Table<Page, 'slug' | 'title'>
       page_sections: Table<PageSection, 'page_id' | 'type'>

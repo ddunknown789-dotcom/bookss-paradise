@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next'
 
 import { getBookSlugs, getInterviews, getSetting } from '@/lib/cms/queries'
 import { canonicalOrigin } from '@/lib/site'
+import { WATCH_LIST } from '@/lib/video'
 
 /**
  * Built from published content, so a book that goes live is in the sitemap on
@@ -20,6 +21,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/books`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${base}/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/books-of-the-week`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
+    ...WATCH_LIST.map((p) => ({
+      url: `${base}${p.path}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    })),
   ]
 
   const bookPages: MetadataRoute.Sitemap = books.flatMap((b) => [

@@ -8,6 +8,7 @@ import type { VideoCardView } from '@/lib/cms/types'
 import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
+import { watchPath } from '@/lib/video'
 import { Divider } from './ui'
 
 /* ============================================================================
@@ -118,6 +119,10 @@ export default function Trailer({ content, videos }: { content: VideosContent; v
       <div className="videos-grid">
         {CATEGORIES.map((c) => {
           const Badge = Icon[c.icon as keyof typeof Icon] ?? Icon.camera
+          // Each card opens its own gallery page. A link an editor has set in
+          // /admin/videos wins; the fallback carries the rows still pointing at
+          // the on-page anchor they used before those pages existed.
+          const href = c.href && !c.href.startsWith('#') ? c.href : watchPath(c.key) ?? c.href
           return (
             <article className="video-card" key={c.key}>
               <div className="video-thumb">
@@ -135,7 +140,7 @@ export default function Trailer({ content, videos }: { content: VideosContent; v
                 <h3>{c.title}</h3>
                 <Divider width={150} />
                 <p>{c.text}</p>
-                <a className="btn btn-gold-bright video-btn" href={c.href}>
+                <a className="btn btn-gold-bright video-btn" href={href}>
                   {c.cta}
                   <Play width="13" height="13" fill="currentColor" />
                 </a>

@@ -6,6 +6,8 @@
  * Mapping from database rows happens once, in queries.ts.
  */
 
+import type { VideoProvider, WatchCategory } from '@/lib/video'
+
 export type MediaView = {
   id: string
   src: string
@@ -117,6 +119,27 @@ export type VideoCardView = {
   href: string
   thumb: string
   videoUrl: string
+}
+
+/** One video in a /watch gallery. Already resolved: the page just plays it. */
+export type VideoItemView = {
+  id: string
+  category: WatchCategory
+  title: string
+  description: string
+  duration: string
+  /** ISO date the video went out, or '' — shown on the card and in its schema. */
+  published: string
+  /** The same date, written the way the card shows it. */
+  publishedLabel: string
+  provider: VideoProvider
+  youtubeId: string | null
+  /** The embed URL for YouTube, or the file URL for an upload. */
+  src: string
+  /** Empty for a YouTube video with no custom poster — the card fills it in. */
+  poster: string
+  /** width ÷ height. Always set: the gallery sizes every card from it. */
+  aspect: number
 }
 
 export type ServiceView = {

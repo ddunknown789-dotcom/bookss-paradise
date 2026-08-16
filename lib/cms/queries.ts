@@ -6,6 +6,7 @@ import { createPublicClient } from '@/lib/supabase/server'
 import { isConfigured, storageUrl } from '@/lib/supabase/env'
 import type { SectionType } from '@/lib/supabase/database.types'
 import { TAGS } from './cache'
+import { parseVideoSource, resolveAspect, round, type WatchCategory } from '@/lib/video'
 import { sectionContent, type SectionContentMap } from './sections'
 import type {
   BookCardView,
@@ -19,6 +20,7 @@ import type {
   ServiceView,
   SocialLinkView,
   VideoCardView,
+  VideoItemView,
   WeekView,
 } from './types'
 
@@ -53,6 +55,18 @@ const mediaView = (m: MediaRef): MediaView | null =>
     : null
 
 const MEDIA_COLS = 'id, path, bucket, alt_text, width, height, kind'
+
+/**
+ * A `date` column as a human reads it. Formatted in UTC on purpose: a plain
+ * calendar date has no time zone, and letting the server's own offset apply
+ * would date half the world's videos to the day before.
+ */
+function dayLabel(date: string | null | undefined): string {
+  if (!date) return ''
+  const d = new Date(`${date}T00:00:00Z`)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
+}
 
 /**
  * Wrap a query so the site renders instead of crashing when Supabase isn't
@@ -647,6 +661,66 @@ export const getVideos = cached(
     ),
   ['videos'],
   [TAGS.videos],
+)
+
+/**
+ * The videos on one /watch gallery page.
+ *
+ * A row carries either a pasted URL or an uploaded file, never both by
+ * necessity — `video_url` wins when it is filled in, so an editor can point a
+ * row at YouTube without first detaching whatever file it used to play. Every
+ * row comes back already resolved into something the player can use, and with
+ * an aspect ratio, so the gallery can reserve each card's exact shape before
+ * anything loads.
+ */
+export const getVideoItems = cached(
+  async (category: WatchCategory): Promise<VideoItemView[]> =>
+    safe(
+      async () => {
+        const db = createPublicClient()
+        const { data } = await db
+          .from('video_items')
+          .select(
+            `*,
+             file:media!video_items_media_id_fkey(${MEDIA_COLS}),
+             poster:media!video_items_poster_id_fkey(${MEDIA_COLS})`,
+          )
+          .eq('category', category)
+          .eq('status', 'published')
+          .order('sort_order')
+
+        return (data ?? [])
+          .map((v) => {
+            const row = v as Record<string, any>
+            const source = parseVideoSource(String(row.video_url ?? '').trim() || mediaSrc(row.file))
+            const poster = mediaSrc(row.poster, String(row.poster_url ?? '').trim())
+
+            return {
+              id: row.id,
+              category: row.category as WatchCategory,
+              title: row.title,
+              description: row.description ?? '',
+              duration: row.duration ?? '',
+              published: row.published_at ?? '',
+              publishedLabel: dayLabel(row.published_at),
+              provider: source.provider,
+              youtubeId: source.youtubeId,
+              src: source.embedUrl,
+              poster,
+              // An uploaded file knows its own dimensions; a YouTube link does
+              // not, which is what the `aspect` column is there to answer.
+              aspect: round(resolveAspect(row.aspect, row.file?.width, row.file?.height, source)),
+            }
+          })
+          // A row with no playable source would render an empty frame. Better
+          // that a half-finished row is simply not on the page yet.
+          .filter((item) => item.provider !== 'none')
+      },
+      [],
+      `getVideoItems(${category})`,
+    ),
+  ['video-items'],
+  [TAGS.videoItems],
 )
 
 export const getServices = cached(
