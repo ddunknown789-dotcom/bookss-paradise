@@ -17,6 +17,7 @@
   position: relative;
   z-index: 1;
   min-height: 100vh;
+  min-height: 100svh;
   background: var(--bg);
   font-family: var(--sans);
   color: var(--ink);

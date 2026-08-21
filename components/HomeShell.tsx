@@ -29,12 +29,24 @@ const flag = (settings: Record<string, unknown>, key: string, fallback = true): 
  * thing is that the nav links and the feature toggles come from the CMS.
  */
 export default function HomeShell({ menu, settings, showIntro, children }: Props) {
+  // `NOANIM` is deliberately left out of this: it reads matchMedia, which the
+  // server can't, so folding it in here would make the first client render
+  // disagree with the server HTML and cost a full re-render of the page. The
+  // effect below drops the loader on the next tick instead — with motion off
+  // there was nothing to watch anyway.
+  const wantsLoader = flag(settings, 'features.loader') && showIntro
+
   // Two flags so the loader and the site overlap for one beat: `siteUp` mounts
   // the page underneath while the loader is still dissolving, so the logo intro
   // blooms *through* the fade instead of appearing after a blank frame.
-  const wantsLoader = flag(settings, 'features.loader') && showIntro && !NOANIM
   const [siteUp, setSiteUp] = useState(!wantsLoader)
   const [loaderGone, setLoaderGone] = useState(!wantsLoader)
+
+  useEffect(() => {
+    if (!NOANIM) return
+    setSiteUp(true)
+    setLoaderGone(true)
+  }, [])
 
   // Hold the page still while the loader is up, and always begin at the top.
   useEffect(() => {

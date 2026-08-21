@@ -39,7 +39,7 @@ export default function HeroArt3D() {
         gsap.to(shadow, { scaleX: 0.9, opacity: 0.65, duration: 3.6, yoyo: true, repeat: -1, ease: 'sine.inOut' })
         // Recurring light sweep across the illustration (masked to its alpha,
         // so the shine only ever crosses the artwork itself).
-        const sheen = root.current.querySelector('.hero3d-sheen i')
+        const sheen = NOANIM ? null : root.current.querySelector('.hero3d-sheen i')
         if (sheen) {
           gsap.fromTo(sheen, { xPercent: -280 }, { xPercent: 320, duration: 2.4, ease: 'power2.inOut', repeat: -1, repeatDelay: 4.4, delay: 0.4 })
         }
@@ -47,6 +47,10 @@ export default function HeroArt3D() {
 
       if (NOANIM) {
         gsap.set([aura, float, shadow, ...sparks], { opacity: 1, scale: 1, y: 0, filter: 'none' })
+        // The sheen ships in the markup for hydration's sake, but a light that
+        // sweeps the artwork on a loop is exactly what motion-off asks us not
+        // to do — take it out of the picture entirely.
+        gsap.set(root.current.querySelectorAll('.hero3d-sheen'), { display: 'none' })
         startAmbient()
       } else {
         gsap.set(aura, { opacity: 0, scale: 0.82 })
@@ -132,9 +136,9 @@ export default function HeroArt3D() {
             src="/assets/model/model-hero.png"
             alt="Reader with a book at a café table surrounded by stacks of books"
           />
-          {!NOANIM && (
-            <span className="hero3d-sheen" aria-hidden="true"><i /></span>
-          )}
+          {/* Always in the markup so the server and client trees match; the
+              effect below hides it outright when motion is off. */}
+          <span className="hero3d-sheen" aria-hidden="true"><i /></span>
         </div>
         <span className="hero3d-shadow" aria-hidden="true" />
         {SPARKS.map((s, i) => (

@@ -1,5 +1,6 @@
 import JsonLd from '@/components/JsonLd'
 import SiteFooter from '@/components/SiteFooter'
+import SmoothScroll from '@/components/SmoothScroll'
 import { graph, organizationSchema, websiteSchema } from '@/lib/seo/schema'
 import { getSetting, getSocialLinks } from '@/lib/cms/queries'
 import { SAME_AS } from '@/lib/site'
@@ -41,6 +42,10 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <>
+      {/* Lenis + ScrollTrigger wiring. It belongs to the visitor-facing pages
+          only — /admin shares the root layout and must keep native scrolling,
+          or nothing inside a dialog will scroll. */}
+      <SmoothScroll />
       <JsonLd id="site-graph" json={siteGraph} />
       {children}
       <SiteFooter />

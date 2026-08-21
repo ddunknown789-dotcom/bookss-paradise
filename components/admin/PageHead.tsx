@@ -18,8 +18,8 @@ export default function PageHead({
   actions?: React.ReactNode
 }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 4 }}>
-      <div style={{ minWidth: 0 }}>
+    <div className="ad-page-head" style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 4 }}>
+      <div className="ad-page-head-text" style={{ minWidth: 0 }}>
         {back && (
           <Link href={back.href} className="ad-btn ad-btn-ghost ad-btn-sm" style={{ marginBottom: 6, marginLeft: -10 }}>
             <Ic n="up" style={{ transform: 'rotate(-90deg)' }} />
@@ -29,7 +29,11 @@ export default function PageHead({
         <h1 style={{ fontSize: 21, fontWeight: 600, letterSpacing: '-.015em' }}>{title}</h1>
         {sub && <p className="ad-muted" style={{ fontSize: 13, marginTop: 3 }}>{sub}</p>}
       </div>
-      {actions && <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, flexShrink: 0 }}>{actions}</div>}
+      {actions && (
+        <div className="ad-page-head-actions" style={{ marginLeft: 'auto', display: 'flex', gap: 8, flexShrink: 0 }}>
+          {actions}
+        </div>
+      )}
     </div>
   )
 }

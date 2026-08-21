@@ -8,6 +8,7 @@
   position: relative;
   z-index: 1;
   min-height: 100vh;
+  min-height: 100svh;
   background: #f4f2ed;
   font-family: var(--sans);
   color: var(--ink);
@@ -74,6 +75,7 @@
   left: 0;
   width: var(--bp-sidebar);
   height: 100vh;
+  height: 100svh;
   padding: 26px 22px 22px;
   display: flex;
   flex-direction: column;
@@ -696,6 +698,7 @@
   position: relative;
   z-index: 1;
   min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   align-items: center;

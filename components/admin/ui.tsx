@@ -3,6 +3,8 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useFormStatus } from 'react-dom'
 
+import { lockPageScroll } from './scrollLock'
+
 /* ============================================================================
    Admin UI kit.
 
@@ -126,17 +128,25 @@ export function Modal({
   footer?: React.ReactNode
   wide?: boolean
 }) {
+  // Callers pass an inline arrow, so `onClose` is a new function on every
+  // render of the parent. Reading it through a ref keeps the effect below tied
+  // to `open` alone — otherwise it tore down and re-applied the scroll lock on
+  // every keystroke in the form behind the dialog.
+  const close = useRef(onClose)
+  close.current = onClose
+
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close.current()
+    }
     document.addEventListener('keydown', onKey)
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    const release = lockPageScroll()
     return () => {
       document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prev
+      release()
     }
-  }, [open, onClose])
+  }, [open])
 
   if (!open) return null
   return (
@@ -148,11 +158,43 @@ export function Modal({
             <Ic n="x" />
           </button>
         </div>
-        <div className="ad-modal-body">{children}</div>
+        {/* `data-lenis-prevent` is inert in the admin — the site's smooth-scroll
+            wrapper does not run here — but the attribute costs nothing and
+            keeps this dialog scrollable if it is ever reused on the site. */}
+        <div className="ad-modal-body" data-lenis-prevent>
+          {children}
+        </div>
         {footer && <div className="ad-modal-foot">{footer}</div>}
       </div>
     </div>
   )
+}
+
+/* ------------------------------ pointer kind ------------------------------ */
+
+/**
+ * True only where a real pointer can press, hold and drag — a mouse or a
+ * stylus. HTML5 drag-and-drop has no touch equivalent: on a phone the browser
+ * reads a press-and-move on a `draggable` element as the start of a drag
+ * session rather than as a scroll, so a list of draggable rows tall enough to
+ * fill the screen becomes impossible to scroll past. Reordering on touch is
+ * done with the up/down buttons instead.
+ *
+ * Starts false so the server-rendered markup and the first client render agree;
+ * a phone then never sees `draggable` at all.
+ */
+export function useCanDrag() {
+  const [can, setCan] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(hover: hover) and (pointer: fine)')
+    const sync = () => setCan(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
+  return can
 }
 
 /** Destructive actions always ask first, and name what's being removed. */

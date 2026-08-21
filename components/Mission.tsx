@@ -12,7 +12,15 @@ export default function Mission({ content }: { content: MissionContent }) {
   const root = useRef<any>(null)
 
   useLayoutEffect(() => {
-    if (NOANIM) return
+    if (NOANIM) {
+      // The markup always ships the "0" state so the server and the client
+      // agree; with motion off there is no count-up to watch, so jump the
+      // figures straight to their targets here instead of in the render.
+      root.current?.querySelectorAll('.stat-num').forEach((el: HTMLElement) => {
+        el.textContent = `${el.dataset.target ?? ''}${el.dataset.suffix ?? ''}`
+      })
+      return
+    }
     const ctx = gsap.context(() => {
       gsap.fromTo(
         '.mission-copy > *',
@@ -68,7 +76,7 @@ export default function Mission({ content }: { content: MissionContent }) {
             {STATS.map((s) => (
               <div className="stat" key={s.label}>
                 <span className="stat-num" data-target={s.target} data-suffix={s.suffix}>
-                  {NOANIM ? `${s.target}${s.suffix}` : `0${s.suffix}`}
+                  {`0${s.suffix}`}
                 </span>
                 <span className="stat-label">{s.label}</span>
               </div>

@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import MediaBrowser, { type Folder, type MediaItem } from './MediaBrowser'
-import { ConfirmButton, Ic, Modal, Submit, useToast } from './ui'
+import { ConfirmButton, Ic, Modal, Submit, useCanDrag, useToast } from './ui'
 
 /* ============================================================================
    A whole small table edited on one screen: add rows, reorder by drag, delete,
@@ -72,7 +72,18 @@ export default function CollectionEditor({
     })
   }
 
-  const grid = `28px ${columns.map((c) => c.width ?? '1fr').join(' ')} 74px`
+  const canDrag = useCanDrag()
+
+  /* A bare `1fr` track is `minmax(auto, 1fr)`, and that `auto` floor is the
+     cell's min-content width. One long filename in a media cell — an uploaded
+     video is usually named after its upload id — and the floor grows wider
+     than the panel, so the row used to push the whole page sideways and the
+     phone got a second surface to pan. A flexible track is capped instead: it
+     may shrink to `--ad-ce-min`, and when even that doesn't fit, `.ad-ce-scroll`
+     scrolls the editor rather than the page. On a phone the row is a stack and
+     the stylesheet overrides all of this to one full-width column. */
+  const track = (w: string) => (w.trim().endsWith('fr') ? `minmax(var(--ad-ce-min), ${w.trim()})` : w)
+  const grid = `28px ${columns.map((c) => track(c.width ?? '1fr')).join(' ')} 74px`
 
   return (
     <>
@@ -87,147 +98,149 @@ export default function CollectionEditor({
     >
       {note && <p className="ad-hint" style={{ marginBottom: 12 }}>{note}</p>}
 
-      {rows.length > 0 && (
-        <div
-          className="ad-ce-head"
-          style={{
-            display: 'grid', gridTemplateColumns: grid, gap: 8, padding: '0 0 6px',
-            fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase',
-            color: 'var(--ad-faint)',
-          }}
-        >
-          <span />
-          {columns.map((c) => <span key={c.key}>{c.label}</span>)}
-          <span />
-        </div>
-      )}
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {rows.map((row, i) => (
+      <div className="ad-ce-scroll">
+        {rows.length > 0 && (
           <div
-            key={(row.id as string) ?? `new-${i}`}
-            className="ad-ce-row"
-            draggable
-            onDragStart={() => setDragging(i)}
-            onDragEnd={() => setDragging(null)}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={() => {
-              if (dragging !== null && dragging !== i) move(dragging, i)
-              setDragging(null)
-            }}
+            className="ad-ce-head"
             style={{
-              display: 'grid', gridTemplateColumns: grid, gap: 8, alignItems: 'center',
-              padding: '7px 8px', borderRadius: 8,
-              border: '1px solid var(--ad-line-soft)',
-              background: dragging === i ? 'var(--ad-gold-soft)' : '#fbfaf7',
+              display: 'grid', gridTemplateColumns: grid, gap: 8, padding: '0 0 6px',
+              fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase',
+              color: 'var(--ad-faint)',
             }}
           >
-            <span className="ad-drag" title="Drag to reorder">
-              <Ic n="grip" style={{ width: 15, height: 15, stroke: 'currentColor', fill: 'none', strokeWidth: 1.6 }} />
-            </span>
+            <span />
+            {columns.map((c) => <span key={c.key}>{c.label}</span>)}
+            <span />
+          </div>
+        )}
 
-            {columns.map((col) => {
-              const value = row[col.key]
-              if (col.type === 'toggle') {
-                return (
-                  <label key={col.key} className="ad-ce-cell ad-check" data-label={col.label} style={{ justifyContent: 'center' }}>
-                    <input type="checkbox" checked={Boolean(value)} onChange={(e) => set(i, { [col.key]: e.target.checked })} />
-                  </label>
-                )
-              }
-              if (col.type === 'select') {
-                return (
-                  <span key={col.key} className="ad-ce-cell" data-label={col.label}>
-                    <select className="ad-select" value={String(value ?? '')} onChange={(e) => set(i, { [col.key]: e.target.value })}>
-                      {(col.options ?? []).map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                    </select>
-                  </span>
-                )
-              }
-              if (col.type === 'media') {
-                // The cell stores the media id; the filename beside it comes
-                // from the library that is already loaded on the page, so
-                // nothing extra has to be selected or carried on the row.
-                const picked = media?.items.find((m) => m.id === value) ?? null
-                return (
-                  <span key={col.key} className="ad-ce-cell" data-label={col.label}>
-                    <span className="ad-ce-media">
-                      <button
-                        type="button"
-                        className="ad-btn ad-btn-sm"
-                        onClick={() => setPicking(`${i}:${col.key}`)}
-                        title={picked?.filename}
-                      >
-                        {picked ? picked.filename : 'Choose file'}
-                      </button>
-                      {picked && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {rows.map((row, i) => (
+            <div
+              key={(row.id as string) ?? `new-${i}`}
+              className="ad-ce-row"
+              draggable={canDrag}
+              onDragStart={() => setDragging(i)}
+              onDragEnd={() => setDragging(null)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                if (dragging !== null && dragging !== i) move(dragging, i)
+                setDragging(null)
+              }}
+              style={{
+                display: 'grid', gridTemplateColumns: grid, gap: 8, alignItems: 'center',
+                padding: '7px 8px', borderRadius: 8,
+                border: '1px solid var(--ad-line-soft)',
+                background: dragging === i ? 'var(--ad-gold-soft)' : '#fbfaf7',
+              }}
+            >
+              <span className="ad-drag" title="Drag to reorder" aria-hidden="true">
+                <Ic n="grip" style={{ width: 15, height: 15, stroke: 'currentColor', fill: 'none', strokeWidth: 1.6 }} />
+              </span>
+
+              {columns.map((col) => {
+                const value = row[col.key]
+                if (col.type === 'toggle') {
+                  return (
+                    <label key={col.key} className="ad-ce-cell ad-check" data-label={col.label} style={{ justifyContent: 'center' }}>
+                      <input type="checkbox" checked={Boolean(value)} onChange={(e) => set(i, { [col.key]: e.target.checked })} />
+                    </label>
+                  )
+                }
+                if (col.type === 'select') {
+                  return (
+                    <span key={col.key} className="ad-ce-cell" data-label={col.label}>
+                      <select className="ad-select" value={String(value ?? '')} onChange={(e) => set(i, { [col.key]: e.target.value })}>
+                        {(col.options ?? []).map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                      </select>
+                    </span>
+                  )
+                }
+                if (col.type === 'media') {
+                  // The cell stores the media id; the filename beside it comes
+                  // from the library that is already loaded on the page, so
+                  // nothing extra has to be selected or carried on the row.
+                  const picked = media?.items.find((m) => m.id === value) ?? null
+                  return (
+                    <span key={col.key} className="ad-ce-cell" data-label={col.label}>
+                      <span className="ad-ce-media">
                         <button
                           type="button"
-                          className="ad-btn ad-btn-ghost ad-btn-icon"
-                          onClick={() => set(i, { [col.key]: '' })}
-                          aria-label={`Remove ${col.label.toLowerCase()}`}
+                          className="ad-btn ad-btn-sm"
+                          onClick={() => setPicking(`${i}:${col.key}`)}
+                          title={picked?.filename}
                         >
-                          <Ic n="x" />
+                          {picked ? picked.filename : 'Choose file'}
                         </button>
-                      )}
+                        {picked && (
+                          <button
+                            type="button"
+                            className="ad-btn ad-btn-ghost ad-btn-icon"
+                            onClick={() => set(i, { [col.key]: '' })}
+                            aria-label={`Remove ${col.label.toLowerCase()}`}
+                          >
+                            <Ic n="x" />
+                          </button>
+                        )}
+                      </span>
                     </span>
-                  </span>
-                )
-              }
-              if (col.type === 'textarea') {
+                  )
+                }
+                if (col.type === 'textarea') {
+                  return (
+                    <span key={col.key} className="ad-ce-cell" data-label={col.label}>
+                      <textarea
+                        className="ad-textarea"
+                        style={{ minHeight: 40 }}
+                        value={String(value ?? '')}
+                        placeholder={col.placeholder}
+                        onChange={(e) => set(i, { [col.key]: e.target.value })}
+                      />
+                    </span>
+                  )
+                }
                 return (
                   <span key={col.key} className="ad-ce-cell" data-label={col.label}>
-                    <textarea
-                      className="ad-textarea"
-                      style={{ minHeight: 40 }}
-                      value={String(value ?? '')}
-                      placeholder={col.placeholder}
-                      onChange={(e) => set(i, { [col.key]: e.target.value })}
-                    />
+                  <input
+                    className="ad-input"
+                    type={col.type === 'number' ? 'number' : col.type === 'date' ? 'date' : 'text'}
+                    required={col.required}
+                    placeholder={col.placeholder}
+                    value={String(value ?? '')}
+                    onChange={(e) => {
+                      const patch: Row = { [col.key]: col.type === 'slug' ? auto(e.target.value) : e.target.value }
+                      // typing a name fills an empty slug beside it
+                      if (col.from) {
+                        const slugCol = columns.find((c) => c.type === 'slug' && c.from === col.key)
+                        if (slugCol && !row[slugCol.key]) patch[slugCol.key] = auto(e.target.value)
+                      }
+                      const derived = columns.find((c) => c.type === 'slug' && c.from === col.key)
+                      if (derived && !row[derived.key]) patch[derived.key] = auto(e.target.value)
+                      set(i, patch)
+                    }}
+                  />
                   </span>
                 )
-              }
-              return (
-                <span key={col.key} className="ad-ce-cell" data-label={col.label}>
-                <input
-                  className="ad-input"
-                  type={col.type === 'number' ? 'number' : col.type === 'date' ? 'date' : 'text'}
-                  required={col.required}
-                  placeholder={col.placeholder}
-                  value={String(value ?? '')}
-                  onChange={(e) => {
-                    const patch: Row = { [col.key]: col.type === 'slug' ? auto(e.target.value) : e.target.value }
-                    // typing a name fills an empty slug beside it
-                    if (col.from) {
-                      const slugCol = columns.find((c) => c.type === 'slug' && c.from === col.key)
-                      if (slugCol && !row[slugCol.key]) patch[slugCol.key] = auto(e.target.value)
-                    }
-                    const derived = columns.find((c) => c.type === 'slug' && c.from === col.key)
-                    if (derived && !row[derived.key]) patch[derived.key] = auto(e.target.value)
-                    set(i, patch)
-                  }}
-                />
-                </span>
-              )
-            })}
+              })}
 
-            <div style={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-              <button type="button" className="ad-btn ad-btn-ghost ad-btn-icon" onClick={() => move(i, i - 1)} disabled={i === 0} aria-label="Up">
-                <Ic n="up" />
-              </button>
-              <button type="button" className="ad-btn ad-btn-ghost ad-btn-icon" onClick={() => move(i, i + 1)} disabled={i === rows.length - 1} aria-label="Down">
-                <Ic n="down" />
-              </button>
-              <ConfirmButton
-                className="ad-btn ad-btn-ghost ad-btn-icon"
-                title="Remove this row?"
-                body="It is removed from the site when you save."
-                confirmLabel="Remove"
-                onConfirm={() => setRows((r) => r.filter((_, n) => n !== i))}
-              />
+              <div style={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                <button type="button" className="ad-btn ad-btn-ghost ad-btn-icon" onClick={() => move(i, i - 1)} disabled={i === 0} aria-label="Up">
+                  <Ic n="up" />
+                </button>
+                <button type="button" className="ad-btn ad-btn-ghost ad-btn-icon" onClick={() => move(i, i + 1)} disabled={i === rows.length - 1} aria-label="Down">
+                  <Ic n="down" />
+                </button>
+                <ConfirmButton
+                  className="ad-btn ad-btn-ghost ad-btn-icon"
+                  title="Remove this row?"
+                  body="It is removed from the site when you save."
+                  confirmLabel="Remove"
+                  onConfirm={() => setRows((r) => r.filter((_, n) => n !== i))}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {!rows.length && <p className="ad-muted" style={{ padding: '18px 0', fontSize: 13 }}>{emptyText}</p>}
@@ -238,7 +251,9 @@ export default function CollectionEditor({
       </button>
 
       <div className="ad-sticky-save">
-        <span className="ad-muted" style={{ fontSize: 12.6 }}>Reorder by dragging. Changes go live when you save.</span>
+        <span className="ad-muted" style={{ fontSize: 12.6 }}>
+          {canDrag ? 'Reorder by dragging.' : 'Reorder with the arrows.'} Changes go live when you save.
+        </span>
         <span className="ad-right"><Submit /></span>
       </div>
 

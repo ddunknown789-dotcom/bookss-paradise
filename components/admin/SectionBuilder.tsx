@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { Ic, Modal, Submit, useToast } from './ui'
+import { Ic, Modal, Submit, useCanDrag, useToast } from './ui'
 import SectionFields from './SectionFields'
 import LivePreview from './LivePreview'
 import { saveSectionContent, saveSectionLayout } from '@/app/admin/(panel)/homepage/actions'
@@ -34,6 +34,8 @@ export default function SectionBuilder({ sections: initial }: { sections: Sectio
 
   const [rows, setRows] = useState(initial)
   const [dragging, setDragging] = useState<number | null>(null)
+  // HTML5 drag-and-drop has no touch equivalent; on a phone the arrows reorder.
+  const canDrag = useCanDrag()
   const [editing, setEditing] = useState<SectionRow | null>(null)
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -85,7 +87,7 @@ export default function SectionBuilder({ sections: initial }: { sections: Sectio
               <div
                 key={s.id}
                 className={`ad-sec ${s.visible ? '' : 'is-hidden'} ${dragging === i ? 'is-dragging' : ''}`}
-                draggable
+                draggable={canDrag}
                 onDragStart={() => setDragging(i)}
                 onDragEnd={() => setDragging(null)}
                 onDragOver={(e) => e.preventDefault()}
@@ -94,7 +96,7 @@ export default function SectionBuilder({ sections: initial }: { sections: Sectio
                   setDragging(null)
                 }}
               >
-                <span className="ad-drag" title="Drag to reorder">
+                <span className="ad-drag" title="Drag to reorder" aria-hidden="true">
                   <Ic n="grip" style={{ width: 16, height: 16, stroke: 'currentColor', fill: 'none', strokeWidth: 1.6 }} />
                 </span>
 

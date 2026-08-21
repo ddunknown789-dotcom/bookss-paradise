@@ -4,11 +4,16 @@ import { useMemo, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-const COUNT =
+const SMALL =
   typeof window !== 'undefined' &&
   (window.matchMedia('(hover: none), (pointer: coarse)').matches || window.innerWidth <= 820)
-    ? 70
-    : 140
+
+const COUNT = SMALL ? 70 : 140
+
+// The field is a full-screen layer, so every extra device pixel is paid for on
+// each frame. A phone at DPR 3 would render 9x the pixels of DPR 1 for dust
+// that is soft, semi-transparent and slowly drifting — cap it lower there.
+const DPR: [number, number] = SMALL ? [1, 1.5] : [1, 2]
 
 function GoldDust() {
   const ref = useRef<any>(null)
@@ -74,7 +79,10 @@ function GoldDust() {
 export default function ParticleField() {
   return (
     <div className="particle-field" aria-hidden="true">
-      <Canvas camera={{ position: [0, 0, 9], fov: 55 }} dpr={[1, 2]} gl={{ alpha: true, antialias: true }}>
+      {/* No antialiasing: these are round, soft, additively-blended sprites with
+          no geometry edge for MSAA to smooth, so it buys nothing and costs real
+          fill rate on a phone. */}
+      <Canvas camera={{ position: [0, 0, 9], fov: 55 }} dpr={DPR} gl={{ alpha: true, antialias: false }}>
         <GoldDust />
       </Canvas>
     </div>

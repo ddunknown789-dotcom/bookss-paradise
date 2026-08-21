@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Ic, ToastHost, type IconName } from './ui'
+import { lockPageScroll } from './scrollLock'
 import type { UserRole } from '@/lib/supabase/database.types'
 
 /* Everything in the sidebar, with the minimum role each item needs. Items the
@@ -67,6 +68,43 @@ export default function Shell({
   const pathname = usePathname() ?? ''
   const [menuOpen, setMenuOpen] = useState(false)
 
+  // The drawer sits over the page, so the page behind it must stop scrolling —
+  // through the same counted lock the dialogs use, never by writing
+  // `body.style.overflow` here, which is how the panel used to end up stuck.
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    const release = lockPageScroll()
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      release()
+    }
+  }, [menuOpen])
+
+  // A link inside the drawer closes it, but the browser's back button and any
+  // redirect after a save do not — close on every address change instead.
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [pathname])
+
+  // Turning the phone sideways can take the window past the width where a
+  // drawer exists at all. The drawer would go on being "open" with nothing on
+  // screen to close it — and its scroll lock would stay applied, which is the
+  // page seizing up for real. Close it as soon as the layout stops being the
+  // drawer layout.
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 901px)')
+    const sync = () => {
+      if (mq.matches) setMenuOpen(false)
+    }
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
   const allowed = (min: UserRole) => RANK[role] >= RANK[min]
   const isActive = (href: string) => (href === '/admin' ? pathname === '/admin' : pathname.startsWith(href))
 
@@ -74,7 +112,7 @@ export default function Shell({
     <ToastHost>
       <div className={`ad ${menuOpen ? 'is-menu-open' : ''}`}>
         <div className="ad-shell">
-          <aside className={`ad-side ${menuOpen ? 'is-open' : ''}`}>
+          <aside id="ad-side" className={`ad-side ${menuOpen ? 'is-open' : ''}`}>
             <div className="ad-brand">
               <span className="ad-brand-mark">BP</span>
               <span className="ad-brand-text">
@@ -123,7 +161,14 @@ export default function Shell({
             </div>
           </aside>
 
-          {menuOpen && <div className="ad-menu-veil" onClick={() => setMenuOpen(false)} />}
+          {menuOpen && (
+            <button
+              type="button"
+              className="ad-menu-veil"
+              onClick={() => setMenuOpen(false)}
+              aria-label="Close the menu"
+            />
+          )}
 
           <div className="ad-main">
             <header className="ad-top">
@@ -132,6 +177,8 @@ export default function Shell({
                 className="ad-btn ad-btn-ghost ad-btn-icon ad-burger"
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-label="Menu"
+                aria-expanded={menuOpen}
+                aria-controls="ad-side"
               >
                 <Ic n="menu" />
               </button>

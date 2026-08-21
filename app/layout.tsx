@@ -15,7 +15,6 @@ import '@fontsource/playfair-display/500.css'
 import '@fontsource/playfair-display/600.css'
 import '@/styles/global.css'
 
-import SmoothScroll from '@/components/SmoothScroll'
 import { buildMetadata } from '@/lib/cms/metadata'
 import { getSetting } from '@/lib/cms/queries'
 
@@ -35,8 +34,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={lang}>
       <body>
-        {/* Lenis + ScrollTrigger wiring, exactly as the Vite app had it. */}
-        <SmoothScroll />
+        {/*
+          Lenis lives in the (site) layout, not here. It is a reading experience
+          for the public pages, and on /admin it was actively harmful: with
+          `smoothWheel` on it cancels the wheel event and scrolls the window
+          itself, so a wheel or trackpad gesture over a scrollable region that
+          is NOT the window — a dialog's body, the sidebar, a long picker list —
+          moved nothing at all, and a dialog that had already frozen the page
+          behind it could not be scrolled by any means. The admin uses ordinary
+          native scrolling.
+        */}
         {children}
       </body>
     </html>

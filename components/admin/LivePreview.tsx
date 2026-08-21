@@ -77,7 +77,12 @@ export default function LivePreview({
       </div>
 
       {open && (
-        <div className="ad-panel-body" style={{ background: '#e9e6dd', display: 'grid', placeItems: 'start center' }}>
+        <div className="ad-panel-body ad-preview" style={{ background: '#e9e6dd', display: 'grid', placeItems: 'start center' }}>
+          {/* On a phone the frame is as tall as the screen, so a finger that
+              lands on it scrolls the *preview* and the admin page underneath
+              appears frozen. `.ad-preview` makes the frame inert on touch —
+              it stays a picture of the page, and the button below opens the
+              real thing in a tab when you want to click around in it. */}
           <iframe
             ref={frame}
             key={nonce}
@@ -93,6 +98,10 @@ export default function LivePreview({
               transition: 'width .25s cubic-bezier(.22,1,.36,1)',
             }}
           />
+          <a className="ad-btn ad-btn-sm ad-preview-open" href={path} target="_blank" rel="noreferrer">
+            <Ic n="external" />
+            Open the real page to click around
+          </a>
         </div>
       )}
     </section>

@@ -27,17 +27,46 @@
   --ad-warn-soft: #fdf3dd;
   --ad-radius: 10px;
   --ad-sidebar: 244px;
+  /* Narrowest a flexible collection-editor column may become before the editor
+     starts scrolling sideways inside its panel instead. */
+  --ad-ce-min: 92px;
 
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 14px;
   line-height: 1.55;
   color: var(--ad-ink);
   background: var(--ad-bg);
+  /* `vh` on a phone is the viewport with the URL bar hidden, so a plain 100vh
+     leaves a strip of page below the fold that scrolls to nothing. `dvh`
+     tracks the bar as it collapses; the `vh` line stays as the fallback. */
   min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
 }
 
+/* ------------------------------ document -------------------------------- */
+
+/* The public site clips its horizontal overflow with `overflow-x: hidden` on
+   html AND body (styles/global.css, loaded from the root layout — the admin
+   shares it). Here that does real damage. `overflow-x: hidden` forces the
+   matching `overflow-y` to compute to `auto`, which turns <body> into a scroll
+   container of its own: every `position: sticky` inside it — the top bar, the
+   sidebar, the save bar — then sticks to a scrollport that never scrolls and
+   slides away with the page, and anything wider than the screen becomes a
+   second, pannable surface, which is what shunted the field labels off the
+   left edge on a phone. `clip` clips exactly the same way without creating a
+   scroll container; where it isn't understood, nothing is clipped and nothing
+   is broken either. */
+html, body { overflow-x: visible; }
+@supports (overflow: clip) { html, body { overflow-x: clip; } }
+
+/* Same reasoning from the other direction: the panel must never be the reason
+   the page can scroll sideways. */
+.ad { overflow-x: clip; }
+
 .ad *, .ad *::before, .ad *::after { box-sizing: border-box; }
+/* No grey flash on tap, and no iOS text inflation in landscape. */
+.ad { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
 .ad h1, .ad h2, .ad h3, .ad h4, .ad p, .ad ul, .ad ol, .ad figure { margin: 0; padding: 0; }
 .ad ul, .ad ol { list-style: none; }
 .ad a { color: inherit; text-decoration: none; }
@@ -46,17 +75,24 @@
 
 /* ------------------------------- shell ---------------------------------- */
 
-.ad-shell { display: grid; grid-template-columns: var(--ad-sidebar) minmax(0, 1fr); min-height: 100vh; }
+.ad-shell {
+  display: grid; grid-template-columns: var(--ad-sidebar) minmax(0, 1fr);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
 
 .ad-side {
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   background: var(--ad-green-deep);
   color: #dfe8e2;
   overflow-y: auto;
+  /* Reaching the end of the nav must not hand the gesture on to the page. */
+  overscroll-behavior: contain;
 }
 .ad-brand {
   display: flex;
@@ -202,6 +238,10 @@
 .ad-textarea { resize: vertical; min-height: 84px; line-height: 1.6; font-family: inherit; }
 .ad-textarea-lg { min-height: 190px; }
 .ad-input[readonly] { background: #f6f5f1; color: var(--ad-muted); }
+/* Compact variant for a field tucked into a toolbar. It carries its size as a
+   class rather than an inline style so the phone block below can raise it —
+   an inline font-size cannot be overridden without `!important`. */
+.ad .ad-input-mini { padding: 4px 9px; font-size: 12.5px; }
 .ad-row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 .ad-row .ad-field + .ad-field { margin-top: 0; }
 
@@ -225,6 +265,12 @@
 /* A media cell in a collection editor: the chosen file's name, and a way to
    clear it. The name is truncated rather than allowed to widen the column —
    the full one is in the button's tooltip. */
+/* Between the phone stack (below) and a wide screen there is a band where the
+   fixed columns of a nine-column editor — the video galleries — cannot all
+   fit. Rather than let them squeeze to nothing or push the page sideways, the
+   editor scrolls inside its own panel, exactly as a wide table does. */
+.ad-ce-scroll { overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+
 .ad-ce-media { display: flex; align-items: center; gap: 4px; min-width: 0; }
 .ad-ce-media > .ad-btn:first-child {
   flex: 1;
@@ -238,7 +284,7 @@
 
 /* ------------------------------- tables --------------------------------- */
 
-.ad-table-wrap { overflow-x: auto; }
+.ad-table-wrap { overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
 .ad-table { width: 100%; border-collapse: collapse; font-size: 13.2px; }
 .ad-table th {
   text-align: left; padding: 9px 14px; font-size: 11px; font-weight: 700;
@@ -323,6 +369,10 @@
   background: rgba(18, 32, 26, .45); backdrop-filter: blur(2px);
   display: grid; place-items: center; padding: 20px;
   animation: ad-fade .16s ease both;
+  /* The page behind is already frozen by the scroll lock; this stops a flick
+     that runs past the end of the dialog from being handed on to anything
+     else — including the browser's own pull-to-refresh. */
+  overscroll-behavior: contain;
 }
 @keyframes ad-fade { from { opacity: 0 } to { opacity: 1 } }
 .ad-modal {
@@ -337,13 +387,17 @@
 .ad-modal-head { padding: 14px 18px; border-bottom: 1px solid var(--ad-line-soft); display: flex; align-items: center; gap: 10px; }
 .ad-modal-head h3 { font-size: 15px; font-weight: 600; }
 .ad-modal-head button { margin-left: auto; }
-.ad-modal-body { padding: 18px; overflow-y: auto; flex: 1; }
+.ad-modal-body {
+  padding: 18px; overflow-y: auto; flex: 1; min-height: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
 .ad-modal-foot { padding: 13px 18px; border-top: 1px solid var(--ad-line-soft); display: flex; gap: 9px; justify-content: flex-end; background: #fbfaf7; }
 
 /* ------------------------------- login ---------------------------------- */
 
 .ad-login {
-  min-height: 100vh; display: grid; place-items: center; padding: 22px;
+  min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 22px;
   background: radial-gradient(1200px 600px at 50% -10%, #1d4535 0%, #12312a 55%, #0c231d 100%);
 }
 .ad-login-card {
@@ -425,7 +479,12 @@
 
 /* -------------------------------- misc ---------------------------------- */
 
-.ad-tabs { display: flex; gap: 3px; border-bottom: 1px solid var(--ad-line); margin-bottom: 16px; overflow-x: auto; }
+.ad-tabs {
+  display: flex; gap: 3px; border-bottom: 1px solid var(--ad-line); margin-bottom: 16px;
+  overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.ad-tabs::-webkit-scrollbar { display: none; }
 .ad-tab {
   padding: 8px 13px; font-size: 13.2px; font-weight: 500; color: var(--ad-muted);
   border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent;
@@ -451,8 +510,22 @@
 }
 .ad-sticky-save .ad-right { margin-left: auto; display: flex; gap: 8px; }
 
+/* --------------------------- live preview ------------------------------- */
+
+/* Only offered where the frame has been made inert — see the phone block. */
+.ad-preview-open { display: none; }
+
 .ad-spin { animation: ad-spin 1s linear infinite; }
 @keyframes ad-spin { to { transform: rotate(360deg) } }
+
+/* Hidden by default and shown by the drawer breakpoint below. Declared here,
+   before that media query, so the query wins on source order alone and needs
+   no `!important` — and so nothing later in the file can turn it off again. */
+.ad-burger { display: none; }
+/* Same idea: the drawer's backdrop exists only at the widths where there is a
+   drawer. Without this it would render as a bare button in the layout if the
+   window were widened while the menu was open. */
+.ad-menu-veil { display: none; }
 
 /* ============================== responsive ==============================
    The admin is a dense tool built around tables and two-column forms, neither
@@ -467,13 +540,25 @@
   .ad-shell { grid-template-columns: 1fr; }
   .ad-side {
     position: fixed; inset: 0 auto 0 0; width: var(--ad-sidebar); z-index: 100;
+    height: auto;
     transform: translateX(-100%); transition: transform .24s cubic-bezier(.22,1,.36,1);
+    /* Off-screen, the drawer must not be something a stray touch can grab or
+       a tab key can walk into. */
+    visibility: hidden;
+    will-change: transform;
   }
     /* The open state lives on the element itself rather than on an ancestor —
      one less thing between the click and the rule that has to be true. */
-  .ad-side.is-open { transform: translateX(0); box-shadow: 0 0 60px rgba(0,0,0,.45); }
-  .ad-menu-veil { position: fixed; inset: 0; z-index: 99; background: rgba(0,0,0,.4); }
-  .ad-burger { display: inline-flex !important; }
+  .ad-side.is-open { transform: translateX(0); visibility: visible; box-shadow: 0 0 60px rgba(0,0,0,.45); }
+  .ad-menu-veil {
+    display: block;
+    position: fixed; inset: 0; z-index: 99; background: rgba(0,0,0,.4);
+    border: 0; padding: 0; width: 100%; cursor: pointer;
+    animation: ad-fade .16s ease both;
+    overscroll-behavior: contain;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ad-burger { display: inline-flex; }
 
   .ad-split { grid-template-columns: 1fr; }
   .ad-body { padding: 16px 14px 90px; }
@@ -484,10 +569,13 @@
 /* ---------------------------- phone (≤760px) --------------------------- */
 
 @media (max-width: 760px) {
-  /* Page header stacks so a long title never squeezes its action button. */
-  .ad-body > div:first-child { flex-direction: column; align-items: stretch !important; }
-  .ad-body > div:first-child > div:last-child { margin-left: 0 !important; }
-  .ad-body > div:first-child .ad-btn { justify-content: center; }
+  /* Page header stacks so a long title never squeezes its action button.
+     Targeted by class: `.ad-body > div:first-child` also caught whatever else
+     happened to come first on a screen without a PageHead — an alert, a panel
+     — and stretched it. */
+  .ad-page-head { flex-direction: column; align-items: stretch !important; }
+  .ad-page-head-actions { margin-left: 0 !important; }
+  .ad-page-head .ad-btn { justify-content: center; }
 
   .ad-panel-head { flex-wrap: wrap; gap: 8px; }
   .ad-panel-head .ad-right { margin-left: 0; width: 100%; flex-wrap: wrap; }
@@ -534,15 +622,26 @@
   .ad-cell-title span { font-size: 12px; word-break: break-word; }
 
   /* --- collection editor becomes a labelled stack --------------------- */
+  .ad-ce-scroll { overflow-x: visible; }
   .ad-ce-head { display: none !important; }
   .ad-ce-row {
-    grid-template-columns: 1fr !important;
+    /* `1fr` alone is `minmax(auto, 1fr)`, and that `auto` floor is the widest
+       cell's min-content width — one long uploaded-video filename and the row
+       grew past the screen, which is what let the page be panned sideways
+       until the labels sat off the left edge. `minmax(0, 1fr)` lets the single
+       column be exactly as wide as the row is. */
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 10px !important;
     padding: 12px !important;
     background: #fff !important;
     border-color: var(--ad-line) !important;
+    /* Rows are only draggable where there is a mouse (the markup leaves the
+       attribute off on touch), but say it in CSS too: a press-and-drag inside
+       a row is a scroll, never the start of a drag session. */
+    touch-action: pan-y;
+    -webkit-user-drag: none;
   }
-  .ad-ce-cell { display: block; }
+  .ad-ce-cell { display: block; min-width: 0; }
   .ad-ce-cell::before {
     content: attr(data-label);
     display: block; margin-bottom: 4px;
@@ -555,7 +654,7 @@
   .ad-ce-row > div:last-child { justify-content: flex-start !important; }
 
   /* --- homepage section rows ------------------------------------------ */
-  .ad-sec { flex-wrap: wrap; gap: 9px; padding: 12px; }
+  .ad-sec { flex-wrap: wrap; gap: 9px; padding: 12px; touch-action: pan-y; -webkit-user-drag: none; }
   /* dragging needs a pointer; the arrows do the job on touch */
   .ad-sec > .ad-drag { display: none; }
   /* position already conveys the order, so the bare index is just noise */
@@ -571,13 +670,33 @@
 
   /* --- modals: a phone has no room for a floating dialog -------------- */
   .ad-modal-veil { padding: 0; place-items: stretch; }
-  .ad-modal, .ad-modal-lg { width: 100%; max-height: 100dvh; height: 100dvh; border-radius: 0; }
+  /* 100% of the veil, not 100dvh: the veil is already pinned to the viewport,
+     so matching it exactly avoids a dialog a few pixels taller than the screen
+     — which is all it takes for the footer buttons to sit under the browser
+     chrome, out of reach. */
+  .ad-modal, .ad-modal-lg {
+    width: 100%; height: 100%; max-height: 100%;
+    border-radius: 0;
+  }
+  .ad-modal-head { position: sticky; top: 0; z-index: 1; background: #fff; }
   .ad-modal-body { padding: 15px; }
-  .ad-modal-foot { flex-wrap: wrap; }
+  .ad-modal-foot {
+    flex-wrap: wrap;
+    padding-bottom: calc(13px + env(safe-area-inset-bottom));
+  }
   .ad-modal-foot .ad-btn { flex: 1; justify-content: center; }
 
   /* --- sticky save ---------------------------------------------------- */
-  .ad-sticky-save { flex-wrap: wrap; gap: 9px; }
+  /* A blurred backdrop on an element that is repainted for every frame of a
+     scroll is the single most expensive thing on this page on a phone. Both
+     sticky bars go opaque instead — same look at this size, none of the cost. */
+  .ad-top, .ad-sticky-save { backdrop-filter: none; }
+  .ad-top { background: var(--ad-bg); }
+  .ad-sticky-save {
+    flex-wrap: wrap; gap: 9px;
+    background: #fff;
+    padding-bottom: calc(11px + env(safe-area-inset-bottom));
+  }
   .ad-sticky-save > span:first-child { flex: 1 1 100%; font-size: 12px; }
   .ad-sticky-save .ad-right { width: 100%; }
   .ad-sticky-save .ad-right .ad-btn { flex: 1; justify-content: center; }
@@ -592,10 +711,31 @@
   .ad-tabs { gap: 0; }
   .ad-tab { padding: 8px 11px; font-size: 12.8px; }
   .ad-stat b { font-size: 22px; }
-  .ad-toasts { left: 12px; right: 12px; bottom: 12px; }
+  .ad-toasts { left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); }
   .ad-toast { width: 100%; }
-  /* iOS zooms any input under 16px on focus, which breaks the layout */
-  .ad-input, .ad-select, .ad-textarea { font-size: 16px; }
+
+  /* 30px is a comfortable mouse target and a poor thumb one; the icon buttons
+     sit in tight rows where the next one along is a delete. */
+  .ad-btn-icon { width: 38px; height: 38px; padding: 9px; }
+  .ad-btn-sm { padding: 8px 12px; }
+  .ad-row-actions, .ad-sec-actions { gap: 4px; }
+
+  /* --- live preview --------------------------------------------------- */
+  /* The frame is as tall as the screen here, so a finger landing on it would
+     scroll the previewed page and leave the admin looking frozen. Make it a
+     picture; the link under it opens the real page to interact with. */
+  .ad-preview iframe { pointer-events: none; }
+  .ad-preview-open { display: inline-flex; margin-top: 10px; }
+  /* iOS zooms the whole page in the moment a field smaller than 16px takes
+     focus, and leaves you pinched in on a layout that no longer fits the
+     screen — which reads exactly like the panel having seized up. Every
+     control has to clear 16px, not just the ones carrying an `.ad-*` class.
+     `.ad input` also has to be the selector, matching the `font: inherit`
+     reset near the top of this file: `.ad-input` on its own is one class with
+     no element, loses to it, and the rule that used to live here never
+     applied to anything. */
+  .ad input, .ad select, .ad textarea,
+  .ad .ad-input, .ad .ad-select, .ad .ad-textarea, .ad .ad-input-mini { font-size: 16px; }
 }
 
 @media (max-width: 420px) {
@@ -604,4 +744,18 @@
   .ad-cell-main img { width: 30px; height: 40px; }
 }
 
-.ad-burger { display: none; }
+/* ============================ reduced motion ============================
+   Everything here is a small ease on a working tool; when the system asks for
+   less movement, there is nothing worth keeping. The drawer still opens and
+   dialogs still appear — they simply arrive rather than slide.
+   ====================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ad *, .ad *::before, .ad *::after,
+  .ad-modal-veil, .ad-modal, .ad-toast, .ad-menu-veil {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

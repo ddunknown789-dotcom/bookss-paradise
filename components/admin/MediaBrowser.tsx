@@ -307,8 +307,8 @@ export default function MediaBrowser({
           ))}
           <span style={{ display: 'flex', gap: 5 }}>
             <input
-              className="ad-input"
-              style={{ width: 150, padding: '4px 9px', fontSize: 12.5 }}
+              className="ad-input ad-input-mini"
+              style={{ width: 150 }}
               placeholder="New folder…"
               value={newFolder}
               onChange={(e) => setNewFolder(e.target.value)}

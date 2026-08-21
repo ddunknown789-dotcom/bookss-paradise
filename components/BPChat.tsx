@@ -110,21 +110,40 @@ export default function BPChat() {
   const [speaking, setSpeaking] = useState(false)
   const [notice, setNotice] = useState('')
 
+  // These three start at the values the SERVER renders and only then adopt the
+  // visitor's own — localStorage and navigator.language don't exist during SSR,
+  // so reading them in a useState initialiser makes the first client render
+  // disagree with the server HTML. React answers a mismatch by throwing the
+  // server tree away and re-rendering everything on the client, which on a
+  // phone is a whole-page reflow the visitor sees as a jolt.
+  const [voice, setVoice] = useState(true)
+  const [lang, setLang] = useState('en')
+  const [msgs, setMsgs] = useState<Turn[]>(() => [{ id: nextId(), from: 'bp', lang: 'en', ...greeting('en') }])
+
   // Voice is on by default, as asked — but a visitor's own choice wins on
-  // every later visit, so a mute is never silently undone.
-  const [voice, setVoice] = useState(() => readStored(VOICE_KEY, NOANIM ? '0' : '1') === '1')
-  const [lang, setLang] = useState(() => {
+  // every later visit, so a mute is never silently undone. Runs once, after
+  // hydration has matched, and only touches what actually differs.
+  useEffect(() => {
+    if (readStored(VOICE_KEY, NOANIM ? '0' : '1') !== '1') setVoice(false)
+
     const saved = readStored(LANG_KEY, '')
-    if (LANGS.some((l) => l.code === saved)) return saved
     // fall in behind the browser's own language when we speak it
     const nav = (typeof navigator !== 'undefined' ? navigator.language : 'en').slice(0, 2)
-    return LANGS.some((l) => l.code === nav) ? nav : 'en'
-  })
+    const wanted = LANGS.some((l) => l.code === saved)
+      ? saved
+      : LANGS.some((l) => l.code === nav)
+        ? nav
+        : 'en'
+    if (wanted === 'en') return
+
+    // The panel is closed on load, so re-greeting in the visitor's language is
+    // invisible — they open it and BP is already speaking the right one.
+    setLang(wanted)
+    setMsgs([{ id: nextId(), from: 'bp', lang: wanted, ...greeting(wanted) }])
+  }, [])
 
   const p = useMemo(() => pack(lang), [lang])
   const speechTag = useMemo(() => LANGS.find((l: (typeof LANGS)[number]) => l.code === lang)?.speech || 'en-US', [lang])
-
-  const [msgs, setMsgs] = useState<Turn[]>(() => [{ id: nextId(), from: 'bp', lang, ...greeting(lang) }])
 
   const logRef = useRef<any>(null)
   const inputRef = useRef<any>(null)
