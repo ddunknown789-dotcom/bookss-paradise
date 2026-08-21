@@ -515,7 +515,25 @@ main { position: relative; z-index: 1; }
   100% { transform: scaleY(0); transform-origin: bottom; }
 }
 
-/* ---------- intro copy (three beats revealed under the badge) ---------- */
+/* ---------- the accounts row, riding above the disc ---------- */
+/* The mirror image of .intro-lines below: that one anchors its TOP edge to the
+   badge's lower edge, this one anchors its BOTTOM edge to the badge's upper
+   edge, so both keep the same clearance as --badge-size changes. The clearance
+   clears the badge's glow too — .badge-glow is inset -26%, but its gradient has
+   already faded out by the disc's rim. */
+.intro-socials {
+  position: fixed;
+  bottom: calc(50% + var(--badge-size) / 2 + clamp(22px, 4.2vh, 56px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 780px);
+  display: flex;
+  justify-content: center;
+  z-index: 44;
+  pointer-events: none;
+}
+
+/* ---------- intro copy (beats revealed under the badge) ---------- */
 /* Fixed like the badge and anchored to its lower edge, so the stack never
    drifts as the disc resizes. Hidden until the scrubbed timeline reveals each
    line, then lifted away as the badge travels to the header. */
@@ -581,7 +599,9 @@ main { position: relative; z-index: 1; }
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: clamp(16px, 2.2vw, 34px);
+  /* The row is its own element above the disc now, not the last line of a
+     stack, so it can afford to breathe. */
+  gap: clamp(22px, 3.2vw, 48px);
 }
 .il-soc {
   display: inline-flex;
@@ -1857,7 +1877,7 @@ a.botw-cover:hover {
   .il-1 { font-size: clamp(16px, 4.6vw, 21px); line-height: 1.34; }
   .il-2 { font-size: clamp(9.5px, 2.7vw, 11.5px); letter-spacing: 0.2em; }
   /* the three handles won't sit on one line at phone widths — stack them */
-  .il-3 { flex-direction: column; gap: clamp(6px, 1.05vh, 10px); }
+  .il-3 { flex-direction: column; gap: clamp(9px, 1.5vh, 14px); }
   .il-soc { font-size: clamp(12.5px, 3.4vw, 14px); gap: 8px; }
 
   /* ---------------------------------------------------------------------
@@ -2021,6 +2041,10 @@ a.botw-cover:hover {
     top: calc(50% + var(--badge-size) / 2 + 10px);
     gap: 7px;
   }
+  /* The accounts stack above the disc, and on a 568px-tall screen the room
+     between the disc's rim and the nav is only ~140px — pull the row in so the
+     three lines can't run under the header. */
+  .intro-socials { bottom: calc(50% + var(--badge-size) / 2 + 12px); }
   .il-1 { font-size: 15px; line-height: 1.3; }
   .il-2 { font-size: 9px; letter-spacing: 0.16em; }
   .il-3 { gap: 5px; }

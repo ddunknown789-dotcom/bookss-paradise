@@ -261,14 +261,14 @@ export default function Intro({ socials }: { socials?: SocialLinkView[] }) {
           </svg>
         </div>
       </div>
-      {/* copy beats — revealed one per scroll beat while the badge assembles */}
-      <div className="intro-lines">
-        <p className="il il-1">{words(PROMISE)}</p>
-        <p className="il il-2">
-          <i className="il-dot" aria-hidden="true">•</i>
-          {words(KICKER)}
-          <i className="il-dot" aria-hidden="true">•</i>
-        </p>
+      {/* The accounts sit ABOVE the disc and the other two beats below it, so
+          they get separate fixed wrappers rather than one stack. They can't
+          share `.intro-lines`: that carries a translateX, and a transformed
+          ancestor becomes the containing block for a fixed child — the row
+          would anchor to the stack instead of to the viewport. This wrapper is
+          a plain child of `.intro`, which has no transform of its own.
+          It also comes first in the DOM, so reading order matches what you see. */}
+      <div className="intro-socials">
         <div className="il il-3">
           {accounts.map(({ platform, name, label, url }) => {
             const inner = (
@@ -298,6 +298,16 @@ export default function Intro({ socials }: { socials?: SocialLinkView[] }) {
             )
           })}
         </div>
+      </div>
+
+      {/* copy beats — revealed one per scroll beat while the badge assembles */}
+      <div className="intro-lines">
+        <p className="il il-1">{words(PROMISE)}</p>
+        <p className="il il-2">
+          <i className="il-dot" aria-hidden="true">•</i>
+          {words(KICKER)}
+          <i className="il-dot" aria-hidden="true">•</i>
+        </p>
       </div>
       <div className="intro-cue">
         <span>Scroll</span>
