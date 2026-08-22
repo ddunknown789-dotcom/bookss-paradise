@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import EntityForm from './EntityForm'
 import MediaPicker from './MediaPicker'
-import { Area, Field, OptionalNote, Repeater, Select, SlugPair, Text } from './ui'
+import { Area, DateField, Field, OptionalNote, Repeater, Select, SlugPair, Text } from './ui'
 import type { Folder, MediaItem } from './MediaBrowser'
 import type { QA } from '@/app/admin/(panel)/interviews/actions'
 
@@ -122,7 +122,7 @@ export default function InterviewForm({
               />
               <Text label="Reading time" name="minutes" defaultValue={data.minutes} placeholder="12 min read" optional />
               <Text label="Date shown" name="published_label" defaultValue={data.published_label} placeholder="May 12, 2024" optional />
-              <Text label="Date" name="published_on" type="date" defaultValue={data.published_on} optional hint="Used for sorting and the sitemap." />
+              <DateField label="Date" name="published_on" defaultValue={data.published_on} hint="Used for sorting and the sitemap." />
             </div>
           </section>
         </aside>

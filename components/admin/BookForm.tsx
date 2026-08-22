@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import MediaPicker from './MediaPicker'
-import { Area, Check, Field, Ic, OptionalNote, Repeater, Select, SlugPair, Submit, Text, useToast } from './ui'
+import { Area, Check, DateField, Field, Ic, OptionalNote, Repeater, Select, SlugPair, Submit, Text, useToast } from './ui'
 import type { Folder, MediaItem } from './MediaBrowser'
 import type { BarRow, FeatureRow, RetailerRow, SectionRow, TakeawayRow, VideoRow } from '@/app/admin/(panel)/books/actions'
 
@@ -156,7 +156,7 @@ export default function BookForm({
               </div>
               <div className="ad-row">
                 <Text label="Publisher" name="publisher" defaultValue={data.publisher} optional />
-                <Text label="Publication date" name="publication_date" type="date" defaultValue={data.publication_date} optional />
+                <DateField label="Publication date" name="publication_date" defaultValue={data.publication_date} />
               </div>
               <Text
                 label="Date shown on the site"

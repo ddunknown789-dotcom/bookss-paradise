@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
 import MediaBrowser, { type Folder, type MediaItem } from './MediaBrowser'
-import { ConfirmButton, Ic, Modal, OptionalNote, Submit, useCanDrag, useToast } from './ui'
+import { ClearFieldButton, ConfirmButton, Ic, Modal, OptionalNote, Submit, useCanDrag, useToast } from './ui'
 
 /* ============================================================================
    A whole small table edited on one screen: add rows, reorder by drag, delete,
@@ -251,6 +251,28 @@ export default function CollectionEditor({
                     </span>
                   )
                 }
+                if (col.type === 'date') {
+                  // A date cannot be emptied by typing over it the way the
+                  // other cells can, so it carries its own way out.
+                  return (
+                    <span key={col.key} className="ad-ce-cell" data-label={col.label}>
+                      <span className="ad-clearable">
+                        <input
+                          className="ad-input"
+                          type="date"
+                          required={col.required}
+                          value={String(value ?? '')}
+                          onChange={(e) => set(i, { [col.key]: e.target.value })}
+                        />
+                        <ClearFieldButton
+                          label={col.label}
+                          filled={Boolean(value)}
+                          onClear={() => set(i, { [col.key]: '' })}
+                        />
+                      </span>
+                    </span>
+                  )
+                }
                 if (col.type === 'textarea') {
                   return (
                     <span key={col.key} className="ad-ce-cell" data-label={col.label}>
@@ -268,7 +290,7 @@ export default function CollectionEditor({
                   <span key={col.key} className="ad-ce-cell" data-label={col.label}>
                   <input
                     className="ad-input"
-                    type={col.type === 'number' ? 'number' : col.type === 'date' ? 'date' : 'text'}
+                    type={col.type === 'number' ? 'number' : 'text'}
                     required={col.required}
                     placeholder={col.placeholder}
                     value={String(value ?? '')}

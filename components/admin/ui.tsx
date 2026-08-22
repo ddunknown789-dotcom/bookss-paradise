@@ -345,6 +345,78 @@ export function Area({
   )
 }
 
+/**
+ * The button that empties a field which has no way of its own to be emptied.
+ *
+ * Kept in the layout when there is nothing to clear, rather than appearing and
+ * disappearing: the field beside it would change width every time the last
+ * character went, which reads as a glitch in the middle of typing.
+ */
+export function ClearFieldButton({
+  label,
+  onClear,
+  filled,
+}: {
+  label: string
+  onClear: () => void
+  filled: boolean
+}) {
+  return (
+    <button
+      type="button"
+      className="ad-btn ad-btn-ghost ad-btn-icon ad-clear"
+      onClick={onClear}
+      disabled={!filled}
+      title={filled ? `Clear ${label.toLowerCase()}` : `No ${label.toLowerCase()} to clear`}
+      aria-label={`Clear ${label.toLowerCase()}`}
+    >
+      <Ic n="x" />
+    </button>
+  )
+}
+
+/**
+ * A date field that can actually be left blank.
+ *
+ * Every other optional field empties by selecting its text and deleting it. A
+ * native date input does not: the keyboard can clear one, but nothing on screen
+ * says so, and the picker a phone opens offers no way at all — so a date, alone
+ * among these fields, could be changed but never taken back off the page. Hence
+ * the Clear beside it.
+ */
+export function DateField({
+  label,
+  name,
+  hint,
+  optional = true,
+  defaultValue = '',
+  ...rest
+}: {
+  label: string
+  name: string
+  hint?: React.ReactNode
+  optional?: boolean
+  defaultValue?: string
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'defaultValue' | 'type' | 'value' | 'onChange'>) {
+  const [value, setValue] = useState(defaultValue)
+  return (
+    <Field label={label} hint={hint} optional={optional} id={name}>
+      <div className="ad-clearable">
+        <input
+          id={name}
+          name={name}
+          type="date"
+          className="ad-input"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          {...rest}
+        />
+        <ClearFieldButton label={label} filled={Boolean(value)} onClear={() => setValue('')} />
+      </div>
+    </Field>
+  )
+}
+
 export function Select({
   label,
   name,
