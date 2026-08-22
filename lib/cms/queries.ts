@@ -407,7 +407,7 @@ export async function getBook(slug: string): Promise<BookView | null> {
             published: row.published_label ?? '',
             publicationDate: row.publication_date,
             isbn: row.isbn ?? '',
-            language: row.language ?? 'English',
+            language: row.language ?? '',
             publisher: row.publisher ?? '',
             verified: row.verified ?? true,
             coverSrc: mediaSrc(row.cover),
@@ -433,7 +433,7 @@ export async function getBook(slug: string): Promise<BookView | null> {
               name: r.name,
               mark: r.mark ?? '',
               tone: r.tone ?? '#1f4634',
-              url: r.url ?? '#',
+              url: r.url ?? '',
               cta: r.cta ?? `View on ${r.name}`,
             })),
             videos: sorted(row.videos ?? []).map((v: any) => ({
@@ -650,7 +650,7 @@ export const getVideos = cached(
             title: row.title,
             text: row.description ?? '',
             cta: row.cta_label ?? '',
-            href: row.cta_href ?? '#',
+            href: row.cta_href ?? '',
             thumb: mediaSrc(row.thumb),
             videoUrl: row.video_url ?? '',
           }

@@ -81,7 +81,7 @@ export default async function VideosPage() {
       />
 
       <section className="ad-panel">
-        <div className="ad-panel-head">
+        <div className="ad-panel-head is-sticky">
           <h2>Home page cards</h2>
           <p className="ad-muted">The “Stories Brought to Life” row. Each button opens one of the galleries below.</p>
         </div>
@@ -90,6 +90,7 @@ export default async function VideosPage() {
             rows={(cards ?? []) as never}
             columns={COLUMNS}
             onSave={saveVideos}
+            title="Home page cards"
             blank={{ title: '', screen_label: '', description: '', icon: 'camera', cta_label: 'Watch', cta_href: '#', status: 'published', key: '' }}
             addLabel="Add video card"
             emptyText="No video cards yet."
@@ -97,19 +98,28 @@ export default async function VideosPage() {
         </div>
       </section>
 
-      {WATCH_LIST.map((page) => (
+      {/* One gallery per section, and all three editors look alike — so each
+          one says which gallery it is in a heading that stays put while you
+          work down its rows, and says it again in its own save bar. */}
+      {WATCH_LIST.map((page) => {
+        const rows = (gallery ?? []).filter((r) => (r as { category: string }).category === page.category)
+        return (
         <section className="ad-panel" key={page.category}>
-          <div className="ad-panel-head">
+          <div className="ad-panel-head is-sticky">
             <h2>{page.kicker}</h2>
+            <span className="ad-panel-count">
+              {rows.length} {rows.length === 1 ? 'video' : 'videos'}
+            </span>
             <p className="ad-muted">
-              Shown on <code>{page.path}</code>
+              The gallery visitors reach from the <b>{page.cta}</b> button, at <code>{page.path}</code>
             </p>
           </div>
           <div className="ad-panel-body">
             <CollectionEditor
-              rows={(gallery ?? []).filter((r) => (r as { category: string }).category === page.category) as never}
+              rows={rows as never}
               columns={GALLERY_COLUMNS}
               onSave={SAVE[page.category]}
+              title={page.kicker}
               blank={{
                 title: '', description: '', video_url: '', media_id: '', poster_id: '',
                 aspect: 'auto', duration: '', published_at: '', status: 'published',
@@ -129,7 +139,8 @@ export default async function VideosPage() {
             />
           </div>
         </section>
-      ))}
+        )
+      })}
     </>
   )
 }

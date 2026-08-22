@@ -8,6 +8,7 @@ export type ReviewBook = BookCardView & { excerpt: string }
 import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
+import { has } from '@/lib/cms/optional'
 import { Divider, ArrowRight } from './ui'
 
 export default function Reviews({ content, books }: { content: ReviewsContent; books: ReviewBook[] }) {
@@ -48,30 +49,42 @@ export default function Reviews({ content, books }: { content: ReviewsContent; b
   return (
     <section className="reviews card" id="reviews" ref={root}>
       <div className="reviews-head section-head">
-        <h2 className="section-title">{content.heading}</h2>
+        {has(content.heading) && <h2 className="section-title">{content.heading}</h2>}
         <Divider width={300} />
       </div>
       <div className="reviews-grid">
         {FEATURED_BOOKS.map((book) => (
           <article className="review-card review-book-card" key={book.slug}>
-            <div className="review-book-cover">
-              <img src={book.coverSrc} alt={`${book.title} by ${book.author}`} loading="lazy" />
-            </div>
+            {has(book.coverSrc) && (
+              <div className="review-book-cover">
+                <img src={book.coverSrc} alt={has(book.author) ? `${book.title} by ${book.author}` : book.title} loading="lazy" />
+              </div>
+            )}
             <div className="review-book-content">
-              <p className="review-book-kicker">{book.genre} · {book.author}</p>
+              {/* The kicker is genre and author with a dot between them, so it
+                  only carries the dot when it has both. */}
+              {(has(book.genre) || has(book.author)) && (
+                <p className="review-book-kicker">
+                  {[book.genre, book.author].filter(has).join(' · ')}
+                </p>
+              )}
               <h3>{book.title}</h3>
-              <p className="review-book-excerpt">{book.excerpt}</p>
-              <a className="review-book-link" href={`${book.href}/review`}>
-                {content.readMoreLabel} <ArrowRight size={17} />
-              </a>
+              {has(book.excerpt) && <p className="review-book-excerpt">{book.excerpt}</p>}
+              {has(content.readMoreLabel) && (
+                <a className="review-book-link" href={`${book.href}/review`}>
+                  {content.readMoreLabel} <ArrowRight size={17} />
+                </a>
+              )}
             </div>
           </article>
         ))}
       </div>
       <div className="reviews-cta">
-        <a className="btn btn-gold-bright btn-morereviews" href={content.cta.href}>
-          {content.cta.label} <ArrowRight size={20} />
-        </a>
+        {has(content.cta.label) && has(content.cta.href) && (
+          <a className="btn btn-gold-bright btn-morereviews" href={content.cta.href}>
+            {content.cta.label} <ArrowRight size={20} />
+          </a>
+        )}
         <div className="review-dots" aria-hidden="true">
           <i className="on" />
           <i />

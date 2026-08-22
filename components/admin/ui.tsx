@@ -260,6 +260,14 @@ export function ConfirmButton({
 
 /* --------------------------------- fields --------------------------------- */
 
+/**
+ * One labelled control.
+ *
+ * `optional` marks a field the site will simply leave out when it is empty —
+ * no label with nothing beside it, no blank line, no broken image. The chip
+ * says so, and says it the same way on every screen, so an editor can clear
+ * anything they don't have and trust the page to close up behind it.
+ */
 export function Field({
   label,
   hint,
@@ -277,11 +285,34 @@ export function Field({
     <div className="ad-field">
       <label className="ad-label" htmlFor={id}>
         {label}
-        {optional && <span className="ad-opt">optional</span>}
+        {optional && <span className="ad-opt" title={OPTIONAL_TITLE}>optional</span>}
       </label>
       {children}
       {hint && <p className="ad-hint">{hint}</p>}
     </div>
+  )
+}
+
+export const OPTIONAL_TITLE = 'Optional — leave it empty and it is left off the live page entirely.'
+
+/**
+ * The house rule, stated once at the top of an editing screen rather than
+ * repeated under all forty fields.
+ */
+export function OptionalNote({ children }: { children?: React.ReactNode }) {
+  return (
+    <p className="ad-hint ad-optional-note">
+      <Ic n="eyeOff" aria-hidden="true" />
+      <span>
+        {children ?? (
+          <>
+            Every field here is optional. <b>Leave one empty and it disappears from the live page</b> —
+            no heading with nothing under it, no empty space where it used to be. Fill it back in and it
+            returns. This works field by field, and separately for each entry.
+          </>
+        )}
+      </span>
+    </p>
   )
 }
 

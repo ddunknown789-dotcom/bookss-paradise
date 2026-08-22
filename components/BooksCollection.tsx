@@ -3,6 +3,7 @@
 import type { BookCardView } from '@/lib/cms/types'
 
 import { ArrowRight } from '@/components/ui'
+import { has } from '@/lib/cms/optional'
 
 
 export default function BooksCollection({
@@ -47,13 +48,15 @@ export default function BooksCollection({
       <section className="collection-grid" aria-label="All books">
         {BOOKS.map((book) => (
           <a className="collection-book" key={book.slug} href={book.href}>
-            <div className="collection-cover">
-              <img src={book.coverSrc} alt={`${book.title} by ${book.author}`} />
-            </div>
+            {has(book.coverSrc) && (
+              <div className="collection-cover">
+                <img src={book.coverSrc} alt={has(book.author) ? `${book.title} by ${book.author}` : book.title} />
+              </div>
+            )}
             <div className="collection-meta">
-              <span>{book.genre}</span>
+              {has(book.genre) && <span>{book.genre}</span>}
               <h2>{book.title}</h2>
-              <p>{book.author}</p>
+              {has(book.author) && <p>{book.author}</p>}
             </div>
           </a>
         ))}

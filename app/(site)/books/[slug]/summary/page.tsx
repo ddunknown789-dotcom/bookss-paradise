@@ -36,7 +36,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     webPageSchema({
       path,
       name: `Summary: ${book.title}`,
-      description: `A full summary of ${book.title} by ${book.author}.`,
+      description: book.author ? `A full summary of ${book.title} by ${book.author}.` : `A full summary of ${book.title}.`,
       type: 'ItemPage',
       image: book.coverSrc || undefined,
       breadcrumbPath: path,

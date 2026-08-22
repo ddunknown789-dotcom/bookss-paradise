@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import SiteHeader from '@/components/SiteHeader'
 import { Divider } from '@/components/ui'
 import { goBack } from '@/lib/router'
+import { has, hasList } from '@/lib/cms/optional'
 import '@/styles/interview.css'
 
 const Icon = {
@@ -86,34 +87,46 @@ export default function InterviewPage({ item }: { item: InterviewView }) {
         <div className="iv-grid">
           {/* ---- profile ---- */}
           <aside className="iv-profile">
-            <figure className="iv-photo">
-              <img src={item.image} alt={item.author} />
-            </figure>
-            <h2 className="iv-name">{item.author}</h2>
-            <p className="iv-role">
-              Author of <a href={item.bookSlug ? `/books/${item.bookSlug}` : '/books'}>{item.bookTitle}</a>
-            </p>
-            <div className="iv-meta">
-              <span>
-                <Icon.clock width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.7"
-                  strokeLinecap="round" strokeLinejoin="round" />
-                {item.minutes}
-              </span>
-              <i className="iv-meta-dot" aria-hidden="true" />
-              <span>
-                <Icon.calendar width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.7"
-                  strokeLinecap="round" strokeLinejoin="round" />
-                <time dateTime={item.iso ?? undefined}>{item.date}</time>
-              </span>
-            </div>
+            {has(item.image) && (
+              <figure className="iv-photo">
+                <img src={item.image} alt={item.author} />
+              </figure>
+            )}
+            {has(item.author) && <h2 className="iv-name">{item.author}</h2>}
+            {has(item.bookTitle) && (
+              <p className="iv-role">
+                Author of <a href={item.bookSlug ? `/books/${item.bookSlug}` : '/books'}>{item.bookTitle}</a>
+              </p>
+            )}
+            {(has(item.minutes) || has(item.date)) && (
+              <div className="iv-meta">
+                {has(item.minutes) && (
+                  <span>
+                    <Icon.clock width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.7"
+                      strokeLinecap="round" strokeLinejoin="round" />
+                    {item.minutes}
+                  </span>
+                )}
+                {/* The dot is a separator, so it only earns its place between two things. */}
+                {has(item.minutes) && has(item.date) && <i className="iv-meta-dot" aria-hidden="true" />}
+                {has(item.date) && (
+                  <span>
+                    <Icon.calendar width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.7"
+                      strokeLinecap="round" strokeLinejoin="round" />
+                    <time dateTime={item.iso ?? undefined}>{item.date}</time>
+                  </span>
+                )}
+              </div>
+            )}
           </aside>
 
           {/* ---- interview body ---- */}
           <div className="iv-content">
             <h1 className="iv-title">{item.title}</h1>
-            <p className="iv-lede">{item.intro}</p>
+            {has(item.intro) && <p className="iv-lede">{item.intro}</p>}
             <Divider align="left" width={220} />
 
+            {hasList(item.qa) && (
             <div className="iv-qa-list">
               {item.qa.map((pair, i) => {
                 const open = openSet.has(i)
@@ -130,7 +143,7 @@ export default function InterviewPage({ item }: { item: InterviewView }) {
                       <Icon.chevron className="iv-chevron" width="19" height="19" fill="none"
                         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </button>
-                    {open && (
+                    {open && has(pair.a) && (
                       <div className="iv-qa-a">
                         <span className="iv-avatar iv-avatar-a" aria-hidden="true">A</span>
                         <p>{pair.a}</p>
@@ -140,6 +153,7 @@ export default function InterviewPage({ item }: { item: InterviewView }) {
                 )
               })}
             </div>
+            )}
           </div>
         </div>
       </main>

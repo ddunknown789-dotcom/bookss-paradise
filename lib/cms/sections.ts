@@ -224,6 +224,12 @@ export const SECTION_LABELS: Record<SectionType, string> = {
  * Merge a stored jsonb blob over the defaults. Shallow by design: nested
  * objects (a CTA, a stats array) are replaced wholesale by the editor, which
  * is what the admin forms submit.
+ *
+ * A key that is absent has never been edited, so the shipped default stands in
+ * — that is what keeps a fresh install from rendering empty boxes. A key that
+ * is present but empty is different: an editor cleared that field on purpose,
+ * and the site honours it by leaving the field off the page. The admin forms
+ * post every field of a section on save, so the two cases never blur.
  */
 export function sectionContent<T extends SectionType>(
   type: T,
@@ -234,7 +240,7 @@ export function sectionContent<T extends SectionType>(
 
   const merged = { ...defaults } as Record<string, unknown>
   for (const [key, value] of Object.entries(stored as Record<string, unknown>)) {
-    if (value === null || value === undefined || value === '') continue
+    if (value === null || value === undefined) continue
     merged[key] = value
   }
   return merged as unknown as SectionContentMap[T]

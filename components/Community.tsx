@@ -5,6 +5,7 @@ import type { CommunityContent } from '@/lib/cms/sections'
 import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
+import { has, hasList } from '@/lib/cms/optional'
 import { ArrowRight, Star4 } from './ui'
 
 export default function Community({ content }: { content: CommunityContent }) {
@@ -44,29 +45,35 @@ export default function Community({ content }: { content: CommunityContent }) {
     <section className="community card" id="community" ref={root}>
       <div className="community-inner">
         <div className="community-copy">
-          <h2 className="section-title">
-            {content.headingLines.map((line, i) => (
-              <span key={line}>{i > 0 && <br />}{line}</span>
-            ))}
-            <span className="gold-dot">.</span>
-          </h2>
+          {hasList(content.headingLines) && (
+            <h2 className="section-title">
+              {content.headingLines.map((line, i) => (
+                <span key={line}>{i > 0 && <br />}{line}</span>
+              ))}
+              <span className="gold-dot">.</span>
+            </h2>
+          )}
           <div className="divider divider-left community-divider" aria-hidden="true">
             <i />
             <Star4 size={13} />
             <i />
           </div>
-          <p>{content.body}</p>
-          <a className="btn btn-gold-bright btn-community" href={content.cta.href}>
-            {content.cta.label} <ArrowRight size={20} />
-          </a>
+          {has(content.body) && <p>{content.body}</p>}
+          {has(content.cta?.label) && has(content.cta?.href) && (
+            <a className="btn btn-gold-bright btn-community" href={content.cta.href}>
+              {content.cta.label} <ArrowRight size={20} />
+            </a>
+          )}
         </div>
-        <figure className="community-art">
-          <img
-            src={content.image}
-            alt={content.imageAlt}
-            loading="lazy"
-          />
-        </figure>
+        {has(content.image) && (
+          <figure className="community-art">
+            <img
+              src={content.image}
+              alt={content.imageAlt}
+              loading="lazy"
+            />
+          </figure>
+        )}
       </div>
     </section>
   )

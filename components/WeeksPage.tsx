@@ -7,6 +7,7 @@ import gsap from 'gsap'
 import SiteHeader from '@/components/SiteHeader'
 import { Divider } from '@/components/ui'
 import { NOANIM } from '@/lib/anim'
+import { has, hasList, hasNum } from '@/lib/cms/optional'
 import '@/styles/weeks.css'
 
 /* The full Book of the Week archive. Every row is one entry from
@@ -61,13 +62,13 @@ export default function WeeksPage({ weeks }: { weeks: WeekView[] }) {
         </header>
 
         <div className="wk-list">
-          {WEEKS_RESOLVED.map((week) => (
+          {WEEKS_RESOLVED.filter((w) => hasList(w.books)).map((week) => (
             <section className="wk-week" key={week.id} aria-label={`Books of ${week.label}`}>
               <div className="wk-label">
                 <p className="wk-label-kicker">Books of</p>
                 <h2>{week.label}</h2>
                 <Divider align="left" width={96} />
-                <p className="wk-range">{week.range}</p>
+                {has(week.range) && <p className="wk-range">{week.range}</p>}
               </div>
 
               <div className="wk-books">
@@ -78,18 +79,22 @@ export default function WeeksPage({ weeks }: { weeks: WeekView[] }) {
                     <Card
                       className="wk-book"
                       key={`${week.id}-${b.title}`}
-                      {...(href ? { href, 'aria-label': `${b.title} by ${b.author}` } : {})}
+                      {...(href ? { href, 'aria-label': has(b.author) ? `${b.title} by ${b.author}` : b.title } : {})}
                     >
-                      <figure className="wk-cover">
-                        <img src={b.coverSrc} alt={`${b.title} by ${b.author}`} loading="lazy" />
-                      </figure>
+                      {has(b.coverSrc) && (
+                        <figure className="wk-cover">
+                          <img src={b.coverSrc} alt={has(b.author) ? `${b.title} by ${b.author}` : b.title} loading="lazy" />
+                        </figure>
+                      )}
                       <h3>{b.title}</h3>
-                      <p className="wk-by">by {b.author}</p>
-                      <p className="wk-meta">
-                        <span className="wk-genre">{b.genre}</span>
-                        <i aria-hidden="true" />
-                        <span>{b.pages} pages</span>
-                      </p>
+                      {has(b.author) && <p className="wk-by">by {b.author}</p>}
+                      {(has(b.genre) || hasNum(b.pages)) && (
+                        <p className="wk-meta">
+                          {has(b.genre) && <span className="wk-genre">{b.genre}</span>}
+                          {has(b.genre) && hasNum(b.pages) && <i aria-hidden="true" />}
+                          {hasNum(b.pages) && <span>{b.pages} pages</span>}
+                        </p>
+                      )}
                     </Card>
                   )
                 })}

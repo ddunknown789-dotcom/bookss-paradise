@@ -1,10 +1,10 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import MediaBrowser, { type Folder, type MediaItem } from './MediaBrowser'
-import { ConfirmButton, Ic, Modal, Submit, useCanDrag, useToast } from './ui'
+import { ConfirmButton, Ic, Modal, OptionalNote, Submit, useCanDrag, useToast } from './ui'
 
 /* ============================================================================
    A whole small table edited on one screen: add rows, reorder by drag, delete,
@@ -42,6 +42,8 @@ export default function CollectionEditor({
   addLabel = 'Add row',
   emptyText = 'Nothing here yet.',
   note,
+  optionalNote,
+  title,
   media,
 }: {
   rows: Row[]
@@ -51,6 +53,15 @@ export default function CollectionEditor({
   addLabel?: string
   emptyText?: string
   note?: React.ReactNode
+  /** Overrides the standard "blank cells are hidden" wording for this table. */
+  optionalNote?: React.ReactNode
+  /**
+   * What this table holds, named in the save bar. Worth passing on any page
+   * that stacks several of these: the bar is what you can see once you have
+   * scrolled down into the rows, so it is where the answer to "which one am I
+   * editing?" belongs.
+   */
+  title?: React.ReactNode
   /** Required when any column has type `media`. */
   media?: MediaLibrary
 }) {
@@ -73,6 +84,45 @@ export default function CollectionEditor({
   }
 
   const canDrag = useCanDrag()
+
+  /**
+   * Which way there is more table to reach, as a space-separated list.
+   *
+   * A nine-column editor scrolls sideways inside its panel, and on a Mac the
+   * overlay scrollbar stays hidden until something is already scrolling — so
+   * the last columns simply looked as though they did not exist. This drives a
+   * fade at whichever edge still has table behind it, and goes quiet the
+   * moment everything fits.
+   */
+  const scroller = useRef<HTMLDivElement>(null)
+  const [more, setMore] = useState('')
+
+  useEffect(() => {
+    const el = scroller.current
+    if (!el) return
+
+    const sync = () => {
+      const max = el.scrollWidth - el.clientWidth
+      // A hair of slack: sub-pixel widths mean the ends rarely land exactly.
+      if (max <= 1) return setMore('')
+      setMore(
+        [el.scrollLeft > 1 && 'left', el.scrollLeft < max - 1 && 'right']
+          .filter(Boolean)
+          .join(' '),
+      )
+    }
+
+    sync()
+    el.addEventListener('scroll', sync, { passive: true })
+    // Catches the window resizing, the sidebar opening, a textarea being
+    // dragged taller — anything that changes what fits.
+    const observer = new ResizeObserver(sync)
+    observer.observe(el)
+    return () => {
+      el.removeEventListener('scroll', sync)
+      observer.disconnect()
+    }
+  }, [rows.length, columns.length])
 
   /* A bare `1fr` track is `minmax(auto, 1fr)`, and that `auto` floor is the
      cell's min-content width. One long filename in a media cell — an uploaded
@@ -98,7 +148,17 @@ export default function CollectionEditor({
     >
       {note && <p className="ad-hint" style={{ marginBottom: 12 }}>{note}</p>}
 
-      <div className="ad-ce-scroll">
+      <OptionalNote>
+        {optionalNote ?? (
+          <>
+            Only the columns marked with a <b>*</b> are needed. <b>Leave any other cell empty and it is
+            left off the live page</b> for that row alone — the rest of the row carries on as normal.
+          </>
+        )}
+      </OptionalNote>
+
+      <div className="ad-ce-scroller" data-more={more || undefined}>
+      <div className="ad-ce-scroll" ref={scroller}>
         {rows.length > 0 && (
           <div
             className="ad-ce-head"
@@ -109,7 +169,12 @@ export default function CollectionEditor({
             }}
           >
             <span />
-            {columns.map((c) => <span key={c.key}>{c.label}</span>)}
+            {columns.map((c) => (
+              <span key={c.key}>
+                {c.label}
+                {c.required && <b title="Needed — the row cannot be saved without it"> *</b>}
+              </span>
+            ))}
             <span />
           </div>
         )}
@@ -242,6 +307,7 @@ export default function CollectionEditor({
           ))}
         </div>
       </div>
+      </div>
 
       {!rows.length && <p className="ad-muted" style={{ padding: '18px 0', fontSize: 13 }}>{emptyText}</p>}
 
@@ -252,6 +318,7 @@ export default function CollectionEditor({
 
       <div className="ad-sticky-save">
         <span className="ad-muted" style={{ fontSize: 12.6 }}>
+          {title && <span className="ad-save-scope"><b>{title}</b> — </span>}
           {canDrag ? 'Reorder by dragging.' : 'Reorder with the arrows.'} Changes go live when you save.
         </span>
         <span className="ad-right"><Submit /></span>

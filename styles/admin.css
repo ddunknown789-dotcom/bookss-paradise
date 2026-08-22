@@ -18,6 +18,9 @@
   --ad-green: #1f4634;
   --ad-green-deep: #12312a;
   --ad-gold: #b8862a;
+  /* Height of the sticky top bar, so a second sticky thing can sit under it
+     rather than slide beneath it. */
+  --ad-topbar: 58px;
   --ad-gold-soft: #f3e7cc;
   --ad-danger: #b4342b;
   --ad-danger-soft: #fbeceb;
@@ -157,6 +160,7 @@ html, body { overflow-x: visible; }
   padding: 13px 26px;
   background: rgba(244,242,236,.9);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--ad-line);
 }
 .ad-top h1 { font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
@@ -225,8 +229,23 @@ html, body { overflow-x: visible; }
   display: flex; align-items: center; gap: 6px;
   font-size: 12.4px; font-weight: 600; color: var(--ad-ink); margin-bottom: 5px;
 }
-.ad-label span.ad-opt { font-weight: 400; color: var(--ad-faint); }
+.ad-label span.ad-opt { font-weight: 400; color: var(--ad-faint); cursor: help; }
 .ad-hint { font-size: 11.8px; color: var(--ad-muted); margin-top: 5px; line-height: 1.45; }
+
+/* The blank-is-hidden rule, stated once at the top of an editing screen. */
+.ad-optional-note {
+  display: flex; align-items: flex-start; gap: 8px;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--ad-line-soft);
+  border-radius: 9px;
+  background: #fbfaf7;
+}
+.ad-optional-note svg {
+  width: 15px; height: 15px; flex: 0 0 auto; margin-top: 1px;
+  fill: none; stroke: var(--ad-gold); stroke-width: 1.7;
+}
+.ad-optional-note b { font-weight: 600; color: var(--ad-ink); }
 .ad-input, .ad-select, .ad-textarea {
   width: 100%; padding: 8px 11px;
   border: 1px solid var(--ad-line); border-radius: 8px; background: #fff;
@@ -270,6 +289,48 @@ html, body { overflow-x: visible; }
    fit. Rather than let them squeeze to nothing or push the page sideways, the
    editor scrolls inside its own panel, exactly as a wide table does. */
 .ad-ce-scroll { overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+
+/* Say that it scrolls.
+
+   Two cues, because one is not enough on a Mac: a fade at whichever edge still
+   has table behind it, and a scrollbar that is always drawn rather than only
+   while the trackpad is moving. Both go away when every column fits. */
+.ad-ce-scroller { position: relative; }
+.ad-ce-scroller::before,
+.ad-ce-scroller::after {
+  content: '';
+  position: absolute; top: 0; bottom: 0; width: 40px; z-index: 2;
+  pointer-events: none;
+  opacity: 0; transition: opacity .18s ease;
+}
+.ad-ce-scroller::before {
+  left: 0;
+  background: linear-gradient(to right, var(--ad-panel) 15%, rgba(255, 255, 255, 0));
+}
+.ad-ce-scroller::after {
+  right: 0;
+  background: linear-gradient(to left, var(--ad-panel) 15%, rgba(255, 255, 255, 0));
+}
+.ad-ce-scroller[data-more~="left"]::before,
+.ad-ce-scroller[data-more~="right"]::after { opacity: 1; }
+
+/* An always-visible bar, sized so it reads as a control rather than a rule.
+
+   The two families are kept apart on purpose. Chrome and Safari only honour
+   `::-webkit-scrollbar` while `scrollbar-width` is absent — set both and the
+   standard property wins, which on a Mac means the overlay bar that hides
+   itself, i.e. the very thing being fixed. So Firefox, the one engine with no
+   pseudos, gets the standard properties and nobody else does. */
+.ad-ce-scroll::-webkit-scrollbar { height: 9px; }
+.ad-ce-scroll::-webkit-scrollbar-track { background: transparent; }
+.ad-ce-scroll::-webkit-scrollbar-thumb {
+  background: #d8d4c7; border-radius: 999px;
+  border: 2px solid var(--ad-panel);   /* insets the thumb without a wrapper */
+}
+.ad-ce-scroll::-webkit-scrollbar-thumb:hover { background: var(--ad-faint); }
+@supports not selector(::-webkit-scrollbar) {
+  .ad-ce-scroll { scrollbar-width: thin; scrollbar-color: #d8d4c7 transparent; }
+}
 
 .ad-ce-media { display: flex; align-items: center; gap: 4px; min-width: 0; }
 .ad-ce-media > .ad-btn:first-child {
@@ -366,7 +427,8 @@ html, body { overflow-x: visible; }
 
 .ad-modal-veil {
   position: fixed; inset: 0; z-index: 150;
-  background: rgba(18, 32, 26, .45); backdrop-filter: blur(2px);
+  background: rgba(18, 32, 26, .45);
+  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
   display: grid; place-items: center; padding: 20px;
   animation: ad-fade .16s ease both;
   /* The page behind is already frozen by the scroll lock; this stops a flick
@@ -505,10 +567,43 @@ html, body { overflow-x: visible; }
   position: sticky; bottom: 0; z-index: 15;
   display: flex; align-items: center; gap: 10px;
   padding: 12px 16px; margin: 18px -26px -60px;
-  background: rgba(255,255,255,.94); backdrop-filter: blur(8px);
+  background: rgba(255,255,255,.94);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   border-top: 1px solid var(--ad-line);
 }
 .ad-sticky-save .ad-right { margin-left: auto; display: flex; gap: 8px; }
+
+/* The negative bottom margin above is sized to swallow `.ad-body`'s bottom
+   padding, which is right when the form is the last thing on the page. Inside
+   a panel it is 44px too much: the bar hung past its own panel and painted
+   over the *next* panel's heading — which, on a page of several near-identical
+   editors, is exactly the line telling you which one you are editing. In a
+   panel the bar is that panel's footer and stops at its edge. */
+.ad-panel-body .ad-sticky-save {
+  margin: 18px -16px -16px;
+  border-radius: 0 0 var(--ad-radius) var(--ad-radius);
+}
+
+/* A panel that is one of several near-identical editors keeps saying which one
+   it is while you work down its table, instead of scrolling its name away. */
+.ad-panel-head.is-sticky {
+  /* Under the save bar on purpose: a sticky head rides down with its panel as
+     the panel leaves, and where the two meet the bar is the one still worth
+     reaching. It can no longer reach the *next* panel's head — see above. */
+  position: sticky; top: var(--ad-topbar); z-index: 12;
+  background: var(--ad-panel);
+  border-radius: var(--ad-radius) var(--ad-radius) 0 0;
+}
+.ad-panel-head.is-sticky h2 { font-size: 16px; }
+.ad-panel-count {
+  font-size: 11.4px; font-weight: 600; letter-spacing: .02em;
+  padding: 3px 8px; border-radius: 999px;
+  background: var(--ad-gold-soft); color: var(--ad-gold);
+  white-space: nowrap;
+}
+/* Names the table in the save bar too, so the answer is on screen whichever
+   end of a long list you are working at. */
+.ad-save-scope b { font-weight: 600; color: var(--ad-ink); }
 
 /* --------------------------- live preview ------------------------------- */
 
@@ -564,6 +659,9 @@ html, body { overflow-x: visible; }
   .ad-body { padding: 16px 14px 90px; }
   .ad-top { padding: 10px 14px; }
   .ad-sticky-save { margin: 18px -14px -90px; padding: 11px 14px; }
+  /* The top bar loses 6px of padding here, so what sticks under it follows. */
+  .ad { --ad-topbar: 52px; }
+  .ad-panel-body .ad-sticky-save { margin: 18px -16px -16px; padding: 11px 14px; }
 }
 
 /* ---------------------------- phone (≤760px) --------------------------- */
@@ -577,8 +675,22 @@ html, body { overflow-x: visible; }
   .ad-page-head-actions { margin-left: 0 !important; }
   .ad-page-head .ad-btn { justify-content: center; }
 
+  /* Tap targets grow at this size (see `.ad-btn-icon` below), which makes the
+     top bar taller — so what sticks under it moves down to match. */
+  .ad { --ad-topbar: 59px; }
+
   .ad-panel-head { flex-wrap: wrap; gap: 8px; }
   .ad-panel-head .ad-right { margin-left: 0; width: 100%; flex-wrap: wrap; }
+  /* On a phone the head is the name and nothing else — the supporting line
+     wraps to a second row, and two stuck rows plus the top bar would leave
+     little screen for the row being edited. The name alone stays. */
+  .ad-panel-head.is-sticky {
+    gap: 4px 8px;
+    padding: 10px 14px;
+    box-shadow: 0 1px 0 var(--ad-line-soft);
+  }
+  .ad-panel-head.is-sticky h2 { font-size: 14.5px; }
+  .ad-panel-head.is-sticky > p { flex: 1 1 100%; font-size: 11.6px; }
   .ad-panel-head form.ad-right { margin-left: 0 !important; }
   .ad-search input { width: 100% !important; }
 
@@ -623,6 +735,8 @@ html, body { overflow-x: visible; }
 
   /* --- collection editor becomes a labelled stack --------------------- */
   .ad-ce-scroll { overflow-x: visible; }
+  /* Nothing scrolls sideways once the row is a stack, so nothing says it does. */
+  .ad-ce-scroller::before, .ad-ce-scroller::after { content: none; }
   .ad-ce-head { display: none !important; }
   .ad-ce-row {
     /* `1fr` alone is `minmax(auto, 1fr)`, and that `auto` floor is the widest
@@ -690,7 +804,7 @@ html, body { overflow-x: visible; }
   /* A blurred backdrop on an element that is repainted for every frame of a
      scroll is the single most expensive thing on this page on a phone. Both
      sticky bars go opaque instead — same look at this size, none of the cost. */
-  .ad-top, .ad-sticky-save { backdrop-filter: none; }
+  .ad-top, .ad-sticky-save { backdrop-filter: none; -webkit-backdrop-filter: none; }
   .ad-top { background: var(--ad-bg); }
   .ad-sticky-save {
     flex-wrap: wrap; gap: 9px;
@@ -698,6 +812,9 @@ html, body { overflow-x: visible; }
     padding-bottom: calc(11px + env(safe-area-inset-bottom));
   }
   .ad-sticky-save > span:first-child { flex: 1 1 100%; font-size: 12px; }
+  /* The pinned heading is on screen the whole time at this size, so repeating
+     the name down here would only cost a line of a small screen. */
+  .ad-save-scope { display: none; }
   .ad-sticky-save .ad-right { width: 100%; }
   .ad-sticky-save .ad-right .ad-btn { flex: 1; justify-content: center; }
 

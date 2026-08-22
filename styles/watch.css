@@ -177,6 +177,7 @@
   color: #fff;
   padding-left: 3px; /* optically centre the triangle */
   backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   transition: background 0.35s, border-color 0.35s, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .wv-cover:hover .wv-play,

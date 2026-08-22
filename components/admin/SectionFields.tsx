@@ -24,8 +24,8 @@ const cta = (fd: FormData, prefix: string) => ({ label: s(fd, `${prefix}_label`)
 function CtaFields({ prefix, label, value }: { prefix: string; label: string; value: { label?: string; href?: string } }) {
   return (
     <div className="ad-row">
-      <Text label={`${label} — text`} name={`${prefix}_label`} defaultValue={value?.label ?? ''} />
-      <Text label={`${label} — link`} name={`${prefix}_href`} defaultValue={value?.href ?? ''} hint="A page like /books, or #books to scroll to a section." />
+      <Text label={`${label} — text`} name={`${prefix}_label`} defaultValue={value?.label ?? ''} optional />
+      <Text label={`${label} — link`} name={`${prefix}_href`} defaultValue={value?.href ?? ''} hint="A page like /books, or #books to scroll to a section." optional />
     </div>
   )
 }
@@ -38,15 +38,15 @@ export default function SectionFields({ type, content: c }: { type: SectionType;
           <p className="ad-hint" style={{ marginBottom: 12 }}>
             The animated brand badge that opens the page. Hide the whole section from the list to skip it.
           </p>
-          <Text label="Scroll cue text" name="cueLabel" defaultValue={c.cueLabel ?? 'Scroll'} />
+          <Text label="Scroll cue text" name="cueLabel" defaultValue={c.cueLabel ?? 'Scroll'} optional />
         </>
       )
 
     case 'hero':
       return (
         <>
-          <Area label="Heading" name="headingLines" defaultValue={(c.headingLines ?? []).join('\n')} hint="One line per row — the site keeps your line breaks." />
-          <Area label="Subheading" name="subheading" defaultValue={c.subheading ?? ''} />
+          <Area label="Heading" name="headingLines" defaultValue={(c.headingLines ?? []).join('\n')} hint="One line per row — the site keeps your line breaks." optional />
+          <Area label="Subheading" name="subheading" defaultValue={c.subheading ?? ''} optional />
           <CtaFields prefix="primaryCta" label="Main button" value={c.primaryCta ?? {}} />
           <CtaFields prefix="secondaryCta" label="Secondary link" value={c.secondaryCta ?? {}} />
           <Text label="Divider width" name="dividerWidth" type="number" defaultValue={String(c.dividerWidth ?? 430)} hint="In pixels. 430 matches the original design." />
@@ -58,9 +58,9 @@ export default function SectionFields({ type, content: c }: { type: SectionType;
       return (
         <>
           <p className="ad-hint" style={{ marginBottom: 12 }}>The cards themselves are managed under <b>Videos</b>.</p>
-          <Text label="Kicker" name="kicker" defaultValue={c.kicker ?? ''} />
-          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} />
-          <Area label="Subheading" name="subheading" defaultValue={c.subheading ?? ''} />
+          <Text label="Kicker" name="kicker" defaultValue={c.kicker ?? ''} optional />
+          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} optional />
+          <Area label="Subheading" name="subheading" defaultValue={c.subheading ?? ''} optional />
         </>
       )
 
@@ -68,7 +68,7 @@ export default function SectionFields({ type, content: c }: { type: SectionType;
       return (
         <>
           <p className="ad-hint" style={{ marginBottom: 12 }}>Books come from the <b>Books</b> screen, in their sort order.</p>
-          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} />
+          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} optional />
           <Text label="How many books" name="limit" type="number" min={1} max={30} defaultValue={String(c.limit ?? 12)} />
           <CtaFields prefix="cta" label="Button" value={c.cta ?? {}} />
         </>
@@ -78,9 +78,9 @@ export default function SectionFields({ type, content: c }: { type: SectionType;
       return (
         <>
           <p className="ad-hint" style={{ marginBottom: 12 }}>Each card uses that book’s <b>Review excerpt</b>.</p>
-          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} />
+          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} optional />
           <Text label="How many" name="limit" type="number" min={1} max={12} defaultValue={String(c.limit ?? 6)} />
-          <Text label="Link text on each card" name="readMoreLabel" defaultValue={c.readMoreLabel ?? 'Read Full Review'} />
+          <Text label="Link text on each card" name="readMoreLabel" defaultValue={c.readMoreLabel ?? 'Read Full Review'} optional />
           <CtaFields prefix="cta" label="Button" value={c.cta ?? {}} />
         </>
       )
@@ -89,8 +89,8 @@ export default function SectionFields({ type, content: c }: { type: SectionType;
       return (
         <>
           <p className="ad-hint" style={{ marginBottom: 12 }}>Picks come from <b>Book of the Week</b> — the newest week is shown.</p>
-          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} />
-          <Area label="Subheading" name="subheading" defaultValue={c.subheading ?? ''} />
+          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} optional />
+          <Area label="Subheading" name="subheading" defaultValue={c.subheading ?? ''} optional />
           <CtaFields prefix="cta" label="Button" value={c.cta ?? {}} />
         </>
       )
@@ -99,8 +99,8 @@ export default function SectionFields({ type, content: c }: { type: SectionType;
       return (
         <>
           <p className="ad-hint" style={{ marginBottom: 12 }}>Uses the latest published interviews.</p>
-          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} />
-          <Area label="Subheading" name="subheading" defaultValue={c.subheading ?? ''} />
+          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} optional />
+          <Area label="Subheading" name="subheading" defaultValue={c.subheading ?? ''} optional />
           <Text label="How many" name="limit" type="number" min={1} max={12} defaultValue={String(c.limit ?? 4)} />
           <CtaFields prefix="cta" label="Button" value={c.cta ?? {}} />
         </>
@@ -109,15 +109,16 @@ export default function SectionFields({ type, content: c }: { type: SectionType;
     case 'mission':
       return (
         <>
-          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} />
-          <Area label="Body" name="body" defaultValue={c.body ?? ''} />
-          <Text label="Image path" name="image" defaultValue={c.image ?? ''} hint="A file in /public, or a full URL." />
-          <Text label="Image description" name="imageAlt" defaultValue={c.imageAlt ?? ''} hint="Read aloud by screen readers." />
+          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} optional />
+          <Area label="Body" name="body" defaultValue={c.body ?? ''} optional />
+          <Text label="Image path" name="image" defaultValue={c.image ?? ''} hint="A file in /public, or a full URL." optional />
+          <Text label="Image description" name="imageAlt" defaultValue={c.imageAlt ?? ''} hint="Read aloud by screen readers." optional />
           <Area
             label="Counters"
             name="stats"
             defaultValue={(c.stats ?? []).map((x: any) => `${x.target}|${x.suffix}|${x.label}`).join('\n')}
-            hint="One per line, as number | suffix | label — for example 500|+|Books Featured"
+            optional
+            hint="One per line, as number | suffix | label — for example 500|+|Books Featured. Empty, and the counters are left off."
           />
         </>
       )
@@ -125,11 +126,11 @@ export default function SectionFields({ type, content: c }: { type: SectionType;
     case 'community':
       return (
         <>
-          <Area label="Heading" name="headingLines" defaultValue={(c.headingLines ?? []).join('\n')} hint="One line per row." />
-          <Area label="Body" name="body" defaultValue={c.body ?? ''} />
+          <Area label="Heading" name="headingLines" defaultValue={(c.headingLines ?? []).join('\n')} hint="One line per row." optional />
+          <Area label="Body" name="body" defaultValue={c.body ?? ''} optional />
           <CtaFields prefix="cta" label="Button" value={c.cta ?? {}} />
-          <Text label="Image path" name="image" defaultValue={c.image ?? ''} />
-          <Text label="Image description" name="imageAlt" defaultValue={c.imageAlt ?? ''} />
+          <Text label="Image path" name="image" defaultValue={c.image ?? ''} optional />
+          <Text label="Image description" name="imageAlt" defaultValue={c.imageAlt ?? ''} optional />
         </>
       )
 
@@ -137,25 +138,25 @@ export default function SectionFields({ type, content: c }: { type: SectionType;
       return (
         <>
           <p className="ad-hint" style={{ marginBottom: 12 }}>The six cards are managed under <b>Services</b>.</p>
-          <Text label="Kicker" name="kicker" defaultValue={c.kicker ?? ''} />
-          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} />
-          <Area label="Subheading" name="subheadingLines" defaultValue={(c.subheadingLines ?? []).join('\n')} hint="One line per row." />
-          <Text label="Closing line" name="footerText" defaultValue={c.footerText ?? ''} />
+          <Text label="Kicker" name="kicker" defaultValue={c.kicker ?? ''} optional />
+          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} optional />
+          <Area label="Subheading" name="subheadingLines" defaultValue={(c.subheadingLines ?? []).join('\n')} hint="One line per row." optional />
+          <Text label="Closing line" name="footerText" defaultValue={c.footerText ?? ''} optional />
         </>
       )
 
     case 'newsletter':
       return (
         <>
-          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} />
-          <Area label="Body" name="body" defaultValue={c.body ?? ''} />
+          <Text label="Heading" name="heading" defaultValue={c.heading ?? ''} optional />
+          <Area label="Body" name="body" defaultValue={c.body ?? ''} optional />
           <div className="ad-row">
-            <Text label="Input placeholder" name="placeholder" defaultValue={c.placeholder ?? ''} />
-            <Text label="Button text" name="submitLabel" defaultValue={c.submitLabel ?? ''} />
-            <Text label="After signing up" name="successLabel" defaultValue={c.successLabel ?? ''} />
+            <Text label="Input placeholder" name="placeholder" defaultValue={c.placeholder ?? ''} optional />
+            <Text label="Button text" name="submitLabel" defaultValue={c.submitLabel ?? ''} optional />
+            <Text label="After signing up" name="successLabel" defaultValue={c.successLabel ?? ''} optional />
           </div>
-          <Text label="Image path" name="image" defaultValue={c.image ?? ''} />
-          <Text label="Image description" name="imageAlt" defaultValue={c.imageAlt ?? ''} />
+          <Text label="Image path" name="image" defaultValue={c.image ?? ''} optional />
+          <Text label="Image description" name="imageAlt" defaultValue={c.imageAlt ?? ''} optional />
         </>
       )
 

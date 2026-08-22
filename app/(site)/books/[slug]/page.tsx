@@ -38,13 +38,15 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const [book, quote] = await Promise.all([getBook(slug), getPageQuote()])
   if (!book) notFound()
 
-  // Search engines get the real Book record, not just a page of text.
+  // Search engines get the real Book record, not just a page of text. A field
+  // the editor left blank is left out of the record too — an empty string in
+  // structured data is a claim that the value is empty, not that it is unknown.
   const jsonLd = {
     '@type': 'Book',
     name: book.title,
-    author: { '@type': 'Person', name: book.author },
+    author: book.author ? { '@type': 'Person', name: book.author } : undefined,
     numberOfPages: book.pages || undefined,
-    inLanguage: book.language,
+    inLanguage: book.language || undefined,
     isbn: book.isbn || undefined,
     publisher: book.publisher || undefined,
     datePublished: book.publicationDate || undefined,
@@ -59,8 +61,8 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     { ...jsonLd, '@context': undefined, publisher: { '@id': NODE.organization } },
     webPageSchema({
       path: `/books/${slug}`,
-      name: `${book.title} — ${book.author}`,
-      description: book.summaryBody || book.about.slice(0, 160),
+      name: book.author ? `${book.title} — ${book.author}` : book.title,
+      description: book.summaryBody || book.about.slice(0, 160) || undefined,
       type: 'ItemPage',
       image: book.coverSrc || undefined,
       breadcrumbPath: `/books/${slug}`,

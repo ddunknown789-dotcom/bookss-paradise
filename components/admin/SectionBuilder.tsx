@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { Ic, Modal, Submit, useCanDrag, useToast } from './ui'
+import { Ic, Modal, OptionalNote, Submit, useCanDrag, useToast } from './ui'
 import SectionFields from './SectionFields'
 import LivePreview from './LivePreview'
 import { saveSectionContent, saveSectionLayout } from '@/app/admin/(panel)/homepage/actions'
@@ -183,6 +183,12 @@ export default function SectionBuilder({ sections: initial }: { sections: Sectio
               } else toast(res.error ?? 'Could not save', 'error')
             }}
           >
+            <OptionalNote>
+              <b>Leave a field empty and it is left off the home page</b> — the heading, the line under
+              it, a button, a picture — rather than showing a blank space where it used to be. Type
+              something back in and it returns. To take the whole section away instead, switch it off in
+              the list behind this dialog.
+            </OptionalNote>
             <SectionFields type={editing.type} content={editing.content} />
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
               <button type="button" className="ad-btn" onClick={() => setEditing(null)}>Cancel</button>

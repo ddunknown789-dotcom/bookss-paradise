@@ -3,9 +3,10 @@
 import type { BookOfWeekContent } from '@/lib/cms/sections'
 import type { WeekView } from '@/lib/cms/types'
 
-import { useLayoutEffect, useRef } from 'react'
+import { Fragment, useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
+import { has, hasList, hasNum } from '@/lib/cms/optional'
 import { Divider, ArrowRight } from './ui'
 
 /* The homepage "Book of the Week" shelf. Content comes entirely from the
@@ -63,9 +64,9 @@ export default function BooksOfWeek({ content, week }: { content: BookOfWeekCont
   return (
     <section className="botw card" id="book-of-the-week" ref={root}>
       <div className="botw-head section-head">
-        <h2 className="section-title">{content.heading}</h2>
+        {has(content.heading) && <h2 className="section-title">{content.heading}</h2>}
         <Divider width={300} />
-        <p className="botw-sub">{content.subheading}</p>
+        {has(content.subheading) && <p className="botw-sub">{content.subheading}</p>}
       </div>
 
       <div className="botw-stage" style={cols}>
@@ -75,25 +76,37 @@ export default function BooksOfWeek({ content, week }: { content: BookOfWeekCont
             // Only titles that have their own page become links; the rest
             // stay as plain cards so nothing dead-ends.
             const Cover = href ? 'a' : 'div'
+            const label = has(b.author) ? `${b.title} by ${b.author}` : b.title
+            // Only the facts this entry carries; the separators follow suit.
+            const facts = [
+              { label: 'Genre', value: b.genre },
+              { label: 'Pages', value: hasNum(b.pages) ? String(b.pages) : '' },
+              { label: 'Published', value: b.published },
+            ].filter((f) => has(f.value))
             return (
               <figure className="botw-book" key={b.title}>
-                <Cover
-                  className="botw-cover"
-                  {...(href ? { href, 'aria-label': `${b.title} by ${b.author}` } : {})}
-                >
-                  <img src={b.coverSrc} alt={`${b.title} by ${b.author}`} loading="lazy" />
-                </Cover>
+                {has(b.coverSrc) && (
+                  <Cover
+                    className="botw-cover"
+                    {...(href ? { href, 'aria-label': label } : {})}
+                  >
+                    <img src={b.coverSrc} alt={label} loading="lazy" />
+                  </Cover>
+                )}
 
                 <figcaption className="botw-caption">
                   <h3>{b.title}</h3>
-                  <p className="botw-by">by {b.author}</p>
-                  <p className="botw-meta">
-                    <span><em>Genre:</em> {b.genre}</span>
-                    <i aria-hidden="true" />
-                    <span><em>Pages:</em> {b.pages}</span>
-                    <i aria-hidden="true" />
-                    <span><em>Published:</em> {b.published}</span>
-                  </p>
+                  {has(b.author) && <p className="botw-by">by {b.author}</p>}
+                  {facts.length > 0 && (
+                    <p className="botw-meta">
+                      {facts.map((f, i) => (
+                        <Fragment key={f.label}>
+                          {i > 0 && <i aria-hidden="true" />}
+                          <span><em>{f.label}:</em> {f.value}</span>
+                        </Fragment>
+                      ))}
+                    </p>
+                  )}
                 </figcaption>
               </figure>
             )
@@ -101,11 +114,13 @@ export default function BooksOfWeek({ content, week }: { content: BookOfWeekCont
         </div>
       </div>
 
-      <div className="botw-cta">
-        <a className="btn btn-gold-bright btn-botw" href={content.cta.href}>
-          {content.cta.label} <ArrowRight size={20} />
-        </a>
-      </div>
+      {has(content.cta.label) && has(content.cta.href) && (
+        <div className="botw-cta">
+          <a className="btn btn-gold-bright btn-botw" href={content.cta.href}>
+            {content.cta.label} <ArrowRight size={20} />
+          </a>
+        </div>
+      )}
     </section>
   )
 }

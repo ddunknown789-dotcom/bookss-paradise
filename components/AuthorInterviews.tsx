@@ -6,6 +6,7 @@ import type { InterviewView } from '@/lib/cms/types'
 import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
+import { has } from '@/lib/cms/optional'
 import { Divider, ArrowRight } from './ui'
 
 function InterviewBadge() {
@@ -77,38 +78,49 @@ export default function AuthorInterviews({ content, interviews }: { content: Int
   return (
     <section className="interviews card" id="interviews" ref={root}>
       <div className="interviews-head section-head">
-        <h2 className="section-title">{content.heading}</h2>
+        {has(content.heading) && <h2 className="section-title">{content.heading}</h2>}
         <Divider width={300} />
-        <p className="interviews-sub">{content.subheading}</p>
+        {has(content.subheading) && <p className="interviews-sub">{content.subheading}</p>}
       </div>
 
       <div className="interviews-grid">
         {interviews.map((item) => (
-          <a className="interview-card" key={item.slug} href={item.href} aria-label={`${item.title} for ${item.bookTitle}`}>
-            <div className="interview-media">
-              <img src={item.image} alt={item.title} loading="lazy" />
-              <InterviewBadge />
-            </div>
+          <a
+            className="interview-card"
+            key={item.slug}
+            href={item.href}
+            aria-label={has(item.bookTitle) ? `${item.title} for ${item.bookTitle}` : item.title}
+          >
+            {has(item.image) && (
+              <div className="interview-media">
+                <img src={item.image} alt={item.title} loading="lazy" />
+                <InterviewBadge />
+              </div>
+            )}
 
             <div className="interview-body">
               <div className="interview-kicker">Interview</div>
               <h3>{item.title}</h3>
-              <p className="interview-book">{item.bookTitle}</p>
+              {has(item.bookTitle) && <p className="interview-book">{item.bookTitle}</p>}
 
-              <div className="interview-meta">
-                <span><ClockIcon /> {item.minutes}</span>
-                <time dateTime={item.iso ?? undefined}>{item.date}</time>
-              </div>
+              {(has(item.minutes) || has(item.date)) && (
+                <div className="interview-meta">
+                  {has(item.minutes) && <span><ClockIcon /> {item.minutes}</span>}
+                  {has(item.date) && <time dateTime={item.iso ?? undefined}>{item.date}</time>}
+                </div>
+              )}
             </div>
           </a>
         ))}
       </div>
 
-      <div className="interviews-cta">
-        <a className="btn btn-gold-bright btn-interviews" href={content.cta.href}>
-          {content.cta.label} <ArrowRight size={20} />
-        </a>
-      </div>
+      {has(content.cta.label) && has(content.cta.href) && (
+        <div className="interviews-cta">
+          <a className="btn btn-gold-bright btn-interviews" href={content.cta.href}>
+            {content.cta.label} <ArrowRight size={20} />
+          </a>
+        </div>
+      )}
     </section>
   )
 }

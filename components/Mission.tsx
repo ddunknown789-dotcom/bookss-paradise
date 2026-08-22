@@ -5,6 +5,7 @@ import type { MissionContent } from '@/lib/cms/sections'
 import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
+import { has, hasList } from '@/lib/cms/optional'
 import { Divider, Star4 } from './ui'
 
 export default function Mission({ content }: { content: MissionContent }) {
@@ -69,9 +70,10 @@ export default function Mission({ content }: { content: MissionContent }) {
     <section className="mission card" id="about" ref={root}>
       <div className="mission-inner">
         <div className="mission-copy">
-          <h2 className="section-title">{content.heading}</h2>
+          {has(content.heading) && <h2 className="section-title">{content.heading}</h2>}
           <Divider align="left" width={320} />
-          <p className="mission-text">{content.body}</p>
+          {has(content.body) && <p className="mission-text">{content.body}</p>}
+          {hasList(STATS) && (
           <div className="mission-stats">
             {STATS.map((s) => (
               <div className="stat" key={s.label}>
@@ -82,13 +84,16 @@ export default function Mission({ content }: { content: MissionContent }) {
               </div>
             ))}
           </div>
+          )}
         </div>
+        {has(content.image) && (
         <figure className="mission-art">
           <span className="sparkle m-sp1"><Star4 size={18} color="#D9A22E" /></span>
           <span className="sparkle m-sp2"><Star4 size={11} color="#D9A22E" /></span>
           <span className="sparkle m-sp3"><Star4 size={14} color="#D9A22E" /></span>
           <img src={content.image} alt={content.imageAlt} loading="lazy" />
         </figure>
+        )}
       </div>
     </section>
   )

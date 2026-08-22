@@ -1,5 +1,6 @@
 import { ORG } from '@/lib/site'
 import { getSetting, getSocialLinks } from '@/lib/cms/queries'
+import { has } from '@/lib/cms/optional'
 import '@/styles/footer.css'
 
 /* ============================================================================
@@ -82,15 +83,17 @@ export default async function SiteFooter() {
       <div className="ft-inner">
         {/* ------------------------------ brand ---------------------------- */}
         <div className="ft-brand">
-          <a className="ft-logo" href="/" aria-label={`${siteName} home`}>
+          <a className="ft-logo" href="/" aria-label={has(siteName) ? `${siteName} home` : 'Home'}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logo} alt="" width={46} height={46} loading="lazy" />
-            <span className="ft-logo-text">
-              <b>{siteName}</b>
-              <span>{ORG.type}</span>
-            </span>
+            {has(logo) && <img src={logo} alt="" width={46} height={46} loading="lazy" />}
+            {has(siteName) && (
+              <span className="ft-logo-text">
+                <b>{siteName}</b>
+                <span>{ORG.type}</span>
+              </span>
+            )}
           </a>
-          <p className="ft-blurb">{blurb}</p>
+          {has(blurb) && <p className="ft-blurb">{blurb}</p>}
           <a className="ft-contact" href={`mailto:${ORG.email}`}>
             <MailIcon />
             {ORG.email}
@@ -110,6 +113,7 @@ export default async function SiteFooter() {
         </nav>
 
         {/* ----------------------------- social ---------------------------- */}
+        {socials.length > 0 && (
         <div>
           <h2 className="ft-col-title" id="ft-social-title">Follow</h2>
           <div className="ft-social" role="list" aria-labelledby="ft-social-title">
@@ -132,11 +136,12 @@ export default async function SiteFooter() {
             <b>{ORG.social.instagram.handle}</b> on Instagram
           </p>
         </div>
+        )}
       </div>
 
       {/* ---------------------------- bottom bar --------------------------- */}
       <div className="ft-bottom">
-        <p className="ft-copy">{copyright}</p>
+        {has(copyright) && <p className="ft-copy">{copyright}</p>}
         <nav className="ft-legal" aria-label="Legal">
           {LEGAL.map((l) => (
             <a key={l.href} href={l.href}>{l.label}</a>

@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import EntityForm from './EntityForm'
 import MediaPicker from './MediaPicker'
-import { Area, Field, Repeater, Select, SlugPair, Text } from './ui'
+import { Area, Field, OptionalNote, Repeater, Select, SlugPair, Text } from './ui'
 import type { Folder, MediaItem } from './MediaBrowser'
 import type { QA } from '@/app/admin/(panel)/interviews/actions'
 
@@ -35,14 +35,20 @@ export default function InterviewForm({
 
   return (
     <EntityForm onSave={onSave} saveLabel="Save interview">
+      <OptionalNote>
+        Only the title and the address are needed. <b>Every other field here is optional — leave one
+        empty and it is left off this interview&rsquo;s page entirely</b>, rather than leaving a blank
+        line or a stray separator behind. Each field, and each interview, is on its own.
+      </OptionalNote>
+
       <div className="ad-split">
         <section className="ad-panel">
           <div className="ad-panel-body">
             <SlugPair defaultTitle={data.title} defaultSlug={data.slug} prefix="/interviews/" />
-            <Area label="Introduction" name="intro" defaultValue={data.intro} hint="The paragraph above the questions." />
+            <Area label="Introduction" name="intro" defaultValue={data.intro} optional hint="The paragraph above the questions." />
 
             <div style={{ marginTop: 16 }}>
-              <Field label="Questions &amp; answers">
+              <Field label="Questions &amp; answers" optional>
                 <Repeater
                   name="qa"
                   value={qa as unknown as Record<string, unknown>[]}
@@ -57,7 +63,7 @@ export default function InterviewForm({
                         <Field label="Question">
                           <input className="ad-input" value={item.question} onChange={(e) => set({ question: e.target.value } as never)} />
                         </Field>
-                        <Field label="Answer">
+                        <Field label="Answer" optional>
                           <textarea className="ad-textarea" value={item.answer} onChange={(e) => set({ answer: e.target.value } as never)} />
                         </Field>
                       </>
@@ -86,13 +92,17 @@ export default function InterviewForm({
                 label="Author"
                 name="author_id"
                 defaultValue={data.author_id}
+                optional
                 options={[{ value: '', label: '— none —' }, ...authors.map((a) => ({ value: a.id, label: a.name }))]}
+                hint="Set to none and the name is left off the profile card."
               />
               <Select
                 label="About which book"
                 name="book_id"
                 defaultValue={data.book_id}
+                optional
                 options={[{ value: '', label: '— none —' }, ...books.map((b) => ({ value: b.id, label: b.title }))]}
+                hint="Set to none and the “Author of…” line is left off."
               />
               <Text label="Sort order" name="sort_order" type="number" defaultValue={data.sort_order} />
             </div>
@@ -107,6 +117,8 @@ export default function InterviewForm({
                 items={media}
                 folders={folders}
                 supabaseUrl={supabaseUrl}
+                optional
+                hint="With none set, the photo frame is left off rather than showing a broken picture."
               />
               <Text label="Reading time" name="minutes" defaultValue={data.minutes} placeholder="12 min read" optional />
               <Text label="Date shown" name="published_label" defaultValue={data.published_label} placeholder="May 12, 2024" optional />

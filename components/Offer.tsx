@@ -6,6 +6,7 @@ import type { ServiceView } from '@/lib/cms/types'
 import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
+import { has, hasList } from '@/lib/cms/optional'
 import { Star4 } from './ui'
 import OfferEmblem, { BookOrnament, type GlyphKey } from './OfferIcons'
 
@@ -82,12 +83,14 @@ export default function Offer({ content, services }: { content: OfferContent; se
   return (
     <section className="offer card" id="offer" ref={root}>
       <div className="offer-head">
-        <p className="offer-kicker">
-          <i aria-hidden="true" />
-          <span>{content.kicker}</span>
-          <i aria-hidden="true" />
-        </p>
-        <h2 className="offer-title">{content.heading}</h2>
+        {has(content.kicker) && (
+          <p className="offer-kicker">
+            <i aria-hidden="true" />
+            <span>{content.kicker}</span>
+            <i aria-hidden="true" />
+          </p>
+        )}
+        {has(content.heading) && <h2 className="offer-title">{content.heading}</h2>}
         <div className="offer-rule" aria-hidden="true">
           <i />
           <Star4 size={15} color="#C39A3E" />
@@ -95,11 +98,13 @@ export default function Offer({ content, services }: { content: OfferContent; se
         </div>
         {/* two spans, not a <br>: the authored break becomes a plain space
             once the lines are set inline on narrow screens */}
-        <p className="offer-sub">
-          {content.subheadingLines.map((line, i) => (
-            <span key={line}>{i > 0 && ' '}{line}</span>
-          ))}
-        </p>
+        {hasList(content.subheadingLines) && (
+          <p className="offer-sub">
+            {content.subheadingLines.map((line, i) => (
+              <span key={line}>{i > 0 && ' '}{line}</span>
+            ))}
+          </p>
+        )}
       </div>
 
       <div className="offer-grid">
@@ -108,17 +113,19 @@ export default function Offer({ content, services }: { content: OfferContent; se
             <span className="offer-card-emblem">
               <OfferEmblem glyph={s.glyph as GlyphKey} />
             </span>
-            <h3 className="offer-card-title">
-              {s.title.map((line) => (
-                <span key={line}>{line}</span>
-              ))}
-            </h3>
+            {hasList(s.title) && (
+              <h3 className="offer-card-title">
+                {s.title.map((line) => (
+                  <span key={line}>{line}</span>
+                ))}
+              </h3>
+            )}
             <span className="offer-card-rule" aria-hidden="true">
               <i />
               <Star4 size={10} color="#C39A3E" />
               <i />
             </span>
-            <p className="offer-card-desc">{s.desc}</p>
+            {has(s.desc) && <p className="offer-card-desc">{s.desc}</p>}
           </article>
         ))}
       </div>
@@ -131,7 +138,7 @@ export default function Offer({ content, services }: { content: OfferContent; se
           <Star4 size={12} color="#C39A3E" />
           <i />
         </div>
-        <p className="offer-foot-text">{content.footerText}</p>
+        {has(content.footerText) && <p className="offer-foot-text">{content.footerText}</p>}
       </div>
     </section>
   )

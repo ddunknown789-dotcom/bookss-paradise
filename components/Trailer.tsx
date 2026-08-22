@@ -9,6 +9,7 @@ import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
 import { watchPath } from '@/lib/video'
+import { has } from '@/lib/cms/optional'
 import { Divider } from './ui'
 
 /* ============================================================================
@@ -110,10 +111,10 @@ export default function Trailer({ content, videos }: { content: VideosContent; v
   return (
     <section className="videos card" id="trailers" ref={root}>
       <div className="videos-head section-head">
-        <p className="videos-kicker">{content.kicker}</p>
+        {has(content.kicker) && <p className="videos-kicker">{content.kicker}</p>}
         <Divider width={300} />
-        <h2 className="section-title">{content.heading}</h2>
-        <p className="videos-sub">{content.subheading}</p>
+        {has(content.heading) && <h2 className="section-title">{content.heading}</h2>}
+        {has(content.subheading) && <p className="videos-sub">{content.subheading}</p>}
       </div>
 
       <div className="videos-grid">
@@ -127,7 +128,7 @@ export default function Trailer({ content, videos }: { content: VideosContent; v
             <article className="video-card" key={c.key}>
               <div className="video-thumb">
                 {c.thumb && <img src={c.thumb} alt="" loading="lazy" />}
-                <span className="video-screen">{c.screen}</span>
+                {has(c.screen) && <span className="video-screen">{c.screen}</span>}
                 <span className="video-play" aria-hidden="true">
                   <Play width="17" height="17" fill="currentColor" />
                 </span>
@@ -139,11 +140,13 @@ export default function Trailer({ content, videos }: { content: VideosContent; v
               <div className="video-body">
                 <h3>{c.title}</h3>
                 <Divider width={150} />
-                <p>{c.text}</p>
-                <a className="btn btn-gold-bright video-btn" href={href}>
-                  {c.cta}
-                  <Play width="13" height="13" fill="currentColor" />
-                </a>
+                {has(c.text) && <p>{c.text}</p>}
+                {has(c.cta) && has(href) && (
+                  <a className="btn btn-gold-bright video-btn" href={href}>
+                    {c.cta}
+                    <Play width="13" height="13" fill="currentColor" />
+                  </a>
+                )}
               </div>
             </article>
           )

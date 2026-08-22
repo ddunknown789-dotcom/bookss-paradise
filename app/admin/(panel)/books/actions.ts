@@ -47,7 +47,7 @@ function bookFields(fd: FormData, slug: string) {
     primary_genre: strOrNull(fd, 'primary_genre'),
     pages: num(fd, 'pages'),
     isbn: strOrNull(fd, 'isbn'),
-    language: str(fd, 'language') || 'English',
+    language: strOrNull(fd, 'language'),
     publisher: strOrNull(fd, 'publisher'),
     publication_date: strOrNull(fd, 'publication_date'),
     published_label: strOrNull(fd, 'published_label'),

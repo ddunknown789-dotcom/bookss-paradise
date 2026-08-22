@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import MediaPicker from './MediaPicker'
-import { ConfirmButton, Field, Ic, Modal, Repeater, Select, Submit, Text, useToast } from './ui'
+import { ConfirmButton, Field, Ic, Modal, OptionalNote, Repeater, Select, Submit, Text, useToast } from './ui'
 import type { Folder, MediaItem } from './MediaBrowser'
 import { deleteWeek, reorderWeeks, saveWeek, type WeekPick } from '@/app/admin/(panel)/weeks/actions'
 
@@ -160,8 +160,13 @@ function WeekForm({
         options={[{ value: 'published', label: 'Published' }, { value: 'draft', label: 'Hidden' }]}
       />
 
+      <OptionalNote>
+        Only the label is needed. <b>Anything else you leave empty is left off the live page</b> — a
+        pick with no genre simply shows the rest of its details, with no stray separator.
+      </OptionalNote>
+
       <div style={{ marginTop: 16 }}>
-        <Field label="Picks" hint="Link to a book on the site, or type the details for a title that isn't in the library.">
+        <Field label="Picks" optional hint="Link to a book on the site, or type the details for a title that isn't in the library. Any detail you leave empty is left off that card — the rest of the card is unaffected.">
           <Repeater
             name="picks"
             value={picks as unknown as Record<string, unknown>[]}
@@ -173,7 +178,7 @@ function WeekForm({
               const p = row as unknown as WeekPick
               return (
                 <>
-                  <Field label="Existing book">
+                  <Field label="Existing book" optional>
                     <select
                       className="ad-select"
                       value={p.book_id}
@@ -188,12 +193,12 @@ function WeekForm({
                   </Field>
                   <div className="ad-row">
                     <Field label="Title"><input className="ad-input" value={p.title} onChange={(e) => set({ title: e.target.value } as never)} /></Field>
-                    <Field label="Author"><input className="ad-input" value={p.author} onChange={(e) => set({ author: e.target.value } as never)} /></Field>
+                    <Field label="Author" optional><input className="ad-input" value={p.author} onChange={(e) => set({ author: e.target.value } as never)} /></Field>
                   </div>
                   <div className="ad-row">
-                    <Field label="Genre"><input className="ad-input" value={p.genre} onChange={(e) => set({ genre: e.target.value } as never)} /></Field>
-                    <Field label="Pages"><input className="ad-input" type="number" value={p.pages} onChange={(e) => set({ pages: e.target.value } as never)} /></Field>
-                    <Field label="Published"><input className="ad-input" value={p.published_label} onChange={(e) => set({ published_label: e.target.value } as never)} /></Field>
+                    <Field label="Genre" optional><input className="ad-input" value={p.genre} onChange={(e) => set({ genre: e.target.value } as never)} /></Field>
+                    <Field label="Pages" optional><input className="ad-input" type="number" value={p.pages} onChange={(e) => set({ pages: e.target.value } as never)} /></Field>
+                    <Field label="Published" optional><input className="ad-input" value={p.published_label} onChange={(e) => set({ published_label: e.target.value } as never)} /></Field>
                   </div>
                   <MediaPicker
                     name={`__cover_${p.title}`}

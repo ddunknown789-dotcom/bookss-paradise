@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 
-import { Area, Check, Submit, Text, useToast } from './ui'
+import { Area, Check, OptionalNote, Submit, Text, useToast } from './ui'
 
 export type SettingRow = { key: string; value: unknown; label: string | null }
 export type FieldSpec = {
@@ -11,6 +11,9 @@ export type FieldSpec = {
   type: 'text' | 'textarea' | 'toggle' | 'url' | 'email'
   hint?: React.ReactNode
   placeholder?: string
+  /** Set when clearing this one would break something. Text fields are
+      otherwise optional: emptied, they are left off the live page. */
+  needed?: boolean
 }
 
 /**
@@ -49,6 +52,8 @@ export default function SettingsForm({
         } else toast(res.error ?? 'Could not save', 'error')
       }}
     >
+      <OptionalNote />
+
       {fields.map((f) => {
         const value = read(f.key)
         if (f.type === 'toggle') {
@@ -59,7 +64,7 @@ export default function SettingsForm({
           )
         }
         if (f.type === 'textarea') {
-          return <Area key={f.key} label={f.label} name={f.key} defaultValue={String(value)} hint={f.hint} placeholder={f.placeholder} />
+          return <Area key={f.key} label={f.label} name={f.key} defaultValue={String(value)} optional={!f.needed} hint={f.hint} placeholder={f.placeholder} />
         }
         return (
           <Text
@@ -68,6 +73,7 @@ export default function SettingsForm({
             name={f.key}
             type={f.type === 'email' ? 'email' : 'text'}
             defaultValue={String(value)}
+            optional={!f.needed}
             hint={f.hint}
             placeholder={f.placeholder}
           />

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import PageHead from '@/components/admin/PageHead'
 import EntityForm from '@/components/admin/EntityForm'
 import MediaPicker from '@/components/admin/MediaPicker'
-import { Area, Select, SlugPair, Text } from '@/components/admin/ui'
+import { Area, OptionalNote, Select, SlugPair, Text } from '@/components/admin/ui'
 import { requireRole } from '@/lib/auth'
 import { adminDb } from '@/lib/admin/actions'
 import { loadMediaLibrary, findMedia } from '@/lib/admin/media'
@@ -38,6 +38,11 @@ export default async function AuthorEditor({ params }: { params: Promise<{ id: s
       <PageHead title={isNew ? 'New author' : a.name} back={{ href: '/admin/authors', label: 'Authors' }} />
 
       <EntityForm onSave={save} saveLabel="Save author">
+        <OptionalNote>
+          Only the name and the address are needed. <b>Every other field here is optional — leave one
+          empty and it is left off wherever this author appears</b> instead of showing an empty line.
+        </OptionalNote>
+
         <div className="ad-split">
           <section className="ad-panel">
             <div className="ad-panel-body">

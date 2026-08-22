@@ -5,6 +5,7 @@ import type { NewsletterContent } from '@/lib/cms/sections'
 import { useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
+import { has } from '@/lib/cms/optional'
 import { Divider } from './ui'
 
 export default function Newsletter({ content }: { content: NewsletterContent }) {
@@ -48,34 +49,42 @@ export default function Newsletter({ content }: { content: NewsletterContent }) 
     setDone(true)
   }
 
+  const buttonLabel = done ? content.successLabel : content.submitLabel
+
   return (
     <section className="news card" id="newsletter" ref={root}>
       <div className="news-inner">
         <div className="news-copy">
-          <h2 className="section-title">{content.heading}</h2>
+          {has(content.heading) && <h2 className="section-title">{content.heading}</h2>}
           <Divider align="left" width={320} />
-          <p>{content.body}</p>
+          {has(content.body) && <p>{content.body}</p>}
           <form className="news-form" onSubmit={submit}>
             <input
               type="email"
-              placeholder={content.placeholder}
+              placeholder={content.placeholder || undefined}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               aria-label="Your email address"
               required
             />
-            <button className="btn btn-gold-bright btn-subscribe" type="submit">
-              {done ? content.successLabel : content.submitLabel}
-            </button>
+            {/* The wording is the button. With none set there is nothing to
+                press, and the field still submits on Enter. */}
+            {has(buttonLabel) && (
+              <button className="btn btn-gold-bright btn-subscribe" type="submit">
+                {buttonLabel}
+              </button>
+            )}
           </form>
         </div>
-        <figure className="news-art">
-          <img
-            src={content.image}
-            alt={content.imageAlt}
-            loading="lazy"
-          />
-        </figure>
+        {has(content.image) && (
+          <figure className="news-art">
+            <img
+              src={content.image}
+              alt={content.imageAlt}
+              loading="lazy"
+            />
+          </figure>
+        )}
       </div>
     </section>
   )

@@ -311,7 +311,7 @@
 .bp-about-copy p { font-size: 15.5px; line-height: 1.75; color: var(--grey); }
 .bp-meta {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--bp-meta-cols, 4), minmax(0, 1fr));
   gap: 14px;
   margin-top: 26px;
   list-style: none;
@@ -385,7 +385,7 @@
 
 .bp-verdict {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--bp-verdict-cols, 3), minmax(0, 1fr));
   gap: 12px;
   margin-top: 20px;
 }
@@ -763,3 +763,14 @@
   .bp-special-grid { grid-template-columns: 1fr; }
   .bp-side-brand { font-size: 13px; }
 }
+
+/* ---------- blank fields leave no gap ----------
+   A book page draws only the fields that were filled in. Where a two-column
+   card would otherwise hold a column open for a picture or a panel that isn't
+   there, the remaining column takes the full width instead of sitting beside
+   a void. Nothing here changes a card that has all of its content. */
+.bp-hero.is-textonly,
+.bp-lhero.is-textonly,
+.bp-about.is-textonly { grid-template-columns: minmax(0, 1fr); }
+
+.bp-scorecard.is-barsonly { grid-template-columns: minmax(0, 1fr); }

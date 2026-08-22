@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 
 import MediaBrowser, { publicUrl, type Folder, type MediaItem } from './MediaBrowser'
-import { Ic, Modal, useToast } from './ui'
+import { Ic, Modal, OPTIONAL_TITLE, useToast } from './ui'
 
 /**
  * A single-image (or video/PDF) field.
@@ -44,7 +44,7 @@ export default function MediaPicker({
     <div className="ad-field">
       <label className="ad-label">
         {label}
-        {optional && <span className="ad-opt">optional</span>}
+        {optional && <span className="ad-opt" title={OPTIONAL_TITLE}>optional</span>}
       </label>
 
       <input type="hidden" name={name} value={picked?.id ?? ''} readOnly />

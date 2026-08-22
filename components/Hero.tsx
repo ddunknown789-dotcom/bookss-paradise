@@ -5,6 +5,7 @@ import type { HeroContent } from '@/lib/cms/sections'
 import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
+import { has, hasList } from '@/lib/cms/optional'
 import { Divider, ArrowRight, Star4 } from './ui'
 import HeroArt3D from './HeroArt3D'
 
@@ -42,25 +43,37 @@ export default function Hero({ content }: { content: HeroContent }) {
     return () => ctx.revert()
   }, [])
 
+  // A button needs both halves: wording to read and somewhere to go.
+  const showPrimary = has(content.primaryCta?.label) && has(content.primaryCta?.href)
+  const showSecondary = has(content.secondaryCta?.label) && has(content.secondaryCta?.href)
+
   return (
     <section className="hero card" id="home" ref={root}>
       <div className="hero-inner">
         <div className="hero-copy">
-          <h1 className="hl">
-            {content.headingLines.map((line) => (
-              <span className="line" key={line}><span>{line}</span></span>
-            ))}
-          </h1>
+          {hasList(content.headingLines) && (
+            <h1 className="hl">
+              {content.headingLines.map((line) => (
+                <span className="line" key={line}><span>{line}</span></span>
+              ))}
+            </h1>
+          )}
           <span className="sparkle hero-sp1"><Star4 size={20} color="#D9A22E" /></span>
           <span className="sparkle hero-sp2"><Star4 size={12} color="#D9A22E" /></span>
           <Divider align="center" width={content.dividerWidth} />
-          <p className="hero-sub">{content.subheading}</p>
-          <div className="hero-cta">
-            <a className="btn btn-gold btn-explore" href={content.primaryCta.href}>{content.primaryCta.label}</a>
-            <a className="link-more" href={content.secondaryCta.href}>
-              {content.secondaryCta.label} <ArrowRight size={22} />
-            </a>
-          </div>
+          {has(content.subheading) && <p className="hero-sub">{content.subheading}</p>}
+          {(showPrimary || showSecondary) && (
+            <div className="hero-cta">
+              {showPrimary && (
+                <a className="btn btn-gold btn-explore" href={content.primaryCta.href}>{content.primaryCta.label}</a>
+              )}
+              {showSecondary && (
+                <a className="link-more" href={content.secondaryCta.href}>
+                  {content.secondaryCta.label} <ArrowRight size={22} />
+                </a>
+              )}
+            </div>
+          )}
         </div>
         {content.showArt && (
           <figure className="hero-art">

@@ -1,5 +1,7 @@
 'use client'
 
+import { has } from '@/lib/cms/optional'
+
 export type Crumb = { label: string; href?: string }
 
 type SvgProps = React.SVGProps<SVGSVGElement>
@@ -145,14 +147,17 @@ export function BookTopBar({ crumbs }: { crumbs: Crumb[] }) {
   )
 }
 
+/* The banner is the quote. With nothing to quote there is no banner — an
+   empty pair of quotation marks over a blank line is worse than the gap. */
 export function BookQuote({ quote }: { quote: { text: string; author: string } }) {
+  if (!has(quote.text)) return null
   return (
     <section className="bp-quote">
       <div className="bp-quote-copy">
         <span aria-hidden="true">“</span>
         <div>
           <p>“{quote.text}”</p>
-          <cite>– {quote.author}</cite>
+          {has(quote.author) && <cite>– {quote.author}</cite>}
         </div>
       </div>
       <img src="/assets/icon-curated.png" alt="" loading="lazy" />

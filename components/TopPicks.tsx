@@ -6,6 +6,7 @@ import type { BookCardView } from '@/lib/cms/types'
 import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
+import { has } from '@/lib/cms/optional'
 import { Divider, ArrowRight } from './ui'
 
 export default function TopPicks({ content, books }: { content: TopPicksContent; books: BookCardView[] }) {
@@ -53,24 +54,29 @@ export default function TopPicks({ content, books }: { content: TopPicksContent;
   return (
     <section className="picks card" id="books" ref={root}>
       <div className="picks-head section-head">
-        <h2 className="section-title">{content.heading}</h2>
+        {has(content.heading) && <h2 className="section-title">{content.heading}</h2>}
         <Divider width={300} />
       </div>
       <div className="picks-shelf-zone">
         <div className="picks-row">
-          {books.map((b) => (
-            <a className="pick-book" key={b.slug} href={b.href} aria-label={`${b.title} by ${b.author}`}>
-              <img src={b.coverSrc} alt={`${b.title} by ${b.author}`} loading="lazy" />
-            </a>
-          ))}
+          {books.filter((b) => has(b.coverSrc)).map((b) => {
+            const label = has(b.author) ? `${b.title} by ${b.author}` : b.title
+            return (
+              <a className="pick-book" key={b.slug} href={b.href} aria-label={label}>
+                <img src={b.coverSrc} alt={label} loading="lazy" />
+              </a>
+            )
+          })}
         </div>
-        <img className="picks-shelf" src={content.shelfImage} alt="" loading="lazy" />
+        {has(content.shelfImage) && <img className="picks-shelf" src={content.shelfImage} alt="" loading="lazy" />}
       </div>
-      <div className="picks-cta">
-        <a className="btn btn-gold-bright btn-viewall" href={content.cta.href}>
-          {content.cta.label} <ArrowRight size={20} />
-        </a>
-      </div>
+      {has(content.cta.label) && has(content.cta.href) && (
+        <div className="picks-cta">
+          <a className="btn btn-gold-bright btn-viewall" href={content.cta.href}>
+            {content.cta.label} <ArrowRight size={20} />
+          </a>
+        </div>
+      )}
     </section>
   )
 }

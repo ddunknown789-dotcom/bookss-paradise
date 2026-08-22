@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import MediaPicker from './MediaPicker'
-import { Area, Check, Field, Ic, Repeater, Select, SlugPair, Submit, Text, useToast } from './ui'
+import { Area, Check, Field, Ic, OptionalNote, Repeater, Select, SlugPair, Submit, Text, useToast } from './ui'
 import type { Folder, MediaItem } from './MediaBrowser'
 import type { BarRow, FeatureRow, RetailerRow, SectionRow, TakeawayRow, VideoRow } from '@/app/admin/(panel)/books/actions'
 
@@ -125,6 +125,12 @@ export default function BookForm({
         ))}
       </div>
 
+      <OptionalNote>
+        Only the title and the address are needed. <b>Every other field here is optional — leave one
+        empty and it is left off this book&rsquo;s pages entirely</b>, rather than showing a heading with
+        nothing under it or a gap where it would have been. Each field, and each book, is on its own.
+      </OptionalNote>
+
       {/* ------------------------------ Details ---------------------------- */}
       <div style={show('Details')}>
         <div className="ad-split">
@@ -136,15 +142,16 @@ export default function BookForm({
                 label="Author"
                 name="author_id"
                 defaultValue={data.author_id}
+                optional
                 options={[{ value: '', label: '— none —' }, ...authors.map((a) => ({ value: a.id, label: a.name }))]}
-                hint="Manage the list under Authors."
+                hint="Manage the list under Authors. Set to none and the by-line is left off."
               />
               <div className="ad-row">
-                <Text label="Primary genre" name="primary_genre" defaultValue={data.primary_genre} />
-                <Text label="Pages" name="pages" type="number" min={0} defaultValue={data.pages} />
+                <Text label="Primary genre" name="primary_genre" defaultValue={data.primary_genre} optional />
+                <Text label="Pages" name="pages" type="number" min={0} defaultValue={data.pages} optional />
               </div>
               <div className="ad-row">
-                <Text label="Language" name="language" defaultValue={data.language} />
+                <Text label="Language" name="language" defaultValue={data.language} optional />
                 <Text label="ISBN" name="isbn" defaultValue={data.isbn} optional />
               </div>
               <div className="ad-row">
@@ -156,10 +163,11 @@ export default function BookForm({
                 name="published_label"
                 defaultValue={data.published_label}
                 placeholder="Jan 12, 2023"
-                hint="Free text — this is what visitors see, so write it however you like."
+                optional
+                hint="Free text — this is what visitors see, so write it however you like. Empty, and no date is shown."
               />
 
-              <Field label="Genres &amp; tags" hint="Ticked genres appear on the book page and power recommendations.">
+              <Field label="Genres &amp; tags" optional hint="Ticked genres appear on the book page and power recommendations. Tick none and the genre pill is left off.">
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
                   {categories.map((c) => (
                     <label key={c.id} className="ad-check" style={{ background: '#fbfaf7', border: '1px solid var(--ad-line-soft)', borderRadius: 7, padding: '5px 10px' }}>
@@ -199,10 +207,10 @@ export default function BookForm({
               <div className="ad-panel-head"><h2>Rating</h2></div>
               <div className="ad-panel-body">
                 <div className="ad-row">
-                  <Text label="Rating" name="rating" type="number" step="0.1" min={0} max={5} defaultValue={data.rating} />
-                  <Text label="Review count" name="review_count" type="number" min={0} defaultValue={data.review_count} />
+                  <Text label="Rating" name="rating" type="number" step="0.1" min={0} max={5} defaultValue={data.rating} optional />
+                  <Text label="Review count" name="review_count" type="number" min={0} defaultValue={data.review_count} optional />
                 </div>
-                <Text label="Our score" name="review_overall" type="number" step="0.1" min={0} max={5} defaultValue={data.review_overall} hint="Shown on the review page." />
+                <Text label="Our score" name="review_overall" type="number" step="0.1" min={0} max={5} defaultValue={data.review_overall} optional hint="Shown on the review page. Empty, and no score is shown." />
               </div>
             </section>
           </aside>
@@ -215,7 +223,7 @@ export default function BookForm({
           <section className="ad-panel">
             <div className="ad-panel-head"><h2>Covers</h2></div>
             <div className="ad-panel-body">
-              <MediaPicker name="cover_id" label="Cover" value={find(data.cover_id)} items={media} folders={folders} supabaseUrl={supabaseUrl} hint="Used everywhere the book appears." />
+              <MediaPicker name="cover_id" label="Cover" value={find(data.cover_id)} items={media} folders={folders} supabaseUrl={supabaseUrl} optional hint="Used everywhere the book appears. With none set, the cover slot is left off and the text takes the full width." />
               <MediaPicker name="cover_3d_id" label="3D cover" value={find(data.cover_3d_id)} items={media} folders={folders} supabaseUrl={supabaseUrl} optional hint="Falls back to the flat cover if empty." />
               <MediaPicker name="about_image_id" label="About image" value={find(data.about_image_id)} items={media} folders={folders} supabaseUrl={supabaseUrl} optional />
             </div>
@@ -257,10 +265,10 @@ export default function BookForm({
                           <option value="other">Other</option>
                         </select>
                       </Field>
-                      <Field label="Duration"><input className="ad-input" value={v.duration} placeholder="2:18" onChange={(e) => set({ duration: e.target.value })} /></Field>
+                      <Field label="Duration" optional><input className="ad-input" value={v.duration} placeholder="2:18" onChange={(e) => set({ duration: e.target.value })} /></Field>
                     </div>
-                    <Field label="Caption"><input className="ad-input" value={v.caption} onChange={(e) => set({ caption: e.target.value })} /></Field>
-                    <Field label="Video URL"><input className="ad-input" value={v.video_url} onChange={(e) => set({ video_url: e.target.value })} /></Field>
+                    <Field label="Caption" optional><input className="ad-input" value={v.caption} onChange={(e) => set({ caption: e.target.value })} /></Field>
+                    <Field label="Video URL" optional><input className="ad-input" value={v.video_url} onChange={(e) => set({ video_url: e.target.value })} /></Field>
                   </>
                 )}
               />
@@ -274,21 +282,23 @@ export default function BookForm({
         <div className="ad-split">
           <section className="ad-panel">
             <div className="ad-panel-body">
-              <Area label="Description" name="description" defaultValue={data.description} big hint="The main blurb on the book page." />
-              <Area label="Short summary" name="summary" defaultValue={data.summary} hint="One or two sentences, used in listings and by the assistant." />
+              <Area label="Description" name="description" defaultValue={data.description} big optional hint="The main blurb on the book page." />
+              <Area label="Short summary" name="summary" defaultValue={data.summary} optional hint="One or two sentences, used in listings and by the assistant." />
               <Area
                 label="Summary lines"
                 name="summary_lines"
                 defaultValue={data.summary_lines}
+                optional
                 hint="One per line. Short punchy fragments shown as a stack."
               />
               <Area
                 label="Pull quote"
                 name="pull_quote_lines"
                 defaultValue={data.pull_quote_lines}
-                hint="One line per row. Shown as the large quote on the book page."
+                optional
+                hint="One line per row. Shown as the large quote on the book page — empty, and the quote block is left off."
               />
-              <Area label="Review excerpt" name="review_excerpt" defaultValue={data.review_excerpt} hint="The snippet shown in Latest Book Reviews on the homepage." />
+              <Area label="Review excerpt" name="review_excerpt" defaultValue={data.review_excerpt} optional hint="The snippet shown in Latest Book Reviews on the homepage." />
             </div>
           </section>
 
@@ -313,7 +323,7 @@ export default function BookForm({
                           </select>
                         </Field>
                       </div>
-                      <Field label="Text"><textarea className="ad-textarea" style={{ minHeight: 56 }} value={f.text} onChange={(e) => set({ text: e.target.value })} /></Field>
+                      <Field label="Text" optional><textarea className="ad-textarea" style={{ minHeight: 56 }} value={f.text} onChange={(e) => set({ text: e.target.value })} /></Field>
                     </>
                   )}
                 />
@@ -338,7 +348,7 @@ export default function BookForm({
         <div className="ad-split">
           <section className="ad-panel">
             <div className="ad-panel-body">
-              <Area label="Intro paragraphs" name="review_intro" defaultValue={data.reviewIntro} hint="One paragraph per line." />
+              <Area label="Intro paragraphs" name="review_intro" defaultValue={data.reviewIntro} optional hint="One paragraph per line." />
               <div style={{ marginTop: 14 }}>
                 <Field label="Sections">
                   <Repeater
@@ -350,15 +360,15 @@ export default function BookForm({
                     addLabel="Add section"
                     render={(s, set) => (
                       <>
-                        <Field label="Heading"><input className="ad-input" value={s.heading} onChange={(e) => set({ heading: e.target.value })} /></Field>
+                        <Field label="Heading" optional><input className="ad-input" value={s.heading} onChange={(e) => set({ heading: e.target.value })} /></Field>
                         <Field label="Body"><textarea className="ad-textarea" value={s.body} onChange={(e) => set({ body: e.target.value })} /></Field>
                       </>
                     )}
                   />
                 </Field>
               </div>
-              <Area label="Verdict" name="review_verdict" defaultValue={data.reviewVerdict} />
-              <Area label="Quote" name="review_quote" defaultValue={data.reviewQuote} />
+              <Area label="Verdict" name="review_verdict" defaultValue={data.reviewVerdict} optional />
+              <Area label="Quote" name="review_quote" defaultValue={data.reviewQuote} optional hint="Empty, and the pull quote is left off the review page." />
             </div>
           </section>
 
@@ -366,8 +376,8 @@ export default function BookForm({
             <section className="ad-panel">
               <div className="ad-panel-head"><h2>What worked</h2></div>
               <div className="ad-panel-body">
-                <Area label="Loved" name="review_loved" defaultValue={data.reviewLoved} hint="One per line." />
-                <Area label="Could be better" name="review_better" defaultValue={data.reviewBetter} hint="One per line." />
+                <Area label="Loved" name="review_loved" defaultValue={data.reviewLoved} optional hint="One per line." />
+                <Area label="Could be better" name="review_better" defaultValue={data.reviewBetter} optional hint="One per line." />
               </div>
             </section>
             <section className="ad-panel">
@@ -401,7 +411,7 @@ export default function BookForm({
         <div className="ad-split">
           <section className="ad-panel">
             <div className="ad-panel-body">
-              <Area label="Intro" name="summary_intro" defaultValue={data.summaryIntro} hint="One paragraph per line." />
+              <Area label="Intro" name="summary_intro" defaultValue={data.summaryIntro} optional hint="One paragraph per line." />
               <div style={{ marginTop: 14 }}>
                 <Field label="Sections">
                   <Repeater
@@ -413,14 +423,14 @@ export default function BookForm({
                     addLabel="Add section"
                     render={(s, set) => (
                       <>
-                        <Field label="Heading"><input className="ad-input" value={s.heading} onChange={(e) => set({ heading: e.target.value })} /></Field>
+                        <Field label="Heading" optional><input className="ad-input" value={s.heading} onChange={(e) => set({ heading: e.target.value })} /></Field>
                         <Field label="Body"><textarea className="ad-textarea" value={s.body} onChange={(e) => set({ body: e.target.value })} /></Field>
                       </>
                     )}
                   />
                 </Field>
               </div>
-              <Area label="Quote" name="summary_quote" defaultValue={data.summaryQuote} />
+              <Area label="Quote" name="summary_quote" defaultValue={data.summaryQuote} optional hint="Empty, and the pull quote is left off the summary page." />
               <input type="hidden" name="summary_verdict" value={data.summaryVerdict} readOnly />
             </div>
           </section>
@@ -446,7 +456,7 @@ export default function BookForm({
                           </select>
                         </Field>
                       </div>
-                      <Field label="Text"><textarea className="ad-textarea" style={{ minHeight: 56 }} value={t.text} onChange={(e) => set({ text: e.target.value })} /></Field>
+                      <Field label="Text" optional><textarea className="ad-textarea" style={{ minHeight: 56 }} value={t.text} onChange={(e) => set({ text: e.target.value })} /></Field>
                     </>
                   )}
                 />
@@ -475,12 +485,12 @@ export default function BookForm({
                 <>
                   <div className="ad-row">
                     <Field label="Name"><input className="ad-input" value={r.name} onChange={(e) => set({ name: e.target.value })} /></Field>
-                    <Field label="Mark"><input className="ad-input" value={r.mark} placeholder="a" onChange={(e) => set({ mark: e.target.value })} /></Field>
+                    <Field label="Mark" optional><input className="ad-input" value={r.mark} placeholder="a" onChange={(e) => set({ mark: e.target.value })} /></Field>
                     <Field label="Colour"><input className="ad-input" type="color" style={{ padding: 3, height: 34 }} value={r.tone || '#1f4634'} onChange={(e) => set({ tone: e.target.value })} /></Field>
                   </div>
                   <div className="ad-row">
-                    <Field label="Link"><input className="ad-input" value={r.url} placeholder="https://…" onChange={(e) => set({ url: e.target.value })} /></Field>
-                    <Field label="Button text"><input className="ad-input" value={r.cta} placeholder={`View on ${r.name || '…'}`} onChange={(e) => set({ cta: e.target.value })} /></Field>
+                    <Field label="Link" optional hint="No link, no button — the retailer is still listed by name."><input className="ad-input" value={r.url} placeholder="https://…" onChange={(e) => set({ url: e.target.value })} /></Field>
+                    <Field label="Button text" optional><input className="ad-input" value={r.cta} placeholder={`View on ${r.name || '…'}`} onChange={(e) => set({ cta: e.target.value })} /></Field>
                   </div>
                 </>
               )}

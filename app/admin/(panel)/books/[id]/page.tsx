@@ -107,7 +107,7 @@ export default async function BookEditor({
       primary_genre: b.primary_genre ?? '',
       pages: b.pages?.toString() ?? '',
       isbn: b.isbn ?? '',
-      language: b.language ?? 'English',
+      language: b.language ?? '',
       publisher: b.publisher ?? '',
       publication_date: b.publication_date ?? '',
       published_label: b.published_label ?? '',
