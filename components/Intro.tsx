@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useLayoutEffect, useRef } from 'react'
+import { Fragment, useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { NOANIM } from '@/lib/anim'
 import { ORG } from '@/lib/site'
@@ -51,10 +51,12 @@ const SOCIAL_ICONS: Record<string, React.ReactNode> = {
   ),
 }
 
-/** The accounts the intro shows, in order, with the name screen readers hear. */
+/** The accounts the intro shows, with the name screen readers hear. This order
+ *  is the order they read around the arc, left to right — Instagram sits in the
+ *  middle, at the top of the disc, because it is the account we push hardest. */
 const SOCIAL_ORDER = [
-  ['instagram', 'Instagram'],
   ['facebook', 'Facebook'],
+  ['instagram', 'Instagram'],
   ['youtube', 'YouTube'],
 ] as const
 
@@ -76,9 +78,112 @@ const resolveSocials = (rows: SocialLinkView[] = []) =>
     }
   })
 
+/* ============================================================================
+   The accounts, set as circular type around the top of the disc.
+
+   Everything below is in the badge's OWN coordinate space — the same 1254-unit
+   box `.badge-arc` uses for the "BOOKS PARADISE" ring, so the two arcs are
+   concentric by construction rather than by eyeballing. Measured off the
+   artwork: the green disc's ink is centred on (625, 620) with an outer radius
+   of 568.5, which is why the centre is NOT the box centre (627, 627).
+   ========================================================================== */
+const RING = { cx: 625, cy: 620, disc: 568.5 }
+
+/** Text baseline radius: just clear of the disc's rim, glyphs growing outward. */
+const ARC_R = 690
+/** Icons ride a touch higher so they optically centre on the x-height. */
+const ICON_R = 703
+/** Padding around the 1254 box so ascenders at the arc's ends are never clipped. */
+const PAD = 200
+const VIEW = 1254 + PAD * 2
+/** How far the element spans relative to --badge-size, at 1 unit per badge unit. */
+export const SOC_SCALE = VIEW / 1254
+
+/** Widest half-span we will bend the row through before it stops reading as a
+ *  line of type and starts reading as a circle. Past this we use the flat row. */
+const S_MAX = 1.4
+
+type ArcItem = { startOffset: number; iconDeg: number }
+type ArcLayout = { d: string; iconScale: number; items: ArcItem[] }
+
+/**
+ * Lays the accounts out along the arc from their MEASURED widths, so the gaps
+ * are even in arc length rather than in angle — the spacing reads as even to
+ * the eye whatever the CMS puts in the handles. Returns null when the row is
+ * too long to bend without wrapping past S_MAX; the caller then falls back to
+ * the straight row.
+ */
+function buildArc(widths: number[], fs: number): ArcLayout | null {
+  if (!widths.length || !fs || widths.some((w) => !w)) return null
+
+  // Every gap is derived from the type size, so the whole row scales as one.
+  const icon = fs * 1.3
+  const gap = fs * 0.44
+  const sep = fs * 1.7
+
+  const blocks = widths.map((w) => icon + gap + w)
+  const total = blocks.reduce((a, b) => a + b, 0) + sep * (blocks.length - 1)
+
+  const S = total / 2 / ARC_R + 0.05 // half-span, plus a little air at each end
+  if (S > S_MAX) return null
+
+  let cur = -total / 2
+  const items = widths.map((w, i) => {
+    const iconPos = cur + icon / 2
+    const labelPos = cur + icon + gap + w / 2
+    cur += blocks[i] + sep
+    return {
+      iconDeg: (iconPos / ARC_R) * (180 / Math.PI),
+      // The path starts at -S, so arc length from its start is simply p + R*S.
+      startOffset: labelPos + ARC_R * S,
+    }
+  })
+
+  const pt = (phi: number) =>
+    [RING.cx + ARC_R * Math.sin(phi), RING.cy - ARC_R * Math.cos(phi)] as const
+  const [x1, y1] = pt(-S)
+  const [x2, y2] = pt(S)
+  // sweep-flag 1 = clockwise, i.e. left to right across the top of the disc.
+  const d = `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${ARC_R} ${ARC_R} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`
+
+  return { d, iconScale: icon / 24, items }
+}
+
 export default function Intro({ socials }: { socials?: SocialLinkView[] }) {
   const root = useRef<any>(null)
+  const measure = useRef<any>(null)
   const accounts = resolveSocials(socials)
+
+  // Two-pass: the hidden <text> below is measured once the fonts are in, and
+  // only then does the arc render. It has to be a real measurement — the
+  // handles come from the CMS, and their set widths decide where each one sits
+  // on the curve. Null means "not measured yet, or too long to bend", and the
+  // straight row renders instead.
+  const [arc, setArc] = useState<ArcLayout | null>(null)
+
+  useLayoutEffect(() => {
+    let live = true
+    const run = () => {
+      const g = measure.current
+      if (!live || !g) return
+      const nodes: SVGTextElement[] = Array.from(g.querySelectorAll('text'))
+      if (!nodes.length) return
+      const fs = parseFloat(getComputedStyle(nodes[0]).fontSize) || 0
+      setArc(buildArc(nodes.map((n) => n.getComputedTextLength()), fs))
+    }
+    run()
+    // Re-measure once webfonts land (Inter's metrics differ from the fallback's)
+    // and whenever the breakpoint changes the type size under us.
+    if (document.fonts?.ready) document.fonts.ready.then(run).catch(() => {})
+    const mq = window.matchMedia('(max-width: 680px)')
+    mq.addEventListener('change', run)
+    window.addEventListener('resize', run)
+    return () => {
+      live = false
+      mq.removeEventListener('change', run)
+      window.removeEventListener('resize', run)
+    }
+  }, [socials])
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -140,7 +245,7 @@ export default function Intro({ socials }: { socials?: SocialLinkView[] }) {
       gsap.set('.il', { autoAlpha: 0, y: 18 })
       gsap.set('.il-w > span', { yPercent: 108 })
       gsap.set('.il-dot', { autoAlpha: 0, scale: 0.4 })
-      gsap.set('.il-soc', { autoAlpha: 0, y: 12 })
+      gsap.set('.il-soc', { autoAlpha: 0, y: arc ? 30 : 12 })
       gsap.set('.il-soc-ic', { autoAlpha: 0, scale: 0.55 })
 
       // ---- load: the girl blooms into a pure-white frame ----
@@ -202,7 +307,12 @@ export default function Intro({ socials }: { socials?: SocialLinkView[] }) {
         .to('.il-3', { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.4 }, 3.9)
         .to('.il-soc', { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.7, stagger: 0.24 }, 3.9)
         .to('.il-soc-ic', { autoAlpha: 1, scale: 1, ease: 'back.out(1.7)', duration: 0.8, stagger: 0.24 }, 3.9)
-        .to('.il-3 .il-w > span', { yPercent: 0, ease: 'power3.out', duration: 0.85, stagger: 0.24 }, 4.0)
+      // the per-word mask only exists on the straight row — the arc sets its
+      // labels as single runs of type on a path, with nothing to mask them with
+      if (root.current.querySelector('.il-3 .il-w > span')) {
+        tl.to('.il-3 .il-w > span', { yPercent: 0, ease: 'power3.out', duration: 0.85, stagger: 0.24 }, 4.0)
+      }
+      tl
         // --- and away: they lift and dissolve just before the badge leaves for
         //     the header. Bottom line first, and the lift is big enough that
         //     every line is gone before the rising hero card reaches its slot. ---
@@ -236,7 +346,10 @@ export default function Intro({ socials }: { socials?: SocialLinkView[] }) {
       return () => window.removeEventListener('mousemove', onMove)
     }, root)
     return () => ctx.revert()
-  }, [])
+    // `arc` is a dependency because the reveal is wired by selector: when the
+    // straight row swaps for the arc the old targets are gone, so the timeline
+    // has to be rebuilt against the elements that are actually on the page.
+  }, [arc])
 
   return (
     <section className="intro" ref={root} aria-label="Books Paradise">
@@ -269,35 +382,95 @@ export default function Intro({ socials }: { socials?: SocialLinkView[] }) {
           a plain child of `.intro`, which has no transform of its own.
           It also comes first in the DOM, so reading order matches what you see. */}
       <div className="intro-socials">
-        <div className="il il-3">
-          {accounts.map(({ platform, name, label, url }) => {
-            const inner = (
-              <>
-                <svg className="il-soc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
-                  {SOCIAL_ICONS[platform]}
-                </svg>
-                <span className="il-w"><span>{label}</span></span>
-              </>
-            )
-            // No URL yet — show the account, but never as a link to nowhere.
-            return url ? (
-              <a
-                className="il-soc"
-                key={platform}
-                href={url}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`${label} on ${name}`}
-              >
-                {inner}
-              </a>
-            ) : (
-              <span className="il-soc il-soc-flat" key={platform} aria-label={`${label} on ${name}`} role="img">
-                {inner}
-              </span>
-            )
-          })}
-        </div>
+        {/* Set at the arc's own type size and measured, never seen. It stays
+            mounted so a breakpoint change or a late font can re-measure without
+            needing a render pass of its own. */}
+        <svg className="soc-gauge" viewBox={`0 0 ${VIEW} ${VIEW}`} aria-hidden="true" focusable="false">
+          <g ref={measure}>
+            {accounts.map((a) => (
+              <text className="soc-label" key={a.platform}>{a.label}</text>
+            ))}
+          </g>
+        </svg>
+
+        {arc ? (
+          /* Same 1254-unit space as .badge-arc, padded on all four sides, so
+             this arc and the disc's own "BOOKS PARADISE" ring share a centre. */
+          <svg
+            className="il il-3 soc-arc"
+            viewBox={`${-PAD} ${-PAD} ${VIEW} ${VIEW}`}
+            role="group"
+            aria-label="Books Paradise accounts"
+          >
+            <defs>
+              <path id="soc-arc-path" d={arc.d} fill="none" />
+            </defs>
+            {accounts.map(({ platform, name, label, url }, i) => {
+              const it = arc.items[i]
+              const body = (
+                <>
+                  {/* Two groups on purpose. The outer one carries the place on
+                      the arc; the inner one is what the reveal animates. They
+                      cannot be the same element — GSAP decomposes an existing
+                      transform and recomposes it from its own values, so its
+                      `scale: 1` would overwrite the scale that sizes the mark. */}
+                  <g
+                    transform={
+                      `translate(${RING.cx} ${RING.cy}) rotate(${it.iconDeg.toFixed(3)}) ` +
+                      `translate(0 ${-ICON_R}) scale(${arc.iconScale.toFixed(4)}) translate(-12 -12)`
+                    }
+                  >
+                    <g className="il-soc-ic" fill="none" stroke="currentColor" strokeWidth="1.7">
+                      {SOCIAL_ICONS[platform]}
+                    </g>
+                  </g>
+                  <text className="soc-label">
+                    <textPath href="#soc-arc-path" startOffset={it.startOffset.toFixed(2)} textAnchor="middle">
+                      {label}
+                    </textPath>
+                  </text>
+                </>
+              )
+              // No URL yet — show the account, but never as a link to nowhere.
+              return url ? (
+                <a className="il-soc" key={platform} href={url} target="_blank" rel="noreferrer"
+                   aria-label={`${label} on ${name}`}>
+                  {body}
+                </a>
+              ) : (
+                <g className="il-soc il-soc-flat" key={platform} aria-label={`${label} on ${name}`} role="img">
+                  {body}
+                </g>
+              )
+            })}
+          </svg>
+        ) : (
+          /* Before the measurement lands, and on screens where the disc is too
+             small to bend the handles around without them wrapping halfway down
+             its sides, they stay on one straight line. */
+          <div className="il il-3">
+            {accounts.map(({ platform, name, label, url }) => {
+              const body = (
+                <>
+                  <svg className="il-soc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+                    {SOCIAL_ICONS[platform]}
+                  </svg>
+                  <span className="il-w"><span>{label}</span></span>
+                </>
+              )
+              return url ? (
+                <a className="il-soc" key={platform} href={url} target="_blank" rel="noreferrer"
+                   aria-label={`${label} on ${name}`}>
+                  {body}
+                </a>
+              ) : (
+                <span className="il-soc il-soc-flat" key={platform} aria-label={`${label} on ${name}`} role="img">
+                  {body}
+                </span>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* copy beats — revealed one per scroll beat while the badge assembles */}

@@ -515,22 +515,62 @@ main { position: relative; z-index: 1; }
   100% { transform: scaleY(0); transform-origin: bottom; }
 }
 
-/* ---------- the accounts row, riding above the disc ---------- */
-/* The mirror image of .intro-lines below: that one anchors its TOP edge to the
-   badge's lower edge, this one anchors its BOTTOM edge to the badge's upper
-   edge, so both keep the same clearance as --badge-size changes. The clearance
-   clears the badge's glow too — .badge-glow is inset -26%, but its gradient has
-   already faded out by the disc's rim. */
+/* ---------- the accounts, set as circular type around the disc ---------- */
+/* The box is the badge's own 1254-unit space padded by 200 on every side, at
+   one unit per badge unit, so 1254 + 400 = 1654 -> 1.3190. Because the scale
+   and the centre match the badge exactly, the accounts arc and the disc's own
+   "BOOKS PARADISE" ring stay concentric at every size, with no magic numbers
+   to keep in sync. Centred on the viewport, like the badge it rings. */
 .intro-socials {
   position: fixed;
-  bottom: calc(50% + var(--badge-size) / 2 + clamp(22px, 4.2vh, 56px));
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  width: min(92vw, 780px);
-  display: flex;
-  justify-content: center;
+  transform: translate(-50%, -50%);
+  width: calc(var(--badge-size) * 1.319);
+  height: calc(var(--badge-size) * 1.319);
   z-index: 44;
   pointer-events: none;
+}
+.soc-arc {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+/* measured, never seen — see the note in Intro.tsx */
+.soc-gauge {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+/* px here are USER UNITS in the 1254 box, not screen pixels: the type scales
+   with the disc, and the measuring pass reads whatever this resolves to. */
+.soc-label {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 40px;
+  letter-spacing: 0.5px;
+  fill: var(--green-deep);
+  stroke: none;
+}
+.soc-arc .il-soc-ic { color: var(--green-deep); }
+.soc-arc a { pointer-events: auto; }
+.soc-arc a:hover .soc-label { fill: var(--gold); }
+.soc-arc a:hover .il-soc-ic { color: var(--gold); }
+.soc-arc .soc-label,
+.soc-arc .il-soc-ic { transition: fill 0.3s ease, color 0.3s ease; }
+
+/* The straight-row fallback still needs centring above the disc. */
+.intro-socials > div.il-3 {
+  position: absolute;
+  left: 50%;
+  bottom: calc(50% + var(--badge-size) * 0.4534 + clamp(18px, 3vh, 40px));
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 92vw;
 }
 
 /* ---------- intro copy (beats revealed under the badge) ---------- */
@@ -1878,6 +1918,11 @@ a.botw-cover:hover {
   .il-2 { font-size: clamp(9.5px, 2.7vw, 11.5px); letter-spacing: 0.2em; }
   /* the three handles won't sit on one line at phone widths — stack them */
   .il-3 { flex-direction: column; gap: clamp(9px, 1.5vh, 14px); }
+  /* The arc scales with the disc, and the disc is far smaller here, so the ring
+     needs a bigger unit size to stay legible. These are USER UNITS in the 1254
+     box, not screen px. Keep it low enough that the row still bends inside
+     S_MAX — past that Intro.tsx drops back to the stacked row above. */
+  .soc-label { font-size: 48px; letter-spacing: 0.2px; }
   .il-soc { font-size: clamp(12.5px, 3.4vw, 14px); gap: 8px; }
 
   /* ---------------------------------------------------------------------
@@ -2041,10 +2086,9 @@ a.botw-cover:hover {
     top: calc(50% + var(--badge-size) / 2 + 10px);
     gap: 7px;
   }
-  /* The accounts stack above the disc, and on a 568px-tall screen the room
-     between the disc's rim and the nav is only ~140px — pull the row in so the
-     three lines can't run under the header. */
-  .intro-socials { bottom: calc(50% + var(--badge-size) / 2 + 12px); }
+  /* On a 568px-tall screen the room between the disc's rim and the nav is only
+     ~140px — pull the fallback row in so its three lines can't run under it. */
+  .intro-socials > div.il-3 { bottom: calc(50% + var(--badge-size) * 0.4534 + 12px); }
   .il-1 { font-size: 15px; line-height: 1.3; }
   .il-2 { font-size: 9px; letter-spacing: 0.16em; }
   .il-3 { gap: 5px; }
